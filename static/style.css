@@ -7,8 +7,6 @@ body {
   float: right;
   text-align: right;
   list-style-type: none;
-
-  border-style: dotted;
 }
 #menu a {
   text-decoration: none;
@@ -24,14 +22,10 @@ body {
   overflow: hidden;
   margin: 0;
   padding: 0;
-
-  border-style: dotted;
 }
 
 #content {
   float: left; 
-
-  border-style: dotted; 
 }
 
 #content li {
@@ -69,66 +63,3 @@ body {
   margin-top: 1px;
 }
 }
-
-
-
-/*body {
-  font-family: Helvetica;
-  font-size: 13px;
-}
-
-.grid {
-    border-style: dotted;
-    border-color: red;
-    display: grid;
-    grid-template-areas: 
-    "content menu";
-    height:100vh;
-}
-
-.content {
-    grid-area: content; 
-    border-style: dotted;
-    float: left;
-    text-align: left;
-    font-size: 1rem;
-}
-
-.menu {
-    grid-area: menu; 
-    border-style: dotted;
-    float: right;
-    text-align: right;
-}
-
-li {
-    list-style: none;
-}
-
-@media (max-width: 500px) {
-.content {
-    margin-top: 1px;
-    margin-left: 1px;
-}
-.menu {
-    margin-top: 1px;
-    margin-right: 1px;
-}
-li {
-    font-size: 3rem;
-}
-}
-
-@media (min-width: 500px) {
-.content {
-    margin-top: 15px;
-    width: 500px;
-}
-.menu {
-    margin-top: 10%;
-    margin-right: 10%;
-}
-li {
-    font-size: 5rem;
-}
-}*/
