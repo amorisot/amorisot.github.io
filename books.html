@@ -18,11 +18,10 @@
     </div>
     <div id="content">
       <h1>Books</h1>
-      <p>Kind of you to assume I could read! I am flattered...</p>
-      <!-- <p>Jk, here's a subset of my bookshelf</p> -->
-      <!-- <ul>
+      <p>A subset of my bookshelf. The books I particularly enjoyed are in green. Their order is random.</p>
+      <ul id="book_list">
         <li>Proofs and Refutations</li>
-        <li>My Family and Other Animals</li>
+        <li class="good_book">My Family and Other Animals</li>
         <li>Why We Sleep</li>
         <li>The Three Body Problem</li>
         <li>Information Theory, Inference, and Learning Algorithms</li>
@@ -31,35 +30,69 @@
         <li>Superintelligence</li>
         <li>Meditations</li>
         <li>Everybody Lies: Big Data, New Data, and what the Internet can tell us about Who We Really Are</li>
-        <li>How to Win Friends and Influence People</li>
         <li>Between the World and Me</li>
         <li>A Walk in the Woods</li>
         <li>What is Life?</li>
         <li>On Liberty and The Subjection of Women</li>
-        <li>How Fiction Works</li>
-        <li>Holy Lands: Reviving Pluralism in the Middle East</li>
-        <li>A Pattern Language: Towns, Buildings, Construction</li>
+        <li class="good_book">How Fiction Works</li>
+        <li class="good_book">A Pattern Language: Towns, Buildings, Construction</li>
         <li>How Buildings Learn: What Happens After They're Built</li>
         <li>Feynman Lectures on Computation</li>
         <li>The Paris Review Interviews, Vol I</li>
         <li>The Inner Game of Tennis: the Classic Guide to the Mental Side of Peak Performance</li>
         <li>Principia Ethica</li>
-        <li>The House of Wisdom: How Arabic Science Saved Ancient Knowledge and Gave Us the Renaissance</li>
+        <li class="good_book">The House of Wisdom: How Arabic Science Saved Ancient Knowledge and Gave Us the Renaissance</li>
         <li>The Dark Forest</li>
         <li>Thinking, Fast and Slow</li>
         <li>Death’s End</li>
         <li>Elon Musk: Tesla, SpaceX, and the Quest for a Fantastic Future</li>
         <li>A Crack in Creation: the New Power to Control Evolution</li>
         <li>Underground: the Tokyo Gas Attack and the Japanese Psyche</li>
-        <li>The Count of Monte Cristo</li>
+        <li class="good_book">The Count of Monte Cristo</li>
         <li>The Elements of Statistical Learning: Data Mining, Inference, and Prediction</li>
         <li>Gathering Moss, a Natural and Cultural History of Mosses</li>
         <li>The Magical World of Moss Gardening</li>
         <li>The Annotated Turing: a Guided Tour through Alan Turing's Historic Paper on Computability and the Turing Machine</li>
         <li>A Death in the Family</li>
         <li>The Selfish Gene</li>
-        <li>The Order of Time</li>
-      </ul> -->
+        <li class="good_book">The Order of Time</li>
+        <li>Spying on Whales</li>
+        <li>Scientific Freedom: The Elixir of Civilization</li>
+        <li>Six Easy Pieces</li>
+        <li>21 Lessons for the 21st Century</li>
+        <li>Cracking the Coding Interview</li>
+        <li>The Invisible Killer</li>
+        <li>The Map Of Knowledge</li>
+        <li>Algorithsm To Live By</li>
+        <li>The Book of Why</li>
+        <li>The Character of Physical Law</li>
+        <li>How to Fall in Love with Anyone</li>
+        <li>Thinking in Numbers</li>
+        <li>Music: A Subversive History</li>
+        <li>Working in Public: The Making and Maintenance of Open Source Software</li>
+        <li>Listening to Whales: What the Orcas Have Taught Us</li>
+        <li>In Defence of Dogs</li>
+        <li>Machines Will Make Better Choices Than Humans</li>
+        <li class="good_book">The Art of Doing Science and Engineering</li>
+        <li>Why Zebras Don't Get Ulcers</li>
+        <li>Bayesian Reasoning and Machine Learning</li>
+        <li>Mother Tongue</li>
+        <li>One Hundred Years of Solitude</li>
+        <li>What If: Serious Scientific Answers to Absurd Hypothetical Questions</li>
+      </ul>
     </div>
+    <script type="text/javascript">
+      // shuffle books
+      var book_list = document.getElementById('book_list');
+      for (var i = book_list.children.length; i >= 0; i--) {
+          book_list.appendChild(book_list.children[Math.random() * i | 0]);
+      }
+      // make good books green
+      var good_books = document.getElementsByClassName('good_book');
+      good_books[0].style.color='green';
+      for (var i = 0; i < good_books.length; i++) {
+          good_books[i].style.color = "green";
+      }
+    </script>
   </body>
 </html>
