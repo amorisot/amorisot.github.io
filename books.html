@@ -19,7 +19,7 @@
     </div>
     <div id="content">
       <h1>Books</h1>
-      <p>A subset of my bookshelf. The books I particularly enjoyed are in green. Their order is random.</p>
+      <p>A subset of my bookshelf. I particularly enjoyed the sparkling books. Their order is random.</p>
       <ul id="book_list">
         <li>Proofs and Refutations</li>
         <li class="good_book">My Family and Other Animals</li>
@@ -81,6 +81,11 @@
         <li>Mother Tongue</li>
         <li>One Hundred Years of Solitude</li>
         <li>What If: Serious Scientific Answers to Absurd Hypothetical Questions</li>
+        <li class="good_book">E=mc2: A Biography of the World's Most Famous Equation</li>
+        <li>Amusing Ourselves To Death</li>
+        <li>Dancing In The Glory Of Monsters: The Collapse Of The Congo And The Great War Of Africa</li>
+        <li>Anna Karenina</li>
+        <li>The Turk: The Life and Times of the Famous Eighteenth-Century Chess-Playing Machine</li>
       </ul>
     </div>
     <script type="text/javascript">
@@ -89,11 +94,10 @@
       for (var i = book_list.children.length; i >= 0; i--) {
           book_list.appendChild(book_list.children[Math.random() * i | 0]);
       }
-      // make good books green
+      // make good books sparkle
       var good_books = document.getElementsByClassName('good_book');
-      good_books[0].style.color='green';
       for (var i = 0; i < good_books.length; i++) {
-          good_books[i].style.color = "green";
+          good_books[i].textContent = "✨ " + good_books[i].textContent + " ✨";
       }
     </script>
   </body>
