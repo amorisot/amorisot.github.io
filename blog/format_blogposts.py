@@ -27,13 +27,9 @@ BLOG_TEMPLATE = """
 """.strip()
 
 POSTS = {
-    "hi": """Hello, world!
+    "hi": """I am thinking a lot about reasoning in LLMs, and will probably write a blogpost about it soon.
 
-Today, we're talking about X.
-
-We might also talk about Y, and Z.
-
-Thanks!
+Thanks for stopping by :)
 """.strip(),
 }
 
@@ -48,7 +44,7 @@ def main():
     with open(f"blog.html", "w") as f:
         all_post_links = ""
         for post_name, post in POSTS.items():
-            all_post_links += f"{' '*6}<li><a href='blog/{post_name}.html'>{post_name}</a></li>\n"
+            all_post_links += f"{' '*6}<li><a href='/blog/{post_name}.html'>{post_name}</a></li>\n"
             with open(f"blog/{post_name}.html", "w") as f_blog:
                 f_blog.write(BLOG_TEMPLATE.format(title=post_name, content=format_post(post)))
             
