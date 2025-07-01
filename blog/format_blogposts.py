@@ -49,8 +49,8 @@ The presence of of E. Coli, salmonella and camphylobacter in virtually ALL consu
 """.strip()
 }
 
-def format_post(post: str) -> str:
-    final_post = ""
+def format_post(post: str, post_name: str) -> str:
+    final_post = f"{' '*4}<h3>" + post_name + "</h3>\n"
     for line in post.split("\n\n"):
         final_post += f"{' '*6}<p>{line}</p>\n"
     return final_post.strip()
@@ -67,7 +67,7 @@ def main():
         for post_name, post in POSTS.items():
             all_post_links += f"{' '*6}<li><a href='/blog/{sanitize_filename(post_name)}.html'>{post_name}</a></li>\n"
             with open(f"blog/{sanitize_filename(post_name)}.html", "w") as f_blog:
-                f_blog.write(BLOG_TEMPLATE.format(title=post_name, content=format_post(post)))
+                f_blog.write(BLOG_TEMPLATE.format(title=post_name, content=format_post(post=post, post_name=post_name)))
             
         f.write(BLOG_TEMPLATE.format(title="all", content=all_post_links.strip()))
 
