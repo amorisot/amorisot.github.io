@@ -53,13 +53,18 @@ def format_post(post: str) -> str:
         final_post += f"{' '*6}<p>{line}</p>\n"
     return final_post.strip()
 
+def sanitize_filename(name: str) -> str:
+    """
+    Sanitize the filename by replacing spaces with underscores and removing special characters.
+    """
+    return name.replace(" ", "_").replace("/", "_").replace("\\", "_").replace(":", "_").replace("?", "").replace("*", "_").replace("'", "")
 
 def main():
     with open(f"blog.html", "w") as f:
         all_post_links = ""
         for post_name, post in POSTS.items():
-            all_post_links += f"{' '*6}<li><a href='/blog/{post_name}.html'>{post_name}</a></li>\n"
-            with open(f"blog/{post_name}.html", "w") as f_blog:
+            all_post_links += f"{' '*6}<li><a href='/blog/{sanitize_filename(post_name)}.html'>{post_name}</a></li>\n"
+            with open(f"blog/{sanitize_filename(post_name)}.html", "w") as f_blog:
                 f_blog.write(BLOG_TEMPLATE.format(title=post_name, content=format_post(post)))
             
         f.write(BLOG_TEMPLATE.format(title="all", content=all_post_links.strip()))
