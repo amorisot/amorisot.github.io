@@ -2,7 +2,7 @@ BLOG_TEMPLATE = """
 <!doctype html>
 <html>
   <head>
-    <link rel="icon" type="image/png" href="favicon.png"/>
+    <link rel="icon" type="image/png" href="/favicon.png"/>
     <link rel="stylesheet" href="/static/style.css">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,15 +27,17 @@ BLOG_TEMPLATE = """
 """.strip()
 
 POSTS = {
-    "hi": """I am thinking a lot about reasoning in LLMs, and will probably write a blogpost about it soon.
+  "hi": """I am thinking a lot about reasoning in LLMs, and will probably write a blogpost about it soon.
 
 Thanks for stopping by :)
 """.strip(),
 
-    "why don't they make chickens without the salmonella?": """
+  "why don't they make chickens without the salmonella?": """
 The question was originally facetious and rhetorical, but the answer is surprising.
 
-I learnt most from this Reddit comment from more than a decade ago: https://www.reddit.com/r/askscience/comments/ncfik/comment/c3816vb/.
+I learnt most from this <a href="https://www.reddit.com/r/askscience/comments/ncfik/comment/c3816vb/">Reddit comment from more than a decade ago</a>.
+
+<hr>
 
 Turning whole, live chickens into pieces in a Colonel bucket or shrink-wrapped in a styro tray, is done in a very different way than segmenting range animals into consumer-friendly portions. The very specialized industrial process developed to deal specifically with poultry is actually the principal cause of systemic contamination of the meat itself.
 
