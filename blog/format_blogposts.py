@@ -46,7 +46,22 @@ Unlike cattle and hogs, chickens are inconveniently covered in (surprise!) feath
 Fresh out of the contaminated scalding tank, after a few seconds at the plucking station, the carcass is mechanically eviscerated. The residual fecal slop still clinging to the skin contaminates the gutting machine, which in turn inoculates the body cavity, splashing fluids and infecting the whole bird from the inside. The carcass is then washed again, usually in another (dirty) communal tank, but by now it is virtually impossible to remove all of the liquified, dilute fecal material from every nook, cranny, scrap, cut and fold of flesh. Some of the bacteria have a reproductive cycle of just a few minutes, so even after a thorough washing, just a few residual bacteria can re-contaminate the carcass in a very short time. (One surviving bacterium, reproducing every ~6 min = 1 million in 2 hr, 1 trillion in 4 hrs.)
 
 The presence of of E. Coli, salmonella and camphylobacter in virtually ALL consumer chicken, including organic and farmer's markets, means it is best to keep raw chicken isolated (well-wrapped) and well refrigerated (bottom shelf). Prepare it as soon as possible, and cook it thoroughly. If you can't use it right away, immerse it fully in a strong brine or acidic marinade (zipper bags are good) to slow pathogen growth. Makes it moist and tasty, too!
-""".strip()
+""".strip(),
+  "10T vs 100T parameter sparse MoE's":"""As of September 2025, LLMs are spikily impressive: they outperform most people in mathematical and coding abilities, and they speak more languages fluently than any one person.
+
+The depth and breadth of even small LLM's knowledge is staggering. However, it is important to remember that their competition is stiff, when it comes to performing tasks in the world.
+
+Current generation LLMs --at most ~10T parameter sparse MoEs-- are competing against the human brain, which are 100T parameter, highly efficient, multimodal MoEs, pretrained on decades of experience, post-trained in university, RLVR'ed/RLHF'ed on the job. Humans should not be slept on."""
+#    "my career path, so far": """
+# An extremely bare-bones summary of where I am at, and how I got here, listed as a series of narrative arcs.
+
+# Arc 1: I did not know what I wanted to do in undergrad. I originally started studying philosophy and political science, as a guess as to what I was interested in.
+# I did not resonate with political science. I was expecting modern theories of how to run states, and instead realised that much of the study of political science still invovles reading texts from centuries ago --Locke, Hobbes, Rousseau.
+# I thought I would be doing those things in philosophy.
+# After about a year, I switched to double majoring in philosophy and mathematics, and was much happier, pushing this to the end of my studies.
+
+# Arc 2: ... tbc
+# """.strip(),
 }
 
 def format_post(post: str, post_name: str) -> str:
