@@ -56,11 +56,11 @@ Current generation LLMs --at most ~10T parameter sparse MoEs-- are competing aga
 # An extremely bare-bones summary of where I am at, and how I got here, listed as a series of narrative arcs.
 
 # Arc 1: I did not know what I wanted to do in undergrad. I originally started studying philosophy and political science, as a guess as to what I was interested in.
-# I did not resonate with political science. I was expecting modern theories of how to run states, and instead realised that much of the study of political science still invovles reading texts from centuries ago --Locke, Hobbes, Rousseau.
-# I thought I would be doing those things in philosophy.
+# I did not resonate with political science. I was expecting modern theories of how to run states, and instead realised that much of the field still involves reading texts from centuries ago --Locke, Hobbes, Rousseau.
+# Philosophy was more interesting. I gravitated particularly towards logic, the philosophy of mathematics, and ethics/metaethics. Unsurprisingly, given the former, I resonated far more with analytic than continental philosophy.
 # After about a year, I switched to double majoring in philosophy and mathematics, and was much happier, pushing this to the end of my studies.
 
-# Arc 2: ... tbc
+# Arc 2: 
 # """.strip(),
 }
 
