@@ -32,6 +32,11 @@ body {
   margin-bottom: 0.7em;
 }
 
+.post-dates {
+  color: #888;
+  margin-top: -0.5em;
+}
+
 @media (min-width: 500px) {
 #menu {
   margin-top: 30px;

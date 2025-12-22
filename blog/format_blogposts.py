@@ -1,3 +1,8 @@
+import subprocess
+from datetime import datetime
+
+import re
+
 BLOG_TEMPLATE = """
 <!doctype html>
 <html>
@@ -6,7 +11,14 @@ BLOG_TEMPLATE = """
     <link rel="stylesheet" href="/static/style.css">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{description}">
+    <meta property="og:title" content="{title} - Adrien Morisot">
+    <meta property="og:description" content="{description}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="{og_url}">
+    <link rel="canonical" href="{og_url}">
     <title>Blog - {title}</title>
+    {structured_data}
   </head>
   <body>
     <div id="menu">
@@ -22,6 +34,7 @@ BLOG_TEMPLATE = """
     <div id="content">
       {content}
     </div>
+    <script data-goatcounter="https://amorisot.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   </body>
 </html>
 """.strip()
@@ -74,8 +87,81 @@ An added benefit of this pastime is it allows me to start re-populating the art 
 # """.strip(),
 }
 
-def format_post(post: str, post_name: str) -> str:
+def get_git_dates(filepath: str) -> tuple[str | None, str | None]:
+    """
+    Get the first commit date (published) and last commit date (updated) for a file.
+    Returns (published_date, updated_date) as ISO format strings, or (None, None) if not in git.
+    """
+    try:
+        # Get first commit date (oldest) - no --follow to avoid tracking renames
+        first = subprocess.run(
+            ["git", "log", "--diff-filter=A", "--format=%aI", "--", filepath],
+            capture_output=True, text=True, check=True
+        )
+        # Get last commit date (most recent)
+        last = subprocess.run(
+            ["git", "log", "-1", "--format=%aI", "--", filepath],
+            capture_output=True, text=True, check=True
+        )
+
+        first_date = first.stdout.strip().split('\n')[-1] if first.stdout.strip() else None
+        last_date = last.stdout.strip().split('\n')[0] if last.stdout.strip() else None
+
+        return (first_date, last_date)
+    except subprocess.CalledProcessError:
+        return (None, None)
+
+def format_date_human(iso_date: str | None) -> str:
+    """Convert ISO date to human-readable format like 'Dec 22, 2025'"""
+    if not iso_date:
+        return ""
+    dt = datetime.fromisoformat(iso_date)
+    return dt.strftime("%b %d, %Y")
+
+def same_day(date1: str | None, date2: str | None) -> bool:
+    """Check if two ISO dates are on the same day"""
+    if not date1 or not date2:
+        return True
+    return datetime.fromisoformat(date1).date() == datetime.fromisoformat(date2).date()
+
+def make_description(post: str, max_length: int = 160) -> str:
+    """Extract a description from post content, stripping HTML and truncating."""
+    # Remove HTML tags
+    text = re.sub(r'<[^>]+>', '', post)
+    # Get first paragraph or sentence
+    text = text.split('\n\n')[0].strip()
+    # Truncate if needed
+    if len(text) > max_length:
+        text = text[:max_length-3].rsplit(' ', 1)[0] + '...'
+    # Escape quotes for HTML attribute
+    return text.replace('"', '&quot;')
+
+def make_structured_data(title: str, published: str | None, updated: str | None) -> str:
+    """Generate schema.org JSON-LD for SEO"""
+    if not published:
+        return ""
+    data = {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": title,
+        "datePublished": published,
+    }
+    if updated and not same_day(published, updated):
+        data["dateModified"] = updated
+    import json
+    return f'<script type="application/ld+json">{json.dumps(data)}</script>'
+
+def format_post(post: str, post_name: str, published: str | None = None, updated: str | None = None) -> str:
     final_post = f"{' '*4}<h3>" + post_name + "</h3>\n"
+
+    # Add date info if available
+    if published:
+        date_html = f'{" "*6}<p class="post-dates"><small>Published: {format_date_human(published)}'
+        if updated and not same_day(published, updated):
+            date_html += f' · Updated: {format_date_human(updated)}'
+        date_html += '</small></p>\n'
+        final_post += date_html
+
     for line in post.split("\n\n"):
         final_post += f"{' '*6}<p>{line}</p>\n"
     return final_post.strip()
@@ -86,15 +172,79 @@ def sanitize_filename(name: str) -> str:
     """
     return name.replace(" ", "_").replace("/", "_").replace("\\", "_").replace(":", "_").replace("?", "").replace("*", "_").replace("'", "")
 
+def get_lastmod(filepath: str) -> str:
+    """Get the last modified date (YYYY-MM-DD) for a file from git."""
+    try:
+        result = subprocess.run(
+            ["git", "log", "-1", "--format=%aI", "--", filepath],
+            capture_output=True, text=True, check=True
+        )
+        if result.stdout.strip():
+            return datetime.fromisoformat(result.stdout.strip()).strftime("%Y-%m-%d")
+    except subprocess.CalledProcessError:
+        pass
+    return datetime.now().strftime("%Y-%m-%d")
+
+def generate_sitemap(blog_posts: list[str]):
+    """Generate sitemap.xml with all pages."""
+    # Static pages
+    static_pages = [
+        ("https://amorisot.github.io/", "index.html"),
+        ("https://amorisot.github.io/about", "about.html"),
+        ("https://amorisot.github.io/art", "art.html"),
+        ("https://amorisot.github.io/ml", "ml.html"),
+        ("https://amorisot.github.io/books", "books.html"),
+        ("https://amorisot.github.io/blog", "blog.html"),
+    ]
+
+    urls = []
+    for url, filepath in static_pages:
+        lastmod = get_lastmod(filepath)
+        urls.append(f"  <url>\n    <loc>{url}</loc>\n    <lastmod>{lastmod}</lastmod>\n  </url>")
+
+    # Blog posts
+    for slug in blog_posts:
+        filepath = f"blog/{slug}.html"
+        lastmod = get_lastmod(filepath)
+        urls.append(f"  <url>\n    <loc>https://amorisot.github.io/blog/{slug}.html</loc>\n    <lastmod>{lastmod}</lastmod>\n  </url>")
+
+    sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    sitemap += "\n".join(urls)
+    sitemap += "\n</urlset>\n"
+
+    with open("sitemap.xml", "w") as f:
+        f.write(sitemap)
+
 def main():
+    blog_slugs = []
     with open(f"blog.html", "w") as f:
         all_post_links = "<h1>'Blog'</h1>\n"
         for post_name, post in POSTS.items():
-            all_post_links += f"{' '*6}<li><a href='/blog/{sanitize_filename(post_name)}.html'>{post_name}</a></li>\n"
-            with open(f"blog/{sanitize_filename(post_name)}.html", "w") as f_blog:
-                f_blog.write(BLOG_TEMPLATE.format(title=post_name, content=format_post(post=post, post_name=post_name)))
-            
-        f.write(BLOG_TEMPLATE.format(title="all", content=all_post_links.strip()))
+            slug = sanitize_filename(post_name)
+            blog_slugs.append(slug)
+            filepath = f"blog/{slug}.html"
+            published, updated = get_git_dates(filepath)
+
+            all_post_links += f"{' '*6}<li><a href='/blog/{slug}.html'>{post_name}</a></li>\n"
+            with open(filepath, "w") as f_blog:
+                f_blog.write(BLOG_TEMPLATE.format(
+                    title=post_name,
+                    og_url=f"https://amorisot.github.io/blog/{slug}.html",
+                    description=make_description(post),
+                    content=format_post(post=post, post_name=post_name, published=published, updated=updated),
+                    structured_data=make_structured_data(post_name, published, updated)
+                ))
+
+        f.write(BLOG_TEMPLATE.format(
+            title="all",
+            og_url="https://amorisot.github.io/blog",
+            description="Blog posts by Adrien Morisot on ML, LLMs, and other topics.",
+            content=all_post_links.strip(),
+            structured_data=""
+        ))
+
+    generate_sitemap(blog_slugs)
+    print(f"Generated {len(blog_slugs)} blog posts and updated sitemap.xml")
 
 if __name__ == "__main__":
     main()
