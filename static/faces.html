@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometric Faces</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        canvas {
+            width: 100%;
+            aspect-ratio: 3/4;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid" id="grid"></div>
+
+    <script>
+        function rand(min, max) {
+            return min + Math.random() * (max - min);
+        }
+
+        function randInt(min, max) {
+            return Math.floor(rand(min, max + 1));
+        }
+
+        function hsl(h, s, l) {
+            return `hsl(${h}, ${s}%, ${l}%)`;
+        }
+
+        function drawFace(canvas) {
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, w, h);
+
+            // Per-frame settings
+            const baseHue = randInt(0, 360);
+            const lineWidth = rand(1, 5);
+            const watercolor = Math.random() > 0.5;
+
+            // Generate color variations of same hue
+            const getColor = () => {
+                const s = rand(50, 90);
+                const l = rand(25, 55);
+                return hsl(baseHue, s, l);
+            };
+
+            ctx.lineWidth = lineWidth;
+
+            // Setup watercolor effect
+            if (watercolor) {
+                ctx.shadowColor = hsl(baseHue, 60, 40);
+                ctx.shadowBlur = rand(8, 20);
+            }
+
+            // Randomize center x position
+            const cx = w * rand(0.4, 0.6);
+
+            // Hair - variable position and size
+            const hairY = h * rand(0.05, 0.18);
+            const hairType = randInt(0, 3);
+            const hairColor = getColor();
+            const hairWidth = w * rand(0.4, 0.7);
+            const hairHeight = h * rand(0.08, 0.2);
+
+            ctx.fillStyle = hairColor;
+            ctx.strokeStyle = hairColor;
+
+            if (hairType === 0) {
+                // Rectangle block
+                ctx.fillRect(cx - hairWidth/2, hairY, hairWidth, hairHeight);
+            } else if (hairType === 1) {
+                // Triangle
+                ctx.beginPath();
+                ctx.moveTo(cx, hairY);
+                ctx.lineTo(cx + hairWidth/2, hairY + hairHeight);
+                ctx.lineTo(cx - hairWidth/2, hairY + hairHeight);
+                ctx.closePath();
+                ctx.fill();
+            } else if (hairType === 2) {
+                // Lines
+                const numLines = randInt(3, 7);
+                for (let i = 0; i < numLines; i++) {
+                    const x = cx - hairWidth/2 + hairWidth * (i / (numLines - 1));
+                    ctx.beginPath();
+                    ctx.moveTo(x, hairY);
+                    ctx.lineTo(x, hairY + hairHeight);
+                    ctx.stroke();
+                }
+            } else {
+                // Circle
+                ctx.beginPath();
+                ctx.arc(cx, hairY + hairHeight/2, Math.min(hairWidth, hairHeight)/2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Eyes - variable position, spacing, and size
+            const eyeY = h * rand(0.32, 0.48);
+            const eyeSpacing = w * rand(0.08, 0.22);
+            const eyeType = randInt(0, 2);
+            const eyeColor = getColor();
+            const eyeSize = w * rand(0.04, 0.1);
+
+            ctx.fillStyle = eyeColor;
+            ctx.strokeStyle = eyeColor;
+
+            for (let side of [-1, 1]) {
+                const ex = cx + side * eyeSpacing;
+
+                if (eyeType === 0) {
+                    // Circle
+                    ctx.beginPath();
+                    ctx.arc(ex, eyeY, eyeSize, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (eyeType === 1) {
+                    // Square
+                    ctx.fillRect(ex - eyeSize, eyeY - eyeSize, eyeSize * 2, eyeSize * 2);
+                } else {
+                    // Dot
+                    ctx.beginPath();
+                    ctx.arc(ex, eyeY, eyeSize * 0.4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Optional glasses
+            if (Math.random() > 0.65) {
+                const glassColor = getColor();
+                ctx.strokeStyle = glassColor;
+
+                const glassType = randInt(0, 1);
+                const gs = eyeSize * rand(2, 3);
+
+                if (glassType === 0) {
+                    // Square glasses
+                    ctx.strokeRect(cx - eyeSpacing - gs/2, eyeY - gs/2, gs, gs);
+                    ctx.strokeRect(cx + eyeSpacing - gs/2, eyeY - gs/2, gs, gs);
+                } else {
+                    // Round glasses
+                    ctx.beginPath();
+                    ctx.arc(cx - eyeSpacing, eyeY, gs/2, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(cx + eyeSpacing, eyeY, gs/2, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                // Bridge
+                ctx.beginPath();
+                ctx.moveTo(cx - eyeSpacing + gs/2, eyeY);
+                ctx.lineTo(cx + eyeSpacing - gs/2, eyeY);
+                ctx.stroke();
+            }
+
+            // Nose - variable position and size
+            const noseY = h * rand(0.5, 0.62);
+            const noseType = randInt(0, 2);
+            const noseColor = getColor();
+            const noseSize = w * rand(0.03, 0.08);
+            const noseX = cx + w * rand(-0.05, 0.05);
+
+            ctx.fillStyle = noseColor;
+            ctx.strokeStyle = noseColor;
+
+            if (noseType === 0) {
+                // Triangle
+                ctx.beginPath();
+                ctx.moveTo(noseX, noseY - noseSize);
+                ctx.lineTo(noseX + noseSize, noseY + noseSize);
+                ctx.lineTo(noseX - noseSize, noseY + noseSize);
+                ctx.closePath();
+                ctx.fill();
+            } else if (noseType === 1) {
+                // Line
+                ctx.beginPath();
+                ctx.moveTo(noseX, noseY - noseSize);
+                ctx.lineTo(noseX, noseY + noseSize);
+                ctx.stroke();
+            } else {
+                // Dot
+                ctx.beginPath();
+                ctx.arc(noseX, noseY, noseSize * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Mouth - variable position and size
+            const mouthY = h * rand(0.68, 0.82);
+            const mouthType = randInt(0, 3);
+            const mouthColor = getColor();
+            const mouthWidth = w * rand(0.12, 0.28);
+            const mouthHeight = h * rand(0.02, 0.06);
+            const mouthX = cx + w * rand(-0.05, 0.05);
+
+            ctx.fillStyle = mouthColor;
+            ctx.strokeStyle = mouthColor;
+
+            if (mouthType === 0) {
+                // Line
+                ctx.beginPath();
+                ctx.moveTo(mouthX - mouthWidth/2, mouthY);
+                ctx.lineTo(mouthX + mouthWidth/2, mouthY);
+                ctx.stroke();
+            } else if (mouthType === 1) {
+                // Rectangle
+                ctx.fillRect(mouthX - mouthWidth/2, mouthY - mouthHeight/2, mouthWidth, mouthHeight);
+            } else if (mouthType === 2) {
+                // Circle
+                ctx.beginPath();
+                ctx.arc(mouthX, mouthY, mouthHeight, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // Triangle
+                ctx.beginPath();
+                ctx.moveTo(mouthX - mouthWidth/2, mouthY - mouthHeight/2);
+                ctx.lineTo(mouthX + mouthWidth/2, mouthY - mouthHeight/2);
+                ctx.lineTo(mouthX, mouthY + mouthHeight);
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+
+        function generateGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+
+            for (let i = 0; i < 20; i++) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 150;
+                canvas.height = 200;
+                drawFace(canvas);
+                grid.appendChild(canvas);
+            }
+        }
+
+        generateGrid();
+    </script>
+</body>
+</html>
