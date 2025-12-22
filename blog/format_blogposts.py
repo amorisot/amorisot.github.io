@@ -51,7 +51,17 @@ The presence of of E. Coli, salmonella and camphylobacter in virtually ALL consu
 
 The depth and breadth of even small LLM's knowledge is staggering. However, it is important to remember that their competition is stiff, when it comes to performing tasks in the world.
 
-Current generation LLMs --at most ~10T parameter sparse MoEs-- are competing against the human brain, which are 100T parameter, highly efficient, multimodal MoEs, pretrained on decades of experience, post-trained in university, RLVR'ed/RLHF'ed on the job. Humans should not be slept on."""
+Current generation LLMs --at most ~10T parameter sparse MoEs-- are competing against the human brain, which are 100T parameter, highly efficient, multimodal MoEs, pretrained on decades of experience, post-trained in university, RLVR'ed/RLHF'ed on the job. Humans should not be slept on.
+""".strip(),
+  "a cute way of passing time while vibe coding": """
+While the model is chugging along, a pleasant and somewhat brain-dead way of passing the time is asking the model for a recreation in code of some work of art or biological phenomena.
+
+It is low stakes, helps me refine my understanding of what models can and cannot do, and the output usually sparks joy --independent of whether or not the model did the task successfully!
+
+I've started compiling the successful outputs of these efforts in the later parts of my <a href="art"> art (👨‍🎨)</a> page. See if you recognise them all!
+
+An added benefit of this pastime is it allows me to start re-populating the art page, which I've ignored for too long!
+""".strip()
 #    "my career path, so far": """
 # An extremely bare-bones summary of where I am at, and how I got here, listed as a series of narrative arcs.
 
@@ -78,7 +88,7 @@ def sanitize_filename(name: str) -> str:
 
 def main():
     with open(f"blog.html", "w") as f:
-        all_post_links = ""
+        all_post_links = "<h1>'Blog'</h1>\n"
         for post_name, post in POSTS.items():
             all_post_links += f"{' '*6}<li><a href='/blog/{sanitize_filename(post_name)}.html'>{post_name}</a></li>\n"
             with open(f"blog/{sanitize_filename(post_name)}.html", "w") as f_blog:
