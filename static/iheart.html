@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I ❤️ ??</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: white;
+            font-family: 'Libre Baskerville', 'Georgia', serif;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: min(25vw, 180px);
+            font-weight: 700;
+            color: black;
+            line-height: 0.9;
+        }
+
+        .top-row {
+            display: flex;
+            align-items: center;
+            gap: 0.1em;
+        }
+
+        .heart {
+            width: 1em;
+            height: 1em;
+        }
+
+        .heart svg {
+            width: 100%;
+            height: 100%;
+            fill: #c41230;
+        }
+
+        .letters {
+            display: flex;
+            justify-content: center;
+            font-size: 1.3em;
+        }
+
+        .letters span {
+            display: inline-block;
+            transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .letters span.changing {
+            transform: scale(0) rotateY(180deg);
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-row">
+            <span>I</span>
+            <span class="heart">
+                <svg viewBox="0 0 100 100">
+                    <path d="M50,88 C20,65 5,50 5,30 C5,15 17,5 30,5 C40,5 48,12 50,18 C52,12 60,5 70,5 C83,5 95,15 95,30 C95,50 80,65 50,88 Z"/>
+                </svg>
+            </span>
+        </div>
+        <div class="letters">
+            <span id="letter1">N</span><span id="letter2">Y</span>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // CHANGE THIS VALUE TO ADJUST THE INTERVAL
+        // 10 minutes = 600000 milliseconds
+        // For testing, try 5000 (5 seconds)
+        // ========================================
+        // const INTERVAL_MS = 600000;
+        const INTERVAL_MS = 5000;
+        // ========================================
+
+        const letter1El = document.getElementById('letter1');
+        const letter2El = document.getElementById('letter2');
+
+        // Generate deterministic letters based on a seed
+        function getLettersForSeed(seed) {
+            const a = seed * 16807 % 2147483647;
+            const b = a * 16807 % 2147483647;
+
+            const letter1 = String.fromCharCode(65 + (a % 26));
+            const letter2 = String.fromCharCode(65 + (b % 26));
+
+            return [letter1, letter2];
+        }
+
+        // Get the current "period" - everyone in the world gets the same period at the same moment
+        function getCurrentPeriod() {
+            return Math.floor(Date.now() / INTERVAL_MS);
+        }
+
+        function updateLetters(animate = true) {
+            const period = getCurrentPeriod();
+            const [l1, l2] = getLettersForSeed(period);
+
+            if (animate && (letter1El.textContent !== l1 || letter2El.textContent !== l2)) {
+                letter1El.classList.add('changing');
+                letter2El.classList.add('changing');
+
+                setTimeout(() => {
+                    letter1El.textContent = l1;
+                    letter2El.textContent = l2;
+
+                    letter1El.classList.remove('changing');
+                    letter2El.classList.remove('changing');
+                }, 300);
+            } else {
+                letter1El.textContent = l1;
+                letter2El.textContent = l2;
+            }
+        }
+
+        // Initial update without animation
+        updateLetters(false);
+
+        // Check every second if we need to update
+        setInterval(() => {
+            const period = getCurrentPeriod();
+            const [l1, l2] = getLettersForSeed(period);
+
+            if (letter1El.textContent !== l1 || letter2El.textContent !== l2) {
+                updateLetters(true);
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

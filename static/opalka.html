@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opalka - Counting Since Nov 1, 2025</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #frame {
+            width: 800px;
+            height: 600px;
+            background: #d8d8d0;
+            padding: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        #canvas {
+            width: 100%;
+            height: 100%;
+            font-family: 'Courier New', monospace;
+            line-height: 1.1;
+            word-wrap: break-word;
+            word-break: break-all;
+            overflow: hidden;
+        }
+
+        .n {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div id="frame">
+        <div id="canvas"></div>
+    </div>
+
+    <script>
+        // November 1, 2025 00:00:00 UTC - our epoch
+        const EPOCH = Date.UTC(2025, 10, 1, 0, 0, 0);
+
+        const canvas = document.getElementById('canvas');
+
+        // Seeded random for consistency across viewers
+        function seededRandom(seed) {
+            const x = Math.sin(seed * 9999) * 10000;
+            return x - Math.floor(x);
+        }
+
+        function getStyle(n) {
+            const r1 = seededRandom(n);
+            const r2 = seededRandom(n * 1.1);
+            const r3 = seededRandom(n * 1.2);
+            const r4 = seededRandom(n * 1.3);
+
+            // Harsh grey variation - from very dark to quite light
+            const grey = Math.floor(15 + r1 * 170);
+
+            // Font size variation
+            const size = 9 + r2 * 5;
+
+            // Margin/spacing around number
+            const marginRight = 1 + r3 * 10;
+            const marginTop = -2 + r4 * 4;
+
+            return {
+                color: `rgb(${grey},${grey},${grey})`,
+                fontSize: `${size}px`,
+                marginRight: `${marginRight}px`,
+                marginTop: `${marginTop}px`
+            };
+        }
+
+        function getCurrentCount() {
+            const now = Date.now();
+            const elapsed = now - EPOCH;
+            if (elapsed < 0) return 0;
+            return Math.floor(elapsed / 60000); // 1 per minute
+        }
+
+        function estimateCapacity(startNum) {
+            const avgLen = String(startNum).length + 1;
+            const charsPerLine = Math.floor(770 / 7);
+            const lines = Math.floor(570 / 13);
+            return Math.floor(charsPerLine * lines / avgLen * 0.85);
+        }
+
+        function render() {
+            const currentCount = getCurrentCount();
+
+            if (currentCount <= 0) {
+                canvas.textContent = "Waiting for November 1, 2025 UTC...";
+                setTimeout(render, 100);
+                return;
+            }
+
+            const capacity = estimateCapacity(currentCount);
+            const startNum = Math.max(1, currentCount - capacity + 1);
+
+            let html = '';
+            for (let i = startNum; i <= currentCount; i++) {
+                const s = getStyle(i);
+                html += `<span class="n" style="color:${s.color};font-size:${s.fontSize};margin-right:${s.marginRight};margin-top:${s.marginTop}">${i}</span>`;
+            }
+
+            canvas.innerHTML = html;
+            setTimeout(render, 1000);
+        }
+
+        render();
+    </script>
+</body>
+</html>
