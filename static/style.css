@@ -61,10 +61,12 @@ body {
   font-size: 3rem;
 }
 #left {
-  height: 1px;
-  width: 1px;
+  display: none;
 }
 #content {
+  clear: both;
   margin-top: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
 }
 }
