@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Unknown Pleasures</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    canvas {
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" width="800" height="1000"></canvas>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width;
+    const H = canvas.height;
+
+    // Parameters
+    const numLines = 80;
+    const numPoints = 500;
+    const lineSpacing = 10;
+    const amplitude = 60;
+    const marginX = 80;
+    const marginY = 80;
+
+    // Simple seeded random
+    let seed = 12345;
+    function random() {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      return seed / 0x7fffffff;
+    }
+
+    // Reset seed for consistent results
+    function resetSeed() {
+      seed = 12345;
+    }
+
+    // Store line parameters so they're consistent across frames
+    const lineParams = [];
+    for (let lineIndex = 0; lineIndex < numLines; lineIndex++) {
+      resetSeed();
+      for (let k = 0; k < lineIndex * 5; k++) random();
+
+      lineParams.push({
+        freq1: 2 + random() * 3,
+        freq2: 5 + random() * 5,
+        freq3: 10 + random() * 10,
+        phase1: random() * Math.PI * 2,
+        phase2: random() * Math.PI * 2,
+        phase3: random() * Math.PI * 2,
+        amp1: 0.5 + random() * 0.5,
+        amp2: 0.2 + random() * 0.3,
+        amp3: 0.1 + random() * 0.1,
+      });
+    }
+
+    // Generate waveform for a single line using summed sine waves
+    function generateLine(lineIndex, time) {
+      const points = [];
+      const p = lineParams[lineIndex];
+
+      // Time-based phase shift (different speed per line for organic feel)
+      const timeOffset = time * 0.001 * (0.5 + (lineIndex % 10) * 0.1);
+
+      for (let i = 0; i < numPoints; i++) {
+        const t = i / (numPoints - 1);
+        const x = marginX + t * (W - 2 * marginX);
+
+        // Sum of sines with animated phase
+        let y = 0;
+        y += p.amp1 * Math.sin(t * Math.PI * p.freq1 + p.phase1 + timeOffset);
+        y += p.amp2 * Math.sin(t * Math.PI * p.freq2 + p.phase2 + timeOffset * 1.3);
+        y += p.amp3 * Math.sin(t * Math.PI * p.freq3 + p.phase3 + timeOffset * 0.7);
+
+        // Horizontal envelope - peaks in center
+        const centerDist = Math.abs(t - 0.5);
+        const envelope = Math.exp(-Math.pow(centerDist / 0.25, 2));
+
+        // Row envelope - middle rows have bigger peaks
+        const rowFactor = 1 - Math.abs(lineIndex - numLines / 2) / (numLines / 2);
+        const rowEnvelope = 0.3 + 0.7 * rowFactor;
+
+        y = y * envelope * rowEnvelope;
+
+        // Only positive values (waves go up, not down)
+        y = Math.max(y, 0);
+
+        // Add tiny noise for texture (use position-based seed for consistency)
+        const noiseSeed = (lineIndex * 1000 + i) * 1103515245;
+        const noise = ((noiseSeed & 0x7fffffff) / 0x7fffffff) * 0.02;
+        y += noise;
+
+        points.push({ x, y });
+      }
+
+      return points;
+    }
+
+    // Draw everything
+    function draw(time = 0) {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, W, H);
+
+      // Pre-generate all lines
+      const allLines = [];
+      for (let i = 0; i < numLines; i++) {
+        allLines.push(generateLine(i, time));
+      }
+
+      // Draw from front (bottom) to back (top)
+      // Each line draws its fill FIRST, then its stroke
+      // Lines are drawn bottom-to-top so front lines occlude back lines
+      for (let i = 0; i < numLines; i++) {
+        const points = allLines[i];
+        const baseY = marginY + i * lineSpacing;
+
+        // Fill polygon below the line (for occlusion of lines behind)
+        ctx.beginPath();
+        ctx.moveTo(marginX - 10, baseY);  // Start at left edge, at baseline
+        for (const pt of points) {
+          ctx.lineTo(pt.x, baseY - pt.y * amplitude);
+        }
+        ctx.lineTo(W - marginX + 10, baseY);  // End at right edge, at baseline
+        ctx.lineTo(W - marginX + 10, baseY + lineSpacing + 5);  // Down to cover gap
+        ctx.lineTo(marginX - 10, baseY + lineSpacing + 5);
+        ctx.closePath();
+        ctx.fillStyle = '#000';
+        ctx.fill();
+
+        // Stroke the line on top
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, baseY - points[0].y * amplitude);
+        for (let j = 1; j < points.length; j++) {
+          ctx.lineTo(points[j].x, baseY - points[j].y * amplitude);
+        }
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+
+    // Animation loop
+    function animate(time) {
+      draw(time);
+      requestAnimationFrame(animate);
+    }
+
+    animate(0);
+  </script>
+</body>
+</html>
