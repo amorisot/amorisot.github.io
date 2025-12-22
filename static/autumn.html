@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autumn Leaves</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #2a1810;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        canvas {
+            position: absolute;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container"></div>
+
+    <script>
+        const autumnColors = [
+            // Vibrant reds - like in the photo
+            { h: 0, s: 85, l: 45 },
+            { h: 5, s: 90, l: 42 },
+            { h: 8, s: 85, l: 48 },
+            { h: 355, s: 80, l: 40 },
+            { h: 358, s: 88, l: 44 },
+            // Scarlet / vermillion
+            { h: 12, s: 90, l: 50 },
+            { h: 15, s: 85, l: 45 },
+            { h: 10, s: 92, l: 48 },
+            // Deep burgundy / maroon
+            { h: 350, s: 70, l: 32 },
+            { h: 355, s: 65, l: 28 },
+            { h: 0, s: 60, l: 30 },
+            { h: 345, s: 55, l: 35 },
+            // Oranges
+            { h: 20, s: 95, l: 52 },
+            { h: 25, s: 92, l: 50 },
+            { h: 30, s: 90, l: 48 },
+            { h: 18, s: 88, l: 55 },
+            // Bright yellows
+            { h: 48, s: 95, l: 55 },
+            { h: 52, s: 92, l: 58 },
+            { h: 45, s: 90, l: 52 },
+            { h: 55, s: 88, l: 60 },
+            // Yellow-greens (like the green maple in photo)
+            { h: 75, s: 70, l: 45 },
+            { h: 80, s: 65, l: 50 },
+            { h: 70, s: 60, l: 42 },
+            // Golden / amber
+            { h: 38, s: 85, l: 48 },
+            { h: 42, s: 90, l: 52 },
+            { h: 35, s: 80, l: 45 },
+        ];
+
+        const leafTypes = [
+            'maple', 'maple', 'maple', 'maple',  // More maples like in photo
+            'ovate', 'lanceolate', 'cordate', 'elliptic',
+            'obovate', 'oak', 'lobed'
+        ];
+
+        function randRange(min, max) {
+            return min + Math.random() * (max - min);
+        }
+
+        function getAutumnColor() {
+            const base = autumnColors[Math.floor(Math.random() * autumnColors.length)];
+            return {
+                h: base.h + randRange(-5, 5),
+                s: Math.min(100, base.s + randRange(-5, 8)),
+                l: base.l + randRange(-5, 5)
+            };
+        }
+
+        function createLeafCanvas(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            const color = getAutumnColor();
+            const fillColor = `hsl(${color.h}, ${color.s}%, ${color.l}%)`;
+            const strokeColor = `hsl(${color.h}, ${color.s + 5}%, ${Math.max(0, color.l - 12)}%)`;
+
+            const leafType = leafTypes[Math.floor(Math.random() * leafTypes.length)];
+            const rotation = randRange(-Math.PI, Math.PI);
+            const scale = randRange(0.75, 1);
+
+            ctx.save();
+            ctx.translate(size/2, size/2);
+            ctx.rotate(rotation);
+            ctx.scale(scale, scale);
+            ctx.translate(-size/2, -size/2);
+
+            ctx.fillStyle = fillColor;
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 1.5;
+
+            drawLeaf(ctx, leafType, size, size);
+
+            ctx.restore();
+
+            return canvas;
+        }
+
+        function drawLeaf(ctx, type, w, h) {
+            const v = () => randRange(-3, 3);
+
+            ctx.beginPath();
+
+            switch(type) {
+                case 'ovate':
+                    ctx.moveTo(w/2, h * 0.08);
+                    ctx.bezierCurveTo(w * 0.78 + v(), h * 0.18 + v(), w * 0.82 + v(), h * 0.48 + v(), w * 0.68 + v(), h * 0.72 + v());
+                    ctx.quadraticCurveTo(w * 0.54 + v(), h * 0.88, w/2, h * 0.92);
+                    ctx.quadraticCurveTo(w * 0.46 + v(), h * 0.88, w * 0.32 + v(), h * 0.72 + v());
+                    ctx.bezierCurveTo(w * 0.18 + v(), h * 0.48 + v(), w * 0.22 + v(), h * 0.18 + v(), w/2, h * 0.08);
+                    break;
+
+                case 'lanceolate':
+                    ctx.moveTo(w/2, h * 0.06);
+                    ctx.bezierCurveTo(w * 0.68 + v(), h * 0.22 + v(), w * 0.68 + v(), h * 0.58 + v(), w * 0.54 + v(), h * 0.88);
+                    ctx.quadraticCurveTo(w/2, h * 0.94, w/2, h * 0.92);
+                    ctx.quadraticCurveTo(w/2, h * 0.94, w * 0.46 + v(), h * 0.88);
+                    ctx.bezierCurveTo(w * 0.32 + v(), h * 0.58 + v(), w * 0.32 + v(), h * 0.22 + v(), w/2, h * 0.06);
+                    break;
+
+                case 'cordate':
+                    ctx.moveTo(w/2, h * 0.2);
+                    ctx.bezierCurveTo(w * 0.82 + v(), h * 0.12 + v(), w * 0.88 + v(), h * 0.52 + v(), w * 0.62 + v(), h * 0.75 + v());
+                    ctx.quadraticCurveTo(w/2, h * 0.92, w/2, h * 0.88);
+                    ctx.quadraticCurveTo(w/2, h * 0.92, w * 0.38 + v(), h * 0.75 + v());
+                    ctx.bezierCurveTo(w * 0.12 + v(), h * 0.52 + v(), w * 0.18 + v(), h * 0.12 + v(), w/2, h * 0.2);
+                    break;
+
+                case 'elliptic':
+                    ctx.ellipse(w/2, h * 0.5, w * 0.28 + v(), h * 0.4 + v(), 0, 0, Math.PI * 2);
+                    break;
+
+                case 'obovate':
+                    ctx.moveTo(w/2, h * 0.1);
+                    ctx.bezierCurveTo(w * 0.62 + v(), h * 0.12 + v(), w * 0.82 + v(), h * 0.42 + v(), w * 0.72 + v(), h * 0.68 + v());
+                    ctx.quadraticCurveTo(w * 0.58 + v(), h * 0.9, w/2, h * 0.92);
+                    ctx.quadraticCurveTo(w * 0.42 + v(), h * 0.9, w * 0.28 + v(), h * 0.68 + v());
+                    ctx.bezierCurveTo(w * 0.18 + v(), h * 0.42 + v(), w * 0.38 + v(), h * 0.12 + v(), w/2, h * 0.1);
+                    break;
+
+                case 'maple':
+                    drawMapleLeaf(ctx, w, h, v);
+                    return;
+
+                case 'oak':
+                    drawOakLeaf(ctx, w, h, v);
+                    return;
+
+                case 'lobed':
+                    ctx.moveTo(w/2, h * 0.08);
+                    ctx.bezierCurveTo(w * 0.62 + v(), h * 0.1, w * 0.72 + v(), h * 0.15, w * 0.78 + v(), h * 0.22 + v());
+                    ctx.quadraticCurveTo(w * 0.68 + v(), h * 0.3, w * 0.74 + v(), h * 0.38 + v());
+                    ctx.quadraticCurveTo(w * 0.84 + v(), h * 0.44, w * 0.78 + v(), h * 0.54 + v());
+                    ctx.quadraticCurveTo(w * 0.68 + v(), h * 0.6, w * 0.7 + v(), h * 0.68 + v());
+                    ctx.quadraticCurveTo(w * 0.62 + v(), h * 0.8, w/2, h * 0.92);
+                    ctx.quadraticCurveTo(w * 0.38 + v(), h * 0.8, w * 0.3 + v(), h * 0.68 + v());
+                    ctx.quadraticCurveTo(w * 0.32 + v(), h * 0.6, w * 0.22 + v(), h * 0.54 + v());
+                    ctx.quadraticCurveTo(w * 0.16 + v(), h * 0.44, w * 0.26 + v(), h * 0.38 + v());
+                    ctx.quadraticCurveTo(w * 0.32 + v(), h * 0.3, w * 0.22 + v(), h * 0.22 + v());
+                    ctx.bezierCurveTo(w * 0.28 + v(), h * 0.15, w * 0.38 + v(), h * 0.1, w/2, h * 0.08);
+                    break;
+            }
+
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.save();
+            ctx.clip();
+            drawVein(ctx, w, h, type);
+            ctx.restore();
+        }
+
+        function drawMapleLeaf(ctx, w, h, v) {
+            const cx = w / 2;
+            const scale = w / 100;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, h * 0.08);
+
+            // Right side - 5-pointed maple
+            ctx.quadraticCurveTo(cx + 5*scale + v(), h * 0.15, cx + 10*scale + v(), h * 0.14);
+            ctx.lineTo(cx + 32*scale + v(), h * 0.12 + v());  // Top right point
+            ctx.quadraticCurveTo(cx + 20*scale + v(), h * 0.22, cx + 25*scale + v(), h * 0.28);
+            ctx.lineTo(cx + 42*scale + v(), h * 0.35 + v());  // Middle right point
+            ctx.quadraticCurveTo(cx + 28*scale + v(), h * 0.42, cx + 22*scale + v(), h * 0.52);
+            ctx.lineTo(cx + 28*scale + v(), h * 0.65 + v());  // Lower right point
+            ctx.quadraticCurveTo(cx + 15*scale + v(), h * 0.68, cx + 8*scale, h * 0.78);
+
+            // Bottom stem area
+            ctx.quadraticCurveTo(cx + 3*scale, h * 0.85, cx, h * 0.92);
+            ctx.quadraticCurveTo(cx - 3*scale, h * 0.85, cx - 8*scale, h * 0.78);
+
+            // Left side
+            ctx.quadraticCurveTo(cx - 15*scale + v(), h * 0.68, cx - 28*scale + v(), h * 0.65 + v());
+            ctx.lineTo(cx - 22*scale + v(), h * 0.52);
+            ctx.quadraticCurveTo(cx - 28*scale + v(), h * 0.42, cx - 42*scale + v(), h * 0.35 + v());
+            ctx.lineTo(cx - 25*scale + v(), h * 0.28);
+            ctx.quadraticCurveTo(cx - 20*scale + v(), h * 0.22, cx - 32*scale + v(), h * 0.12 + v());
+            ctx.lineTo(cx - 10*scale + v(), h * 0.14);
+            ctx.quadraticCurveTo(cx - 5*scale + v(), h * 0.15, cx, h * 0.08);
+
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Clip and draw veins
+            ctx.save();
+            ctx.clip();
+
+            ctx.beginPath();
+            ctx.moveTo(cx, h * 0.88);
+            ctx.lineTo(cx, h * 0.12);
+            // Diagonal veins to points
+            ctx.moveTo(cx, h * 0.25);
+            ctx.lineTo(cx + 28*scale, h * 0.15);
+            ctx.moveTo(cx, h * 0.25);
+            ctx.lineTo(cx - 28*scale, h * 0.15);
+            ctx.moveTo(cx, h * 0.38);
+            ctx.lineTo(cx + 35*scale, h * 0.38);
+            ctx.moveTo(cx, h * 0.38);
+            ctx.lineTo(cx - 35*scale, h * 0.38);
+            ctx.moveTo(cx, h * 0.55);
+            ctx.lineTo(cx + 22*scale, h * 0.62);
+            ctx.moveTo(cx, h * 0.55);
+            ctx.lineTo(cx - 22*scale, h * 0.62);
+            ctx.globalAlpha = 0.45;
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+
+            ctx.restore();
+        }
+
+        function drawOakLeaf(ctx, w, h, v) {
+            ctx.beginPath();
+            ctx.moveTo(w/2, h * 0.1);
+
+            ctx.quadraticCurveTo(w * 0.58 + v(), h * 0.12, w * 0.68 + v(), h * 0.18 + v());
+            ctx.quadraticCurveTo(w * 0.6 + v(), h * 0.24, w * 0.72 + v(), h * 0.32 + v());
+            ctx.quadraticCurveTo(w * 0.62 + v(), h * 0.4, w * 0.7 + v(), h * 0.48 + v());
+            ctx.quadraticCurveTo(w * 0.6 + v(), h * 0.56, w * 0.68 + v(), h * 0.64 + v());
+            ctx.quadraticCurveTo(w * 0.58 + v(), h * 0.74, w * 0.55 + v(), h * 0.82);
+            ctx.quadraticCurveTo(w * 0.52, h * 0.9, w/2, h * 0.92);
+
+            ctx.quadraticCurveTo(w * 0.48, h * 0.9, w * 0.45 + v(), h * 0.82);
+            ctx.quadraticCurveTo(w * 0.42 + v(), h * 0.74, w * 0.32 + v(), h * 0.64 + v());
+            ctx.quadraticCurveTo(w * 0.4 + v(), h * 0.56, w * 0.3 + v(), h * 0.48 + v());
+            ctx.quadraticCurveTo(w * 0.38 + v(), h * 0.4, w * 0.28 + v(), h * 0.32 + v());
+            ctx.quadraticCurveTo(w * 0.4 + v(), h * 0.24, w * 0.32 + v(), h * 0.18 + v());
+            ctx.quadraticCurveTo(w * 0.42 + v(), h * 0.12, w/2, h * 0.1);
+
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.save();
+            ctx.clip();
+            drawVein(ctx, w, h, 'oak');
+            ctx.restore();
+        }
+
+        function drawVein(ctx, w, h, type) {
+            ctx.globalAlpha = 0.45;
+            ctx.lineWidth = 1;
+
+            ctx.beginPath();
+            ctx.moveTo(w/2, h * 0.12);
+            ctx.lineTo(w/2, h * 0.88);
+            ctx.stroke();
+
+            const numVeins = 4 + Math.floor(Math.random() * 3);
+            for (let i = 1; i <= numVeins; i++) {
+                const y = h * 0.18 + (h * 0.58) * (i / (numVeins + 1));
+                const spread = 15 + Math.random() * 12;
+
+                ctx.beginPath();
+                ctx.moveTo(w/2, y);
+                ctx.quadraticCurveTo(w/2 + spread * 0.6, y - 4, w/2 + spread, y - 8);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(w/2, y);
+                ctx.quadraticCurveTo(w/2 - spread * 0.6, y - 4, w/2 - spread, y - 8);
+                ctx.stroke();
+            }
+
+            ctx.globalAlpha = 1;
+        }
+
+        // Generate overlapping leaves
+        function generateLeaves() {
+            const container = document.getElementById('container');
+            container.innerHTML = '';
+
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            // Many more leaves for dense coverage
+            const numLeaves = 500;
+
+            for (let i = 0; i < numLeaves; i++) {
+                const size = randRange(60, 140);
+                const x = randRange(-size/2, width - size/2);
+                const y = randRange(-size/2, height - size/2);
+
+                const canvas = createLeafCanvas(size);
+                canvas.style.left = x + 'px';
+                canvas.style.top = y + 'px';
+                canvas.style.width = size + 'px';
+                canvas.style.height = size + 'px';
+
+                container.appendChild(canvas);
+            }
+        }
+
+        generateLeaves();
+
+        // Regenerate on resize
+        window.addEventListener('resize', generateLeaves);
+    </script>
+</body>
+</html>
