@@ -71,7 +71,7 @@ While the model is chugging along, a pleasant and somewhat brain-dead way of pas
 
 It is low stakes, helps me refine my understanding of what models can and cannot do, and the output usually sparks joy --independent of whether or not the model did the task successfully!
 
-I've started compiling the successful outputs of these efforts in the later parts of my <a href="art"> art (👨‍🎨)</a> page. See if you recognise them all!
+I've started compiling the successful outputs of these efforts in the later parts of my <a href="/art">art (👨‍🎨)</a> page. See if you recognise them all!
 
 An added benefit of this pastime is it allows me to start re-populating the art page, which I've ignored for too long!
 """.strip()

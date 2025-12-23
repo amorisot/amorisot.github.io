@@ -2,23 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://amorisot.github.io/</loc>
-    <lastmod>2024-10-20</lastmod>
-  </url>
-  <url>
-    <loc>https://amorisot.github.io/about</loc>
-    <lastmod>2025-11-27</lastmod>
-  </url>
-  <url>
-    <loc>https://amorisot.github.io/art</loc>
     <lastmod>2025-12-22</lastmod>
   </url>
   <url>
+    <loc>https://amorisot.github.io/about</loc>
+    <lastmod>2025-12-22</lastmod>
+  </url>
+  <url>
+    <loc>https://amorisot.github.io/art</loc>
+    <lastmod>2025-12-23</lastmod>
+  </url>
+  <url>
     <loc>https://amorisot.github.io/ml</loc>
-    <lastmod>2025-11-20</lastmod>
+    <lastmod>2025-12-22</lastmod>
   </url>
   <url>
     <loc>https://amorisot.github.io/books</loc>
-    <lastmod>2025-07-01</lastmod>
+    <lastmod>2025-12-22</lastmod>
   </url>
   <url>
     <loc>https://amorisot.github.io/blog</loc>
@@ -26,15 +26,15 @@
   </url>
   <url>
     <loc>https://amorisot.github.io/blog/hi.html</loc>
-    <lastmod>2025-07-01</lastmod>
+    <lastmod>2025-12-22</lastmod>
   </url>
   <url>
     <loc>https://amorisot.github.io/blog/why_dont_they_make_chickens_without_the_salmonella.html</loc>
-    <lastmod>2025-07-01</lastmod>
+    <lastmod>2025-12-22</lastmod>
   </url>
   <url>
     <loc>https://amorisot.github.io/blog/10T_vs_100T_parameter_sparse_MoEs.html</loc>
-    <lastmod>2025-09-11</lastmod>
+    <lastmod>2025-12-22</lastmod>
   </url>
   <url>
     <loc>https://amorisot.github.io/blog/a_cute_way_of_passing_time_while_vibe_coding.html</loc>
