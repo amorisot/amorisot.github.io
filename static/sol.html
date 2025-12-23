@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sol LeWitt - Four Directions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #canvas {
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const size = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+        canvas.width = size;
+        canvas.height = size;
+
+        const gap = size * 0.02;
+        const quadrantSize = (size - gap) / 2;
+        const lineSpacing = 14;
+        const lineWidth = 8;
+        const diagonalSpacing = lineSpacing * Math.sqrt(2); // Adjust for 45° angle
+
+        // Calculate max lines per quadrant
+        const maxLinesVertical = Math.floor(quadrantSize / lineSpacing);
+        const maxLinesHorizontal = Math.floor(quadrantSize / lineSpacing);
+        const maxLinesDiagonal = Math.floor(quadrantSize * 2 / diagonalSpacing);
+
+        // Track which line positions are drawn (randomly filled)
+        let drawnLines = {
+            topLeft: new Set(),
+            topRight: new Set(),
+            bottomLeft: new Set(),
+            bottomRight: new Set()
+        };
+
+        const maxLines = {
+            topLeft: maxLinesVertical,
+            topRight: maxLinesHorizontal,
+            bottomLeft: maxLinesDiagonal,
+            bottomRight: maxLinesDiagonal
+        };
+
+        // Pick a random available position
+        function pickRandomPosition(quadrant) {
+            const max = maxLines[quadrant];
+            const available = [];
+            for (let i = 0; i < max; i++) {
+                if (!drawnLines[quadrant].has(i)) {
+                    available.push(i);
+                }
+            }
+            if (available.length === 0) return null;
+            return available[Math.floor(Math.random() * available.length)];
+        }
+
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, size, size);
+
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = lineWidth;
+
+            // Top Left - Vertical lines
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(0, 0, quadrantSize, quadrantSize);
+            ctx.clip();
+            for (const i of drawnLines.topLeft) {
+                const x = (i + 0.5) * lineSpacing;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, quadrantSize);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // Top Right - Horizontal lines
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(quadrantSize + gap, 0, quadrantSize, quadrantSize);
+            ctx.clip();
+            for (const i of drawnLines.topRight) {
+                const y = (i + 0.5) * lineSpacing;
+                ctx.beginPath();
+                ctx.moveTo(quadrantSize + gap, y);
+                ctx.lineTo(size, y);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // Bottom Left - Diagonal lines (/)
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(0, quadrantSize + gap, quadrantSize, quadrantSize);
+            ctx.clip();
+            for (const i of drawnLines.bottomLeft) {
+                const offset = i * diagonalSpacing;
+                const y1 = quadrantSize + gap;
+                ctx.beginPath();
+                ctx.moveTo(-quadrantSize + offset, y1 + quadrantSize);
+                ctx.lineTo(offset, y1);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // Bottom Right - Diagonal lines (\)
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(quadrantSize + gap, quadrantSize + gap, quadrantSize, quadrantSize);
+            ctx.clip();
+            for (const i of drawnLines.bottomRight) {
+                const offset = i * diagonalSpacing;
+                const x1 = quadrantSize + gap;
+                const y1 = quadrantSize + gap;
+                ctx.beginPath();
+                ctx.moveTo(x1 + offset, y1);
+                ctx.lineTo(x1 + offset + quadrantSize, y1 + quadrantSize);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function addLine() {
+            const quadrants = ['topLeft', 'topRight', 'bottomLeft', 'bottomRight'];
+            let anyAdded = false;
+
+            // Add one random line to each quadrant
+            for (const q of quadrants) {
+                const pos = pickRandomPosition(q);
+                if (pos !== null) {
+                    drawnLines[q].add(pos);
+                    anyAdded = true;
+                }
+            }
+
+            draw();
+
+            if (anyAdded) {
+                setTimeout(addLine, 2000);
+            }
+        }
+
+        // Initial draw with empty quadrants
+        draw();
+
+        // Start adding lines after a brief delay
+        setTimeout(addLine, 2000);
+    </script>
+</body>
+</html>
