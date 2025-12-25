@@ -74,7 +74,13 @@ It is low stakes, helps me refine my understanding of what models can and cannot
 I've started compiling the successful outputs of these efforts in the later parts of my <a href="/art">art (👨‍🎨)</a> page. See if you recognise them all!
 
 An added benefit of this pastime is it allows me to start re-populating the art page, which I've ignored for too long!
-""".strip()
+""".strip(),
+  "list of crafts that are fun on dates, ranked": """
+- Blowing glass: you learn a lot about the craft of glass blowing, but this is mostly too difficult or dangerous as an amateur, and so the instructor usually does most of the actual crafting. They'll let you blow into the tube (sometimes), and perhaps dip the hot glass into the colours, but not much beyond that. 3/10, would not recommend.
+- Pottery: a blessed activity, difficult at the beginning, but you get better fast with practice, the results are immediately tangible (you can drink from them!), and having hands full of wet clay and the pressure to build fast enables pure focus. When doing pottery, flow state is easy to find. The studio at which I do it in Toronto, United Spirits Pottery, is great. Cathy and Ricky, the proprietors, are delightful. And Ricky has a storied past!
+- Glass cutting: delightful. Best place in Toronto: Verbeek studios, in Leslieville. The proprietor, Lane, is lovely too.
+- TODO: watercolour painting.
+  """.strip()
 #    "my career path, so far": """
 # An extremely bare-bones summary of where I am at, and how I got here, listed as a series of narrative arcs.
 
@@ -85,6 +91,7 @@ An added benefit of this pastime is it allows me to start re-populating the art 
 
 # Arc 2: 
 # """.strip(),
+
 }
 
 def get_git_dates(filepath: str) -> tuple[str | None, str | None]:
