@@ -5,3 +5,4 @@
 * You can just make stuff: my wife and I made rings for each other, designed based on what we think the other would enjoy. My wife's spirit animal is a turtle, so the pattern on her ring is tortoise-shell. I like the ocean and the mountains, so my ring has a wave and mountain ridge pattern. Making each other rings was fun, and significantly more meaningful than just buying jewelry at a store. And it seems plain that this principle can be extended further: if you want something made, you can most likely just make it
 * List of crafts to do on dates, ranked
 * email as an interface to back-office work
+* if an LLM can already do it perfectly, is it worth doing? related to the Karpathy post about him trying to build a training repo from scratch, and trying to get Claude to help build, and Claude just continuously trying to import pytorch FSDP.
