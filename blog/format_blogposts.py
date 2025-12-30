@@ -39,13 +39,19 @@ BLOG_TEMPLATE = """
 </html>
 """.strip()
 
+# Each post has: content, published (required), updated (optional)
 POSTS = {
-  "hi": """I am thinking a lot about reasoning in LLMs, and will probably write a blogpost about it soon.
+  "hi": {
+    "published": "2024-10-20",
+    "content": """I am thinking a lot about reasoning in LLMs, and will probably write a blogpost about it soon.
 
 Thanks for stopping by :)
 """.strip(),
+  },
 
-  "why don't they make chickens without the salmonella?": """
+  "why don't they make chickens without the salmonella?": {
+    "published": "2025-07-01",
+    "content": """
 The question was originally facetious and rhetorical, but the answer is surprising.
 
 I learnt most from this <a href="https://www.reddit.com/r/askscience/comments/ncfik/comment/c3816vb/">Reddit comment from more than a decade ago</a>.
@@ -60,13 +66,21 @@ Fresh out of the contaminated scalding tank, after a few seconds at the plucking
 
 The presence of of E. Coli, salmonella and camphylobacter in virtually ALL consumer chicken, including organic and farmer's markets, means it is best to keep raw chicken isolated (well-wrapped) and well refrigerated (bottom shelf). Prepare it as soon as possible, and cook it thoroughly. If you can't use it right away, immerse it fully in a strong brine or acidic marinade (zipper bags are good) to slow pathogen growth. Makes it moist and tasty, too!
 """.strip(),
-  "10T vs 100T parameter sparse MoE's":"""As of September 2025, LLMs are spikily impressive: they outperform most people in mathematical and coding abilities, and they speak more languages fluently than any one person.
+  },
+
+  "10T vs 100T parameter sparse MoE's": {
+    "published": "2025-09-11",
+    "content": """As of September 2025, LLMs are spikily impressive: they outperform most people in mathematical and coding abilities, and they speak more languages fluently than any one person.
 
 The depth and breadth of even small LLM's knowledge is staggering. However, it is important to remember that their competition is stiff, when it comes to performing tasks in the world.
 
 Current generation LLMs --at most ~10T parameter sparse MoEs-- are competing against the human brain, which are 100T parameter, highly efficient, multimodal MoEs, pretrained on decades of experience, post-trained in university, RLVR'ed/RLHF'ed on the job. Humans should not be slept on.
 """.strip(),
-  "a cute way of passing time while vibe coding": """
+  },
+
+  "a cute way of passing time while vibe coding": {
+    "published": "2025-12-22",
+    "content": """
 While the model is chugging along, a pleasant and somewhat brain-dead way of passing the time is asking the model for a recreation in code of some work of art or biological phenomena.
 
 It is low stakes, helps me refine my understanding of what models can and cannot do, and the output usually sparks joy --independent of whether or not the model did the task successfully!
@@ -75,13 +89,11 @@ I've started compiling the successful outputs of these efforts in the later part
 
 An added benefit of this pastime is it allows me to start re-populating the art page, which I've ignored for too long!
 """.strip(),
-#   "list of crafts that are fun on dates, ranked": """
-# - Blowing glass: you learn a lot about the craft of glass blowing, but this is mostly too difficult or dangerous as an amateur, and so the instructor usually does most of the actual crafting. They'll let you blow into the tube (sometimes), and perhaps dip the hot glass into the colours, but not much beyond that. 3/10, would not recommend.
-# - Pottery: a blessed activity, difficult at the beginning, but you get better fast with practice, the results are immediately tangible (you can drink from them!), and having hands full of wet clay and the pressure to build fast enables pure focus. When doing pottery, flow state is easy to find. The studio at which I do it in Toronto, United Spirits Pottery, is great. Cathy and Ricky, the proprietors, are delightful. And Ricky has a storied past!
-# - Glass cutting: delightful. Best place in Toronto: Verbeek studios, in Leslieville. The proprietor, Lane, is lovely too.
-# - TODO: watercolour painting.
-#   """.strip(),
-  "micro-pmf": """
+  },
+
+  "micro-pmf": {
+    "published": "2025-12-30",
+    "content": """
 The existence of <a href="https://en.wikipedia.org/wiki/Micromort">micromorts</a> and <a href="https://colah.github.io/personal/micromarriages/">micromarriages</a> implies the existence of micro-pmf's, associated with actions you take to increase the probability that your startup builds something that reaches product-market fit.
 
 An incomplete (and largely facetious) list:
@@ -97,18 +109,8 @@ An incomplete (and largely facetious) list:
 - Having heated debates with your cofounders = 25 micro-pmfs
 
 I'll update these, probably with more earnesty, as my co-proprietorship of my small business evolves.
-  """.strip(),
-#    "my career path, so far": """
-# An extremely bare-bones summary of where I am at, and how I got here, listed as a series of narrative arcs.
-
-# Arc 1: I did not know what I wanted to do in undergrad. I originally started studying philosophy and political science, as a guess as to what I was interested in.
-# I did not resonate with political science. I was expecting modern theories of how to run states, and instead realised that much of the field still involves reading texts from centuries ago --Locke, Hobbes, Rousseau.
-# Philosophy was more interesting. I gravitated particularly towards logic, the philosophy of mathematics, and ethics/metaethics. Unsurprisingly, given the former, I resonated far more with analytic than continental philosophy.
-# After about a year, I switched to double majoring in philosophy and mathematics, and was much happier, pushing this to the end of my studies.
-
-# Arc 2: 
-# """.strip(),
-
+""".strip(),
+  },
 }
 
 def get_git_dates(filepath: str) -> tuple[str | None, str | None]:
@@ -194,8 +196,18 @@ def format_post(post: str, post_name: str, published: str | None = None, updated
         date_html += '</small></p>\n'
         final_post += date_html
 
-    for line in post.split("\n\n"):
-        final_post += f"{' '*6}<p>{line}</p>\n"
+    for block in post.split("\n\n"):
+        # Check if this block is a list (lines starting with -)
+        lines = block.strip().split("\n")
+        if all(line.strip().startswith("- ") for line in lines if line.strip()):
+            final_post += f"{' '*6}<ul>\n"
+            for line in lines:
+                if line.strip():
+                    item = line.strip()[2:]  # Remove "- " prefix
+                    final_post += f"{' '*8}<li>{item}</li>\n"
+            final_post += f"{' '*6}</ul>\n"
+        else:
+            final_post += f"{' '*6}<p>{block}</p>\n"
     return final_post.strip()
 
 def sanitize_filename(name: str) -> str:
@@ -203,6 +215,18 @@ def sanitize_filename(name: str) -> str:
     Sanitize the filename by replacing spaces with underscores and removing special characters.
     """
     return name.replace(" ", "_").replace("/", "_").replace("\\", "_").replace(":", "_").replace("?", "").replace("*", "_").replace("'", "")
+
+def write_if_changed(filepath: str, content: str) -> bool:
+    """Only write file if content differs. Returns True if written."""
+    try:
+        with open(filepath, "r") as f:
+            if f.read() == content:
+                return False
+    except FileNotFoundError:
+        pass
+    with open(filepath, "w") as f:
+        f.write(content)
+    return True
 
 def get_lastmod(filepath: str) -> str:
     """Get the last modified date (YYYY-MM-DD) for a file from git."""
@@ -217,8 +241,8 @@ def get_lastmod(filepath: str) -> str:
         pass
     return datetime.now().strftime("%Y-%m-%d")
 
-def generate_sitemap(blog_posts: list[str]):
-    """Generate sitemap.xml with all pages."""
+def generate_sitemap(blog_posts: dict[str, str]):
+    """Generate sitemap.xml with all pages. blog_posts is slug -> lastmod date."""
     # Static pages
     static_pages = [
         ("https://amorisot.github.io/", "index.html"),
@@ -234,18 +258,15 @@ def generate_sitemap(blog_posts: list[str]):
         lastmod = get_lastmod(filepath)
         urls.append(f"  <url>\n    <loc>{url}</loc>\n    <lastmod>{lastmod}</lastmod>\n  </url>")
 
-    # Blog posts
-    for slug in blog_posts:
-        filepath = f"blog/{slug}.html"
-        lastmod = get_lastmod(filepath)
+    # Blog posts - use explicit dates
+    for slug, lastmod in blog_posts.items():
         urls.append(f"  <url>\n    <loc>https://amorisot.github.io/blog/{slug}.html</loc>\n    <lastmod>{lastmod}</lastmod>\n  </url>")
 
     sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     sitemap += "\n".join(urls)
     sitemap += "\n</urlset>\n"
 
-    with open("sitemap.xml", "w") as f:
-        f.write(sitemap)
+    write_if_changed("sitemap.xml", sitemap)
 
 def load_seedlings() -> str:
     """Load ideas from the markdown file and format as a seedlings post."""
@@ -263,52 +284,51 @@ def load_seedlings() -> str:
     return html
 
 def main():
-    blog_slugs = []
-    with open(f"blog.html", "w") as f:
-        all_post_links = "<h1>'Blog'</h1>\n"
+    blog_slugs = {}  # slug -> lastmod date for sitemap
+    all_post_links = "<h1>'Blog'</h1>\n"
 
-        # Add seedlings section at the top, demarcated
-        seedlings_content = load_seedlings()
-        seedlings_slug = "seedlings"
-        blog_slugs.append(seedlings_slug)
-        filepath = f"blog/{seedlings_slug}.html"
-        published, updated = get_git_dates("blog/ideas_to_write_about_eventually.md")
+    # Add seedlings section at the top, demarcated
+    seedlings_content = load_seedlings()
+    seedlings_slug = "seedlings"
+    filepath = f"blog/{seedlings_slug}.html"
+    published, updated = get_git_dates("blog/ideas_to_write_about_eventually.md")
+    blog_slugs[seedlings_slug] = to_date_only(updated or published)
 
-        all_post_links += f"{' '*6}<li><a href='/blog/{seedlings_slug}.html'>🌱 seedlings</a></li>\n"
-        all_post_links += f"{' '*6}<hr>\n"
+    all_post_links += f"{' '*6}<li><a href='/blog/{seedlings_slug}.html'>🌱 seedlings</a></li>\n"
+    all_post_links += f"{' '*6}<hr>\n"
 
-        with open(filepath, "w") as f_seedlings:
-            f_seedlings.write(BLOG_TEMPLATE.format(
-                title="🌱 seedlings",
-                og_url=f"https://amorisot.github.io/blog/{seedlings_slug}.html",
-                description="Ideas I'm mulling over, that may one day grow into fuller posts.",
-                content=f"    <h3>🌱 seedlings</h3>\n      {seedlings_content}",
-                structured_data=make_structured_data("seedlings", published, updated)
-            ))
+    write_if_changed(filepath, BLOG_TEMPLATE.format(
+        title="🌱 seedlings",
+        og_url=f"https://amorisot.github.io/blog/{seedlings_slug}.html",
+        description="Ideas I'm mulling over, that may one day grow into fuller posts.",
+        content=f"    <h3>🌱 seedlings</h3>\n      {seedlings_content}",
+        structured_data=make_structured_data("seedlings", published, updated)
+    ))
 
-        for post_name, post in POSTS.items():
-            slug = sanitize_filename(post_name)
-            blog_slugs.append(slug)
-            filepath = f"blog/{slug}.html"
-            published, updated = get_git_dates(filepath)
+    for post_name, post_data in POSTS.items():
+        slug = sanitize_filename(post_name)
+        filepath = f"blog/{slug}.html"
+        published = post_data["published"]
+        updated = post_data.get("updated")  # None if not specified
+        content = post_data["content"]
+        blog_slugs[slug] = updated or published  # Use updated if present, else published
 
-            all_post_links += f"{' '*6}<li><a href='/blog/{slug}.html'>{post_name}</a></li>\n"
-            with open(filepath, "w") as f_blog:
-                f_blog.write(BLOG_TEMPLATE.format(
-                    title=post_name,
-                    og_url=f"https://amorisot.github.io/blog/{slug}.html",
-                    description=make_description(post),
-                    content=format_post(post=post, post_name=post_name, published=published, updated=updated),
-                    structured_data=make_structured_data(post_name, published, updated)
-                ))
-
-        f.write(BLOG_TEMPLATE.format(
-            title="all",
-            og_url="https://amorisot.github.io/blog",
-            description="Blog posts by Adrien Morisot on ML, LLMs, and other topics.",
-            content=all_post_links.strip(),
-            structured_data=""
+        all_post_links += f"{' '*6}<li><a href='/blog/{slug}.html'>{post_name}</a></li>\n"
+        write_if_changed(filepath, BLOG_TEMPLATE.format(
+            title=post_name,
+            og_url=f"https://amorisot.github.io/blog/{slug}.html",
+            description=make_description(content),
+            content=format_post(post=content, post_name=post_name, published=published, updated=updated),
+            structured_data=make_structured_data(post_name, published, updated)
         ))
+
+    write_if_changed("blog.html", BLOG_TEMPLATE.format(
+        title="all",
+        og_url="https://amorisot.github.io/blog",
+        description="Blog posts by Adrien Morisot on ML, LLMs, and other topics.",
+        content=all_post_links.strip(),
+        structured_data=""
+    ))
 
     generate_sitemap(blog_slugs)
     print(f"Generated {len(blog_slugs)} blog posts and updated sitemap.xml")
