@@ -75,12 +75,29 @@ I've started compiling the successful outputs of these efforts in the later part
 
 An added benefit of this pastime is it allows me to start re-populating the art page, which I've ignored for too long!
 """.strip(),
-  "list of crafts that are fun on dates, ranked": """
-- Blowing glass: you learn a lot about the craft of glass blowing, but this is mostly too difficult or dangerous as an amateur, and so the instructor usually does most of the actual crafting. They'll let you blow into the tube (sometimes), and perhaps dip the hot glass into the colours, but not much beyond that. 3/10, would not recommend.
-- Pottery: a blessed activity, difficult at the beginning, but you get better fast with practice, the results are immediately tangible (you can drink from them!), and having hands full of wet clay and the pressure to build fast enables pure focus. When doing pottery, flow state is easy to find. The studio at which I do it in Toronto, United Spirits Pottery, is great. Cathy and Ricky, the proprietors, are delightful. And Ricky has a storied past!
-- Glass cutting: delightful. Best place in Toronto: Verbeek studios, in Leslieville. The proprietor, Lane, is lovely too.
-- TODO: watercolour painting.
-  """.strip()
+#   "list of crafts that are fun on dates, ranked": """
+# - Blowing glass: you learn a lot about the craft of glass blowing, but this is mostly too difficult or dangerous as an amateur, and so the instructor usually does most of the actual crafting. They'll let you blow into the tube (sometimes), and perhaps dip the hot glass into the colours, but not much beyond that. 3/10, would not recommend.
+# - Pottery: a blessed activity, difficult at the beginning, but you get better fast with practice, the results are immediately tangible (you can drink from them!), and having hands full of wet clay and the pressure to build fast enables pure focus. When doing pottery, flow state is easy to find. The studio at which I do it in Toronto, United Spirits Pottery, is great. Cathy and Ricky, the proprietors, are delightful. And Ricky has a storied past!
+# - Glass cutting: delightful. Best place in Toronto: Verbeek studios, in Leslieville. The proprietor, Lane, is lovely too.
+# - TODO: watercolour painting.
+#   """.strip(),
+  "micro-pmf": """
+The existence of <a href="https://en.wikipedia.org/wiki/Micromort">micromorts</a> and <a href="https://colah.github.io/personal/micromarriages/">micromarriages</a> implies the existence of micro-pmf's, associated with actions you take to increase the probability that your startup builds something that reaches product-market fit.
+
+An incomplete (and largely facetious) list:
+
+- Thinking about your product in the shower = 1 micro-pmf
+- Talking to a customer = 2 micro-pmfs
+- Listening to a customer = 10 micro-pmfs
+- Hiring an engineer = 10 micro-pmfs
+- Hiring a 10x engineer = 100 micro-pmfs
+- Hiring a 100x engineer = 1 milli-pmf
+- Closing a deal = 100 micro-pmfs
+- Going to a conference to network = -10 micro-pmfs
+- Having heated debates with your cofounders = 25 micro-pmfs
+
+I'll update these, probably with more earnesty, as my co-proprietorship of my small business evolves.
+  """.strip(),
 #    "my career path, so far": """
 # An extremely bare-bones summary of where I am at, and how I got here, listed as a series of narrative arcs.
 
@@ -143,18 +160,26 @@ def make_description(post: str, max_length: int = 160) -> str:
     # Escape quotes for HTML attribute
     return text.replace('"', '&quot;')
 
+def to_date_only(iso_date: str | None) -> str | None:
+    """Convert ISO datetime to just YYYY-MM-DD, stripping timezone."""
+    if not iso_date:
+        return None
+    return datetime.fromisoformat(iso_date).strftime("%Y-%m-%d")
+
 def make_structured_data(title: str, published: str | None, updated: str | None) -> str:
     """Generate schema.org JSON-LD for SEO"""
     if not published:
         return ""
+    pub_date = to_date_only(published)
+    upd_date = to_date_only(updated)
     data = {
         "@context": "https://schema.org",
         "@type": "BlogPosting",
         "headline": title,
-        "datePublished": published,
+        "datePublished": pub_date,
     }
-    if updated and not same_day(published, updated):
-        data["dateModified"] = updated
+    if upd_date and pub_date != upd_date:
+        data["dateModified"] = upd_date
     import json
     return f'<script type="application/ld+json">{json.dumps(data)}</script>'
 
@@ -222,10 +247,45 @@ def generate_sitemap(blog_posts: list[str]):
     with open("sitemap.xml", "w") as f:
         f.write(sitemap)
 
+def load_seedlings() -> str:
+    """Load ideas from the markdown file and format as a seedlings post."""
+    with open("blog/ideas_to_write_about_eventually.md", "r") as f:
+        ideas = f.read().strip().split("\n")
+
+    # Parse bullet points (lines starting with *)
+    bullets = [line.lstrip("* ").strip() for line in ideas if line.startswith("*")]
+
+    html = "<p>Ideas I'm mulling over, that may one day grow into full posts:</p>\n"
+    html += "      <ul>\n"
+    for bullet in bullets:
+        html += f"        <li>{bullet}</li>\n"
+    html += "      </ul>"
+    return html
+
 def main():
     blog_slugs = []
     with open(f"blog.html", "w") as f:
         all_post_links = "<h1>'Blog'</h1>\n"
+
+        # Add seedlings section at the top, demarcated
+        seedlings_content = load_seedlings()
+        seedlings_slug = "seedlings"
+        blog_slugs.append(seedlings_slug)
+        filepath = f"blog/{seedlings_slug}.html"
+        published, updated = get_git_dates("blog/ideas_to_write_about_eventually.md")
+
+        all_post_links += f"{' '*6}<li><a href='/blog/{seedlings_slug}.html'>🌱 seedlings</a></li>\n"
+        all_post_links += f"{' '*6}<hr>\n"
+
+        with open(filepath, "w") as f_seedlings:
+            f_seedlings.write(BLOG_TEMPLATE.format(
+                title="🌱 seedlings",
+                og_url=f"https://amorisot.github.io/blog/{seedlings_slug}.html",
+                description="Ideas I'm mulling over, that may one day grow into fuller posts.",
+                content=f"    <h3>🌱 seedlings</h3>\n      {seedlings_content}",
+                structured_data=make_structured_data("seedlings", published, updated)
+            ))
+
         for post_name, post in POSTS.items():
             slug = sanitize_filename(post_name)
             blog_slugs.append(slug)

@@ -6,4 +6,5 @@
 * List of crafts to do on dates, ranked
 * email as an interface to back-office work
 * if an LLM can already do it perfectly, is it worth doing? related to the Karpathy post about him trying to build a training repo from scratch, and trying to get Claude to help build, and Claude just continuously trying to import pytorch FSDP.
-* Things that compound (skills, relationships, knowledge, company abilities)
+* Things that compound (skills, relationships, knowledge, company abilities, trees)
+* Micro-PMF --inspired by micro-morts and micro-marriages
