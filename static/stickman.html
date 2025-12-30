@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stickman</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #fff;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        // Wandering target points for hands and feet
+        class WanderingPoint {
+            constructor(x, y, range) {
+                this.x = x;
+                this.y = y;
+                this.targetX = x;
+                this.targetY = y;
+                this.baseX = x;
+                this.baseY = y;
+                this.range = range;
+                this.speed = 0.02 + Math.random() * 0.02;
+                this.pickNewTarget();
+            }
+
+            pickNewTarget() {
+                this.targetX = this.baseX + (Math.random() - 0.5) * this.range * 2;
+                this.targetY = this.baseY + (Math.random() - 0.5) * this.range * 2;
+                this.timeToNext = 1000 + Math.random() * 3000;
+                this.timer = 0;
+            }
+
+            update(dt) {
+                this.timer += dt;
+                if (this.timer > this.timeToNext) {
+                    this.pickNewTarget();
+                }
+                this.x += (this.targetX - this.x) * this.speed;
+                this.y += (this.targetY - this.y) * this.speed;
+            }
+
+            setBase(x, y) {
+                this.baseX = x;
+                this.baseY = y;
+            }
+        }
+
+        // Two-segment arm/leg that reaches toward a target
+        function drawLimb(ctx, startX, startY, targetX, targetY, len1, len2, flip = 1) {
+            const dx = targetX - startX;
+            const dy = targetY - startY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const maxLen = len1 + len2;
+
+            // Clamp distance
+            const clampedDist = Math.min(dist, maxLen * 0.99);
+
+            // Law of cosines to find elbow angle
+            const a = len1;
+            const b = len2;
+            const c = clampedDist;
+
+            let elbowAngle = Math.acos((a * a + b * b - c * c) / (2 * a * b));
+            if (isNaN(elbowAngle)) elbowAngle = Math.PI;
+
+            // Angle to target
+            const angleToTarget = Math.atan2(dy, dx);
+
+            // Angle at shoulder
+            let shoulderAngle = Math.acos((a * a + c * c - b * b) / (2 * a * c));
+            if (isNaN(shoulderAngle)) shoulderAngle = 0;
+
+            const angle1 = angleToTarget + shoulderAngle * flip;
+
+            // Elbow position
+            const elbowX = startX + Math.cos(angle1) * len1;
+            const elbowY = startY + Math.sin(angle1) * len1;
+
+            // Hand position
+            const angle2 = angle1 - (Math.PI - elbowAngle) * flip;
+            const endX = elbowX + Math.cos(angle2) * len2;
+            const endY = elbowY + Math.sin(angle2) * len2;
+
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(elbowX, elbowY);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+
+            return { elbowX, elbowY, endX, endY };
+        }
+
+        // Stickman
+        const stickman = {
+            x: 0,
+            y: 0,
+            headRadius: 20,
+            bodyLen: 60,
+            upperArm: 30,
+            lowerArm: 28,
+            upperLeg: 35,
+            lowerLeg: 33
+        };
+
+        let leftHand, rightHand, leftFoot, rightFoot, headWander;
+
+        function initPoints() {
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            stickman.x = cx;
+            stickman.y = cy - 30;
+
+            const shoulderY = stickman.y + stickman.headRadius + 15;
+            const hipY = stickman.y + stickman.headRadius + stickman.bodyLen;
+
+            leftHand = new WanderingPoint(cx - 50, shoulderY + 20, 40);
+            rightHand = new WanderingPoint(cx + 50, shoulderY + 20, 40);
+            leftFoot = new WanderingPoint(cx - 25, hipY + 60, 30);
+            rightFoot = new WanderingPoint(cx + 25, hipY + 60, 30);
+            headWander = new WanderingPoint(cx, stickman.y, 8);
+        }
+
+        initPoints();
+        window.addEventListener('resize', () => {
+            resize();
+            initPoints();
+        });
+
+        let lastTime = 0;
+
+        function draw(time) {
+            const dt = time - lastTime;
+            lastTime = time;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Update wandering points
+            leftHand.update(dt);
+            rightHand.update(dt);
+            leftFoot.update(dt);
+            rightFoot.update(dt);
+            headWander.update(dt);
+
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            const headX = headWander.x;
+            const headY = headWander.y;
+            const neckY = headY + stickman.headRadius;
+            const shoulderY = neckY + 15;
+            const hipY = neckY + stickman.bodyLen;
+
+            // Body (torso)
+            ctx.beginPath();
+            ctx.moveTo(headX, neckY);
+            ctx.lineTo(headX, hipY);
+            ctx.stroke();
+
+            // Arms
+            drawLimb(ctx, headX, shoulderY, leftHand.x, leftHand.y, stickman.upperArm, stickman.lowerArm, 1);
+            drawLimb(ctx, headX, shoulderY, rightHand.x, rightHand.y, stickman.upperArm, stickman.lowerArm, -1);
+
+            // Legs
+            drawLimb(ctx, headX, hipY, leftFoot.x, leftFoot.y, stickman.upperLeg, stickman.lowerLeg, 1);
+            drawLimb(ctx, headX, hipY, rightFoot.x, rightFoot.y, stickman.upperLeg, stickman.lowerLeg, -1);
+
+            // Head
+            ctx.beginPath();
+            ctx.arc(headX, headY, stickman.headRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            ctx.stroke();
+
+            // Eyes
+            ctx.fillStyle = '#222';
+            ctx.beginPath();
+            ctx.arc(headX - 6, headY - 2, 3, 0, Math.PI * 2);
+            ctx.arc(headX + 6, headY - 2, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            requestAnimationFrame(draw);
+        }
+
+        requestAnimationFrame(draw);
+    </script>
+</body>
+</html>
