@@ -27,9 +27,18 @@
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            draw();
+            // Only draw if canvas has valid dimensions
+            if (canvas.width > 0 && canvas.height > 0) {
+                draw();
+            }
         }
-        resize();
+
+        // Use multiple initialization methods to handle different browser behaviors
+        if (document.readyState === 'complete') {
+            resize();
+        } else {
+            window.addEventListener('load', resize);
+        }
         window.addEventListener('resize', resize);
 
         // Human figure silhouette as a series of points
