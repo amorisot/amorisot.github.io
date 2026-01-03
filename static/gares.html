@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facts About French Train Station Cleanliness</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #fafafa;
+            --text: #1a1a1a;
+            --muted: #666;
+            --accent: #0066cc;
+            --green: #059669;
+            --red: #dc2626;
+            --yellow: #ca8a04;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 1.1rem;
+            font-style: italic;
+        }
+
+        .statements {
+            text-align: justify;
+            font-size: 0.88rem;
+            line-height: 1.85;
+        }
+
+        .statement {
+            display: inline;
+        }
+
+        .sep {
+            color: #ccc;
+            margin: 0 0.3em;
+        }
+
+        .number {
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .station {
+            font-style: italic;
+        }
+
+        .good { color: var(--green); }
+        .bad { color: var(--red); }
+
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="statements" id="statements">
+        <div class="loading">Loading data from SNCF...</div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://data.sncf.com/api/explore/v2.1/catalog/datasets/proprete-en-gare/records';
+
+        let allData = [];
+
+        async function fetchAllData() {
+            try {
+                const results = await Promise.all([
+                    fetch(`${API_BASE}?limit=100&offset=0`).then(r => r.json()),
+                    fetch(`${API_BASE}?limit=100&offset=100`).then(r => r.json()),
+                    fetch(`${API_BASE}?limit=100&offset=200`).then(r => r.json()),
+                    fetch(`${API_BASE}?limit=100&offset=300`).then(r => r.json()),
+                    fetch(`${API_BASE}?limit=100&offset=400`).then(r => r.json())
+                ]);
+                allData = results.flatMap(r => r.results || []);
+                if (allData.length === 0) {
+                    document.getElementById('statements').innerHTML = '<div class="loading">No data received from API</div>';
+                    return;
+                }
+                generateStatements();
+            } catch (err) {
+                console.error('Fetch error:', err);
+                document.getElementById('statements').innerHTML = `<div class="loading">Error: ${err.message}</div>`;
+            }
+        }
+
+        function generateStatements() {
+            const statements = [];
+
+            // Process data
+            const stationData = {};
+            const monthData = {};
+            const monthsSet = new Set();
+
+            allData.forEach(record => {
+                const name = record.nom_gare;
+                const month = record.mois;
+
+                if (!stationData[name]) {
+                    stationData[name] = { name, records: [], totalObs: 0, totalNonConf: 0 };
+                }
+                stationData[name].records.push(record);
+                stationData[name].totalObs += record.nombre_d_observations || 0;
+                stationData[name].totalNonConf += record.nombre_de_non_conformites || 0;
+
+                if (!monthData[month]) {
+                    monthData[month] = { records: [], totalObs: 0, totalNonConf: 0 };
+                }
+                monthData[month].records.push(record);
+                monthData[month].totalObs += record.nombre_d_observations || 0;
+                monthData[month].totalNonConf += record.nombre_de_non_conformites || 0;
+
+                monthsSet.add(month);
+            });
+
+            const stations = Object.values(stationData);
+            const months = Array.from(monthsSet).sort();
+
+            stations.forEach(s => {
+                s.avgRate = s.totalObs > 0 ? ((s.totalObs - s.totalNonConf) / s.totalObs * 100) : 0;
+                s.records.sort((a, b) => a.mois.localeCompare(b.mois));
+            });
+
+            Object.values(monthData).forEach(m => {
+                m.avgRate = m.totalObs > 0 ? ((m.totalObs - m.totalNonConf) / m.totalObs * 100) : 0;
+            });
+
+            // Sort stations
+            const byRate = [...stations].sort((a, b) => b.avgRate - a.avgRate);
+            const byObs = [...stations].sort((a, b) => b.totalObs - a.totalObs);
+            const byNonConf = [...stations].sort((a, b) => b.totalNonConf - a.totalNonConf);
+
+            // GLOBAL STATS
+            const totalRecords = allData.length;
+            const totalStations = stations.length;
+            const totalObs = stations.reduce((s, st) => s + st.totalObs, 0);
+            const totalNonConf = stations.reduce((s, st) => s + st.totalNonConf, 0);
+            const globalRate = ((totalObs - totalNonConf) / totalObs * 100);
+
+            statements.push({ text: `<span class="number">${totalStations}</span> train stations are monitored for cleanliness across France.`, size: 'large' });
+            statements.push({ text: `<span class="number">${totalObs.toLocaleString()}</span> cleanliness observations have been recorded.`, size: 'medium' });
+            statements.push({ text: `<span class="number">${totalNonConf.toLocaleString()}</span> were non-conformities.`, size: 'medium' });
+            statements.push({ text: `The overall conformity rate is <span class="number">${globalRate.toFixed(1)}%</span>.`, size: 'large' });
+            statements.push({ text: `That means <span class="number">${(100 - globalRate).toFixed(1)}%</span> of checks found something wrong.`, size: 'small' });
+            const obsPerNonConf = totalObs / totalNonConf;
+            statements.push({ text: `On average, <span class="number">1 in ${Math.round(obsPerNonConf)}</span> observations finds a problem.`, size: 'small' });
+
+            // TIME RANGE
+            const firstMonth = months[0];
+            const lastMonth = months[months.length - 1];
+            const formatMonth = (m) => {
+                const [y, mo] = m.split('-');
+                const names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                return `${names[parseInt(mo) - 1]} ${y}`;
+            };
+
+            statements.push({ text: `The data spans from <span class="number">${formatMonth(firstMonth)}</span> to <span class="number">${formatMonth(lastMonth)}</span>.`, size: 'medium' });
+            statements.push({ text: `That's <span class="number">${months.length}</span> months of cleanliness tracking.`, size: 'small' });
+
+            statements.push({ text: '···', size: 'break' });
+
+            // CLEANEST STATIONS
+            statements.push({ text: `The cleanest station is <span class="station">${byRate[0].name}</span> with a <span class="number good">${byRate[0].avgRate.toFixed(1)}%</span> conformity rate.`, size: 'large' });
+
+            const perfect = stations.filter(s => s.avgRate >= 99.9);
+            if (perfect.length > 0) {
+                statements.push({ text: `<span class="number">${perfect.length}</span> stations have achieved near-perfect cleanliness (99.9%+).`, size: 'medium' });
+            }
+
+            const above95 = stations.filter(s => s.avgRate >= 95);
+            statements.push({ text: `<span class="number">${above95.length}</span> stations maintain a conformity rate above 95%.`, size: 'medium' });
+
+            for (let i = 1; i < 5 && i < byRate.length; i++) {
+                statements.push({ text: `The ${['second', 'third', 'fourth', 'fifth'][i-1]} cleanest station is <span class="station">${byRate[i].name}</span> at <span class="number good">${byRate[i].avgRate.toFixed(1)}%</span>.`, size: 'small' });
+            }
+
+            statements.push({ text: '···', size: 'break' });
+
+            // DIRTIEST STATIONS
+            const worst = byRate[byRate.length - 1];
+            statements.push({ text: `The station with the lowest conformity rate is <span class="station">${worst.name}</span> at just <span class="number bad">${worst.avgRate.toFixed(1)}%</span>.`, size: 'large' });
+
+            const below80 = stations.filter(s => s.avgRate < 80);
+            statements.push({ text: `<span class="number">${below80.length}</span> stations have a conformity rate below 80%.`, size: 'medium' });
+
+            const below90 = stations.filter(s => s.avgRate < 90);
+            statements.push({ text: `<span class="number">${below90.length}</span> stations fall below the 90% threshold.`, size: 'small' });
+
+            for (let i = 2; i <= 5 && i <= byRate.length; i++) {
+                const s = byRate[byRate.length - i];
+                statements.push({ text: `<span class="station">${s.name}</span> has a conformity rate of only <span class="number bad">${s.avgRate.toFixed(1)}%</span>.`, size: 'small' });
+            }
+
+            statements.push({ text: '···', size: 'break' });
+
+            // BIGGEST STATIONS
+            statements.push({ text: `The most inspected station is <span class="station">${byObs[0].name}</span> with <span class="number">${byObs[0].totalObs.toLocaleString()}</span> observations.`, size: 'large' });
+
+            for (let i = 1; i < 5 && i < byObs.length; i++) {
+                statements.push({ text: `<span class="station">${byObs[i].name}</span> has had <span class="number">${byObs[i].totalObs.toLocaleString()}</span> cleanliness checks.`, size: 'small' });
+            }
+
+            const avgObs = totalObs / totalStations;
+            statements.push({ text: `On average, each station has <span class="number">${Math.round(avgObs).toLocaleString()}</span> observations.`, size: 'medium' });
+
+            const medianObs = [...stations].sort((a, b) => a.totalObs - b.totalObs)[Math.floor(stations.length / 2)].totalObs;
+            statements.push({ text: `The median station has <span class="number">${medianObs.toLocaleString()}</span> observations — much lower than the average.`, size: 'small' });
+
+            statements.push({ text: '···', size: 'break' });
+
+            // NON-CONFORMITIES
+            statements.push({ text: `<span class="station">${byNonConf[0].name}</span> has the most non-conformities: <span class="number bad">${byNonConf[0].totalNonConf.toLocaleString()}</span>.`, size: 'large' });
+
+            for (let i = 1; i < 4 && i < byNonConf.length; i++) {
+                statements.push({ text: `<span class="station">${byNonConf[i].name}</span> has recorded <span class="number">${byNonConf[i].totalNonConf.toLocaleString()}</span> non-conformities.`, size: 'small' });
+            }
+
+            const zeroNonConf = stations.filter(s => s.totalNonConf === 0);
+            if (zeroNonConf.length > 0) {
+                statements.push({ text: `<span class="number good">${zeroNonConf.length}</span> stations have never recorded a single non-conformity.`, size: 'medium' });
+                if (zeroNonConf.length <= 5) {
+                    zeroNonConf.forEach(s => {
+                        statements.push({ text: `<span class="station">${s.name}</span> has a perfect record: zero non-conformities.`, size: 'small' });
+                    });
+                }
+            }
+
+            statements.push({ text: '···', size: 'break' });
+
+            // MONTHLY PATTERNS
+            const monthsSorted = Object.entries(monthData).sort((a, b) => b[1].avgRate - a[1].avgRate);
+            const bestMonth = monthsSorted[0];
+            const worstMonth = monthsSorted[monthsSorted.length - 1];
+
+            statements.push({ text: `The cleanest month on record was <span class="number">${formatMonth(bestMonth[0])}</span> with a <span class="number good">${bestMonth[1].avgRate.toFixed(1)}%</span> conformity rate.`, size: 'large' });
+            statements.push({ text: `The worst month was <span class="number">${formatMonth(worstMonth[0])}</span> at <span class="number bad">${worstMonth[1].avgRate.toFixed(1)}%</span>.`, size: 'medium' });
+
+            // Seasonal analysis
+            const summerMonths = Object.entries(monthData).filter(([m]) => ['06', '07', '08'].includes(m.split('-')[1]));
+            const winterMonths = Object.entries(monthData).filter(([m]) => ['12', '01', '02'].includes(m.split('-')[1]));
+
+            if (summerMonths.length > 0 && winterMonths.length > 0) {
+                const summerAvg = summerMonths.reduce((s, [, d]) => s + d.avgRate, 0) / summerMonths.length;
+                const winterAvg = winterMonths.reduce((s, [, d]) => s + d.avgRate, 0) / winterMonths.length;
+
+                if (Math.abs(summerAvg - winterAvg) > 0.5) {
+                    const better = summerAvg > winterAvg ? 'summer' : 'winter';
+                    const diff = Math.abs(summerAvg - winterAvg).toFixed(1);
+                    statements.push({ text: `Stations are slightly cleaner in ${better}, by about <span class="number">${diff}</span> percentage points.`, size: 'medium' });
+                }
+            }
+
+            statements.push({ text: '···', size: 'break' });
+
+            // TRENDS
+            const stationsWithTrend = stations.filter(s => s.records.length >= 6);
+            const trends = stationsWithTrend.map(s => {
+                const first3 = s.records.slice(0, 3).reduce((sum, r) => sum + (r.taux_de_conformite || 0), 0) / 3;
+                const last3 = s.records.slice(-3).reduce((sum, r) => sum + (r.taux_de_conformite || 0), 0) / 3;
+                return { name: s.name, change: last3 - first3, first3, last3 };
+            }).sort((a, b) => b.change - a.change);
+
+            if (trends.length > 0) {
+                const mostImproved = trends[0];
+                const mostDeclined = trends[trends.length - 1];
+
+                if (mostImproved.change > 2) {
+                    statements.push({ text: `The most improved station is <span class="station">${mostImproved.name}</span>, up <span class="number good">+${mostImproved.change.toFixed(1)}</span> percentage points.`, size: 'large' });
+                }
+
+                if (mostDeclined.change < -2) {
+                    statements.push({ text: `<span class="station">${mostDeclined.name}</span> has declined the most, down <span class="number bad">${mostDeclined.change.toFixed(1)}</span> percentage points.`, size: 'medium' });
+                }
+
+                const improving = trends.filter(t => t.change > 1);
+                const declining = trends.filter(t => t.change < -1);
+
+                statements.push({ text: `<span class="number">${improving.length}</span> stations are showing improvement over time.`, size: 'medium' });
+                statements.push({ text: `<span class="number">${declining.length}</span> stations are getting worse.`, size: 'small' });
+
+                for (let i = 1; i < 4 && i < trends.length; i++) {
+                    const t = trends[i];
+                    if (t.change > 1) {
+                        statements.push({ text: `<span class="station">${t.name}</span> improved by <span class="number good">+${t.change.toFixed(1)}</span> points.`, size: 'small' });
+                    }
+                }
+            }
+
+            statements.push({ text: '···', size: 'break' });
+
+            // DISTRIBUTIONS
+            const rate95 = stations.filter(s => s.avgRate >= 95).length;
+            const rate90 = stations.filter(s => s.avgRate >= 90 && s.avgRate < 95).length;
+            const rate85 = stations.filter(s => s.avgRate >= 85 && s.avgRate < 90).length;
+            const rate80 = stations.filter(s => s.avgRate >= 80 && s.avgRate < 85).length;
+            const rateBelow80 = stations.filter(s => s.avgRate < 80).length;
+
+            statements.push({ text: `<span class="number">${rate95}</span> stations (${(rate95/totalStations*100).toFixed(0)}%) have excellent cleanliness above 95%.`, size: 'medium' });
+            statements.push({ text: `<span class="number">${rate90}</span> stations fall in the 90-95% range.`, size: 'small' });
+            statements.push({ text: `<span class="number">${rate85}</span> stations are in the 85-90% range.`, size: 'small' });
+            statements.push({ text: `<span class="number">${rate80}</span> stations score between 80-85%.`, size: 'small' });
+            statements.push({ text: `<span class="number">${rateBelow80}</span> stations fall below 80% conformity.`, size: 'small' });
+
+            // Average rate
+            const avgRate = stations.reduce((s, st) => s + st.avgRate, 0) / stations.length;
+            const medianRate = [...stations].sort((a, b) => a.avgRate - b.avgRate)[Math.floor(stations.length / 2)].avgRate;
+
+            statements.push({ text: `The average station conformity rate is <span class="number">${avgRate.toFixed(1)}%</span>.`, size: 'medium' });
+            statements.push({ text: `The median conformity rate is <span class="number">${medianRate.toFixed(1)}%</span>.`, size: 'small' });
+
+            statements.push({ text: '···', size: 'break' });
+
+            // COMPARISONS
+            const bigStations = byObs.slice(0, 20);
+            const smallStations = byObs.slice(-20);
+
+            const bigAvg = bigStations.reduce((s, st) => s + st.avgRate, 0) / bigStations.length;
+            const smallAvg = smallStations.reduce((s, st) => s + st.avgRate, 0) / smallStations.length;
+
+            statements.push({ text: `The 20 busiest stations have an average conformity of <span class="number">${bigAvg.toFixed(1)}%</span>.`, size: 'medium' });
+            statements.push({ text: `The 20 smallest stations average <span class="number">${smallAvg.toFixed(1)}%</span>.`, size: 'small' });
+
+            if (Math.abs(bigAvg - smallAvg) > 1) {
+                const better = bigAvg > smallAvg ? 'larger' : 'smaller';
+                statements.push({ text: `Interestingly, ${better} stations tend to be cleaner.`, size: 'medium' });
+            }
+
+            statements.push({ text: '···', size: 'break' });
+
+            // SPECIFIC INTERESTING FACTS
+            const stationsWith100 = allData.filter(r => r.taux_de_conformite === 100);
+            statements.push({ text: `There have been <span class="number">${stationsWith100.length}</span> instances of perfect 100% conformity in a single month.`, size: 'medium' });
+
+            const lowest = allData.filter(r => r.taux_de_conformite != null).sort((a, b) => a.taux_de_conformite - b.taux_de_conformite)[0];
+            if (lowest) {
+                statements.push({ text: `The lowest single-month score was <span class="number bad">${lowest.taux_de_conformite.toFixed(1)}%</span> at <span class="station">${lowest.nom_gare}</span> in ${formatMonth(lowest.mois)}.`, size: 'medium' });
+            }
+
+            // High volume, low score
+            const highVolumeLowScore = byObs.slice(0, 50).filter(s => s.avgRate < 85);
+            if (highVolumeLowScore.length > 0) {
+                statements.push({ text: `<span class="number">${highVolumeLowScore.length}</span> major stations have conformity below 85%.`, size: 'medium' });
+                highVolumeLowScore.slice(0, 3).forEach(s => {
+                    statements.push({ text: `<span class="station">${s.name}</span> is a busy station with only <span class="number bad">${s.avgRate.toFixed(1)}%</span> conformity.`, size: 'small' });
+                });
+            }
+
+            // Small station, perfect score
+            const smallPerfect = stations.filter(s => s.totalObs < avgObs && s.avgRate > 98);
+            if (smallPerfect.length > 0) {
+                statements.push({ text: `<span class="number">${smallPerfect.length}</span> smaller stations maintain near-perfect cleanliness.`, size: 'small' });
+            }
+
+            statements.push({ text: '···', size: 'break' });
+
+            // FUN FACTS
+            const avgNonConfPerDay = totalNonConf / (months.length * 30);
+            statements.push({ text: `Roughly <span class="number">${Math.round(avgNonConfPerDay).toLocaleString()}</span> cleanliness issues are found every day across all stations.`, size: 'medium' });
+
+            const avgObsPerStation = totalObs / totalStations / months.length;
+            statements.push({ text: `Each station averages about <span class="number">${Math.round(avgObsPerStation)}</span> observations per month.`, size: 'small' });
+
+            // Name-based fun
+            const saintStations = stations.filter(s => s.name.toLowerCase().includes('saint'));
+            if (saintStations.length > 5) {
+                const saintAvg = saintStations.reduce((s, st) => s + st.avgRate, 0) / saintStations.length;
+                statements.push({ text: `There are <span class="number">${saintStations.length}</span> stations with "Saint" in their name, averaging <span class="number">${saintAvg.toFixed(1)}%</span> conformity.`, size: 'small' });
+            }
+
+            const parisStations = stations.filter(s => s.name.toLowerCase().includes('paris'));
+            if (parisStations.length > 0) {
+                const parisAvg = parisStations.reduce((s, st) => s + st.avgRate, 0) / parisStations.length;
+                statements.push({ text: `Paris stations average <span class="number">${parisAvg.toFixed(1)}%</span> conformity.`, size: 'medium' });
+
+                const cleanestParis = parisStations.sort((a, b) => b.avgRate - a.avgRate)[0];
+                statements.push({ text: `The cleanest Paris station is <span class="station">${cleanestParis.name}</span> at <span class="number">${cleanestParis.avgRate.toFixed(1)}%</span>.`, size: 'small' });
+            }
+
+            const merStations = stations.filter(s => s.name.toLowerCase().includes('mer') || s.name.toLowerCase().includes('plage'));
+            if (merStations.length > 3) {
+                const merAvg = merStations.reduce((s, st) => s + st.avgRate, 0) / merStations.length;
+                statements.push({ text: `Coastal stations ("Mer", "Plage") average <span class="number">${merAvg.toFixed(1)}%</span> conformity.`, size: 'small' });
+            }
+
+            // Most consistent
+            const consistency = stations.filter(s => s.records.length >= 6).map(s => {
+                const rates = s.records.map(r => r.taux_de_conformite).filter(r => r != null);
+                const mean = rates.reduce((a, b) => a + b, 0) / rates.length;
+                const variance = rates.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / rates.length;
+                return { name: s.name, stdDev: Math.sqrt(variance), avgRate: s.avgRate };
+            }).sort((a, b) => a.stdDev - b.stdDev);
+
+            if (consistency.length > 0) {
+                const mostConsistent = consistency[0];
+                const leastConsistent = consistency[consistency.length - 1];
+
+                statements.push({ text: `The most consistent station is <span class="station">${mostConsistent.name}</span> with minimal variation in scores.`, size: 'medium' });
+                statements.push({ text: `<span class="station">${leastConsistent.name}</span> has the most variable cleanliness scores.`, size: 'small' });
+            }
+
+            statements.push({ text: '···', size: 'break' });
+
+            // REGIONAL ANALYSIS
+            const tgvStations = stations.filter(s => s.name.toLowerCase().includes('tgv'));
+            if (tgvStations.length > 0) {
+                const tgvAvg = tgvStations.reduce((s, st) => s + st.avgRate, 0) / tgvStations.length;
+                statements.push({ text: `TGV stations average <span class="number">${tgvAvg.toFixed(1)}%</span> conformity.`, size: 'medium' });
+            }
+
+            const villeStations = stations.filter(s => s.name.toLowerCase().includes('ville'));
+            if (villeStations.length > 3) {
+                const villeAvg = villeStations.reduce((s, st) => s + st.avgRate, 0) / villeStations.length;
+                statements.push({ text: `Stations with "Ville" in the name average <span class="number">${villeAvg.toFixed(1)}%</span>.`, size: 'small' });
+            }
+
+            statements.push({ text: '···', size: 'break' });
+
+            // YEAR-OVER-YEAR
+            const years = [...new Set(months.map(m => m.split('-')[0]))].sort();
+            if (years.length > 1) {
+                years.forEach(year => {
+                    const yearMonths = Object.entries(monthData).filter(([m]) => m.startsWith(year));
+                    if (yearMonths.length > 0) {
+                        const yearAvg = yearMonths.reduce((s, [, d]) => s + d.avgRate, 0) / yearMonths.length;
+                        statements.push({ text: `In ${year}, the average conformity was <span class="number">${yearAvg.toFixed(1)}%</span>.`, size: 'small' });
+                    }
+                });
+            }
+
+            statements.push({ text: '···', size: 'break' });
+
+            // MORE EXTREMES
+            const highestSingleMonth = allData.filter(r => r.taux_de_conformite != null).sort((a, b) => b.nombre_d_observations - a.nombre_d_observations)[0];
+            if (highestSingleMonth) {
+                statements.push({ text: `The busiest single month was <span class="station">${highestSingleMonth.nom_gare}</span> in ${formatMonth(highestSingleMonth.mois)} with <span class="number">${highestSingleMonth.nombre_d_observations.toLocaleString()}</span> observations.`, size: 'medium' });
+            }
+
+            // Volatility
+            const volatile = stations.filter(s => s.records.length >= 3).map(s => {
+                const rates = s.records.map(r => r.taux_de_conformite).filter(r => r != null);
+                return { name: s.name, max: Math.max(...rates), min: Math.min(...rates), range: Math.max(...rates) - Math.min(...rates) };
+            }).sort((a, b) => b.range - a.range);
+
+            if (volatile.length > 0 && volatile[0].range > 20) {
+                statements.push({ text: `<span class="station">${volatile[0].name}</span> has the widest range: from <span class="number bad">${volatile[0].min.toFixed(1)}%</span> to <span class="number good">${volatile[0].max.toFixed(1)}%</span>.`, size: 'medium' });
+            }
+
+            statements.push({ text: '···', size: 'break' });
+
+            // MORE STATS
+            const gap = byRate[0].avgRate - byRate[byRate.length - 1].avgRate;
+            statements.push({ text: `The gap between the cleanest and dirtiest station is <span class="number">${gap.toFixed(1)}</span> percentage points.`, size: 'medium' });
+
+            const above90Count = stations.filter(s => s.avgRate >= 90).length;
+            statements.push({ text: `<span class="number">${((above90Count / totalStations) * 100).toFixed(0)}%</span> of stations meet the 90% threshold.`, size: 'small' });
+
+            const topQuartile = byRate.slice(0, Math.floor(stations.length / 4));
+            const bottomQuartile = byRate.slice(-Math.floor(stations.length / 4));
+            const topAvg = topQuartile.reduce((s, st) => s + st.avgRate, 0) / topQuartile.length;
+            const bottomAvg = bottomQuartile.reduce((s, st) => s + st.avgRate, 0) / bottomQuartile.length;
+            statements.push({ text: `The top quartile averages <span class="number good">${topAvg.toFixed(1)}%</span>.`, size: 'small' });
+            statements.push({ text: `The bottom quartile averages <span class="number bad">${bottomAvg.toFixed(1)}%</span>.`, size: 'small' });
+
+            const midStation = byRate[Math.floor(byRate.length / 2)];
+            statements.push({ text: `The median station is <span class="station">${midStation.name}</span> at <span class="number">${midStation.avgRate.toFixed(1)}%</span>.`, size: 'small' });
+
+            // Observations vs rate correlation hint
+            const highObsHighRate = byObs.slice(0, 10).filter(s => s.avgRate >= 90).length;
+            statements.push({ text: `<span class="number">${highObsHighRate}</span> of the 10 busiest stations score above 90%.`, size: 'small' });
+
+            // MORE INDIVIDUAL STATION FACTS
+            for (let i = 5; i < Math.min(15, byRate.length); i++) {
+                const s = byRate[i];
+                statements.push({ text: `<span class="station">${s.name}</span> scores <span class="number">${s.avgRate.toFixed(1)}%</span>.`, size: 'small' });
+            }
+
+            // Bottom stations
+            for (let i = 5; i < Math.min(12, byRate.length); i++) {
+                const s = byRate[byRate.length - 1 - i];
+                if (s) statements.push({ text: `<span class="station">${s.name}</span> has only <span class="number bad">${s.avgRate.toFixed(1)}%</span> conformity.`, size: 'small' });
+            }
+
+            // Observation counts for more stations
+            for (let i = 5; i < Math.min(12, byObs.length); i++) {
+                statements.push({ text: `<span class="station">${byObs[i].name}</span> has <span class="number">${byObs[i].totalObs.toLocaleString()}</span> observations.`, size: 'small' });
+            }
+
+            // Non-conformity counts
+            for (let i = 4; i < Math.min(10, byNonConf.length); i++) {
+                statements.push({ text: `<span class="station">${byNonConf[i].name}</span> recorded <span class="number">${byNonConf[i].totalNonConf.toLocaleString()}</span> non-conformities.`, size: 'small' });
+            }
+
+            // Specific rate thresholds
+            const exactly100 = stations.filter(s => s.avgRate === 100);
+            if (exactly100.length > 0) {
+                exactly100.slice(0, 5).forEach(s => {
+                    statements.push({ text: `<span class="station">${s.name}</span> has perfect <span class="number good">100%</span> conformity.`, size: 'small' });
+                });
+            }
+
+            // Stations near thresholds
+            const near90 = stations.filter(s => s.avgRate >= 89 && s.avgRate < 91);
+            near90.slice(0, 3).forEach(s => {
+                statements.push({ text: `<span class="station">${s.name}</span> hovers around the 90% mark at <span class="number">${s.avgRate.toFixed(1)}%</span>.`, size: 'small' });
+            });
+
+            // Ratios
+            const ratioCleanToDirty = above95.length / (rateBelow80 || 1);
+            statements.push({ text: `For every struggling station, there are <span class="number">${ratioCleanToDirty.toFixed(1)}</span> excellent ones.`, size: 'small' });
+
+            // More comparisons
+            const topTenAvg = byObs.slice(0, 10).reduce((s, st) => s + st.avgRate, 0) / 10;
+            const bottomTenAvg = byObs.slice(-10).reduce((s, st) => s + st.avgRate, 0) / 10;
+            statements.push({ text: `The 10 busiest stations average <span class="number">${topTenAvg.toFixed(1)}%</span> conformity.`, size: 'small' });
+            statements.push({ text: `The 10 quietest stations average <span class="number">${bottomTenAvg.toFixed(1)}%</span>.`, size: 'small' });
+
+            // Random interesting stations by name patterns
+            const gareStations = stations.filter(s => s.name.toLowerCase().includes('gare'));
+            if (gareStations.length > 0) {
+                const gareAvg = gareStations.reduce((s, st) => s + st.avgRate, 0) / gareStations.length;
+                statements.push({ text: `Stations with "Gare" in the name average <span class="number">${gareAvg.toFixed(1)}%</span>.`, size: 'small' });
+            }
+
+            const surMerStations = stations.filter(s => s.name.toLowerCase().includes('sur-mer'));
+            if (surMerStations.length > 2) {
+                const surMerAvg = surMerStations.reduce((s, st) => s + st.avgRate, 0) / surMerStations.length;
+                statements.push({ text: `"Sur-Mer" stations average <span class="number">${surMerAvg.toFixed(1)}%</span>.`, size: 'small' });
+            }
+
+            // Total facts
+            statements.push({ text: `This page displays <span class="number">${statements.length + 3}</span> facts about train station cleanliness.`, size: 'small' });
+            statements.push({ text: `Every percentage point represents thousands of checks.`, size: 'medium' });
+            statements.push({ text: `Behind every number is a team working to keep travelers comfortable.`, size: 'medium' });
+
+            // Render
+            renderStatements(statements);
+        }
+
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function renderStatements(statements) {
+            const container = document.getElementById('statements');
+            const filtered = statements.filter(s => s.size !== 'break');
+            const shuffled = shuffle([...filtered]);
+            container.innerHTML = shuffled.map((s, i) =>
+                `<span class="statement">${s.text}</span>${i < shuffled.length - 1 ? '<span class="sep">·</span>' : ''}`
+            ).join('');
+        }
+
+        fetchAllData();
+    </script>
+</body>
+</html>

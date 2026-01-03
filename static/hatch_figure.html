@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hatched Figure</title>
+    <title>Hatched Figures</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,6 @@
         }
         canvas {
             display: block;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
     </style>
 </head>
@@ -29,28 +28,83 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
 
-        // Set canvas size
-        const size = Math.min(window.innerWidth, window.innerHeight) * 0.9;
-        canvas.width = size;
-        canvas.height = size * 1.3;
+        // Grid configuration
+        const COLS = 4;
+        const ROWS = 3;
 
-        // Color palette (warm gradient like the reference)
-        const colors = [
-            '#ff4500', // orange-red
-            '#ff6b35', // orange
-            '#ff8c42', // light orange
-            '#ffa94d', // yellow-orange
-            '#ffc857', // yellow
+        // Chagall-inspired palettes - rich but painterly
+        const figurePalettes = [
+            ['#1a3a5c', '#2d5a87', '#4a7ba7', '#6b9bc4', '#9dbcd4'], // prussian blue
+            ['#8b1a1a', '#a63d3d', '#c25a5a', '#d98080', '#e6a6a6'], // carmine red
+            ['#c4a000', '#d4b72c', '#e0c84a', '#e8d56b', '#f0e08c'], // ochre yellow
+            ['#2d5a3d', '#4a7a5a', '#6b9a7a', '#8cb89a', '#aed4ba'], // viridian green
+            ['#4a3060', '#6b4a80', '#8b6aa0', '#ab8ac0', '#cbaae0'], // violet
+            ['#b84a6a', '#c86a85', '#d88aa0', '#e8aaba', '#f4cad4'], // rose
+            ['#c45a20', '#d47a40', '#e49a60', '#f0b480', '#f8cca0'], // burnt orange
+            ['#1a4a6a', '#2d6a8a', '#4a8aaa', '#6aaaca', '#8acae6'], // cerulean
         ];
 
-        // Figure silhouette check - walking pose
-        function isInsideFigure(px, py, figure) {
-            const { centerX, centerY, h } = figure;
-            const relX = px - centerX;
-            const relY = py - centerY;
+        // Seeded random for deterministic patterns
+        function seededRandom(seed) {
+            const x = Math.sin(seed * 9999) * 10000;
+            return x - Math.floor(x);
+        }
 
-            // Head (tilted slightly)
-            const headCenterX = centerX + h * 0.02;
+        // Figure class with animated pose parameters
+        class Figure {
+            constructor(index) {
+                this.index = index;
+                // Random phase offsets for each figure
+                this.phaseOffset = Math.random() * Math.PI * 2;
+                this.speedMultiplier = 0.6 + Math.random() * 0.6;
+                // Base pose variations
+                this.baseHeadTilt = (Math.random() - 0.5) * 0.04;
+                this.baseLean = (Math.random() - 0.5) * 0.02;
+                // Swing magnitude - some wild, some muted
+                this.armSwingMagnitude = 0.04 + Math.random() * 0.20; // 0.04 to 0.24
+                this.legSwingMagnitude = 0.05 + Math.random() * 0.25; // 0.05 to 0.30
+                // Figure color palette
+                this.colors = figurePalettes[Math.floor(Math.random() * figurePalettes.length)];
+            }
+
+            // Get animated pose parameters
+            getPose(time) {
+                const t = time * this.speedMultiplier + this.phaseOffset;
+                const walkCycle = Math.sin(t * 2);
+                const breathe = Math.sin(t * 0.8) * 0.5;
+
+                return {
+                    headTilt: this.baseHeadTilt + Math.sin(t * 0.5) * 0.01,
+                    torsoLean: this.baseLean + Math.sin(t) * 0.015 * (this.armSwingMagnitude / 0.12),
+                    leftArmSwing: walkCycle * this.armSwingMagnitude,
+                    rightArmSwing: -walkCycle * this.armSwingMagnitude,
+                    leftLegSwing: walkCycle * this.legSwingMagnitude,
+                    rightLegSwing: -walkCycle * this.legSwingMagnitude,
+                    shoulderWidth: 0.16 + breathe * 0.005,
+                };
+            }
+        }
+
+        // Create figures for the grid
+        const figures = [];
+        for (let i = 0; i < COLS * ROWS; i++) {
+            figures.push(new Figure(i));
+        }
+
+        // Check if point is inside figure with animated pose
+        function isInsideFigure(px, py, centerX, centerY, h, pose) {
+            const {
+                headTilt,
+                torsoLean,
+                leftArmSwing,
+                rightArmSwing,
+                leftLegSwing,
+                rightLegSwing,
+                shoulderWidth
+            } = pose;
+
+            // Head
+            const headCenterX = centerX + h * headTilt;
             const headCenterY = centerY - h * 0.40;
             const headRadiusX = h * 0.09;
             const headRadiusY = h * 0.10;
@@ -61,67 +115,53 @@
             // Neck
             if (py > headCenterY + headRadiusY * 0.7 && py < centerY - h * 0.28) {
                 const neckWidth = h * 0.045;
-                if (Math.abs(px - (centerX + h * 0.01)) < neckWidth) return true;
+                if (Math.abs(px - (centerX + h * headTilt * 0.5)) < neckWidth) return true;
             }
 
-            // Torso (slightly twisted walking pose)
+            // Torso
             if (py >= centerY - h * 0.30 && py < centerY + h * 0.08) {
                 const t = (py - (centerY - h * 0.30)) / (h * 0.38);
-                // Shoulders wider at top, narrowing to waist
-                const torsoWidth = h * 0.16 * (1 - t * 0.4);
-                const torsoOffset = t * h * 0.02; // slight lean
+                const torsoWidth = h * shoulderWidth * (1 - t * 0.4);
+                const torsoOffset = t * h * torsoLean;
                 if (Math.abs(px - (centerX + torsoOffset)) < torsoWidth) return true;
             }
 
-            // Left arm (forward swing)
+            // Left arm
             const leftArmStartY = centerY - h * 0.28;
             const leftArmEndY = centerY + h * 0.05;
             if (py >= leftArmStartY && py <= leftArmEndY) {
                 const t = (py - leftArmStartY) / (leftArmEndY - leftArmStartY);
-                // Arm swings forward
-                const armX = centerX - h * 0.14 - t * h * 0.08 + t * t * h * 0.12;
+                const armX = centerX - h * 0.14 + t * h * leftArmSwing;
                 const armWidth = h * 0.04 * (1 - t * 0.3);
                 if (Math.abs(px - armX) < armWidth) return true;
             }
 
-            // Right arm (backward swing)
+            // Right arm
             const rightArmStartY = centerY - h * 0.28;
-            const rightArmEndY = centerY + h * 0.12;
+            const rightArmEndY = centerY + h * 0.08;
             if (py >= rightArmStartY && py <= rightArmEndY) {
                 const t = (py - rightArmStartY) / (rightArmEndY - rightArmStartY);
-                // Arm swings backward
-                const armX = centerX + h * 0.14 + t * h * 0.15;
+                const armX = centerX + h * 0.14 + t * h * rightArmSwing;
                 const armWidth = h * 0.04 * (1 - t * 0.3);
                 if (Math.abs(px - armX) < armWidth) return true;
             }
 
-            // Left leg (forward stride)
+            // Left leg
             const leftLegStartY = centerY + h * 0.06;
             const leftLegEndY = centerY + h * 0.50;
             if (py >= leftLegStartY && py <= leftLegEndY) {
                 const t = (py - leftLegStartY) / (leftLegEndY - leftLegStartY);
-                // Forward stride with knee bend
-                const kneeT = 0.45;
-                let legX;
-                if (t < kneeT) {
-                    // Upper leg going forward
-                    legX = centerX - h * 0.04 - (t / kneeT) * h * 0.12;
-                } else {
-                    // Lower leg angling back down
-                    const lowerT = (t - kneeT) / (1 - kneeT);
-                    legX = centerX - h * 0.16 + lowerT * h * 0.08;
-                }
+                const legX = centerX - h * 0.04 + t * h * leftLegSwing;
                 const legWidth = h * 0.05 * (1 - t * 0.3);
                 if (Math.abs(px - legX) < legWidth) return true;
             }
 
-            // Right leg (backward stride)
+            // Right leg
             const rightLegStartY = centerY + h * 0.06;
             const rightLegEndY = centerY + h * 0.48;
             if (py >= rightLegStartY && py <= rightLegEndY) {
                 const t = (py - rightLegStartY) / (rightLegEndY - rightLegStartY);
-                // Backward stride
-                const legX = centerX + h * 0.04 + t * h * 0.10;
+                const legX = centerX + h * 0.04 + t * h * rightLegSwing;
                 const legWidth = h * 0.045 * (1 - t * 0.35);
                 if (Math.abs(px - legX) < legWidth) return true;
             }
@@ -129,59 +169,41 @@
             return false;
         }
 
-        // Draw with colored hatching
-        function draw() {
-            ctx.fillStyle = '#fafaf8';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Add subtle dots like in the reference image
-            ctx.fillStyle = '#e8e8e4';
-            for (let x = 0; x < canvas.width; x += 15) {
-                for (let y = 0; y < canvas.height; y += 15) {
-                    ctx.beginPath();
-                    ctx.arc(x, y, 0.5, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-
-            const figureHeight = canvas.height * 0.75;
-            const centerX = canvas.width * 0.45;
-            const centerY = canvas.height * 0.48;
-            const figure = { centerX, centerY, h: figureHeight };
-
-            ctx.lineCap = 'round';
-            ctx.lineWidth = 1.2;
-
+        // Draw a single figure
+        function drawFigure(centerX, centerY, figureHeight, pose, figureColors) {
             const startY = centerY - figureHeight * 0.52;
             const endY = centerY + figureHeight * 0.52;
             const step = 3.5;
 
-            // Draw hatching with color layers
-            for (let colorIndex = 0; colorIndex < colors.length; colorIndex++) {
-                ctx.strokeStyle = colors[colorIndex];
+            // Expand scan range based on swing magnitude to prevent clipping
+            const maxSwing = Math.max(
+                Math.abs(pose.leftArmSwing),
+                Math.abs(pose.rightArmSwing),
+                Math.abs(pose.leftLegSwing),
+                Math.abs(pose.rightLegSwing)
+            );
+            const scanMargin = figureHeight * (0.30 + maxSwing + 0.1);
 
-                const offsetY = (colorIndex - 2) * 1.2; // Slight vertical offset per color
-                const offsetX = (colorIndex - 2) * 0.8; // Slight horizontal offset
+            for (let colorIndex = 0; colorIndex < figureColors.length; colorIndex++) {
+                ctx.strokeStyle = figureColors[colorIndex];
+
+                const offsetY = (colorIndex - 2) * 1.2;
+                const offsetX = (colorIndex - 2) * 0.8;
 
                 for (let y = startY; y < endY; y += step) {
                     const points = [];
-                    // Wobble parameters that vary by line
                     const wobbleFreq = 0.08 + Math.sin(y * 0.02) * 0.02;
                     const wobbleAmp = 2 + Math.sin(y * 0.05 + colorIndex) * 1.5;
                     const phase = y * 0.1 + colorIndex * 0.5;
-
-                    // Horizontal position varies with y (walking motion)
                     const yRatio = (y - startY) / (endY - startY);
 
-                    for (let x = centerX - figureHeight * 0.30; x < centerX + figureHeight * 0.35; x += 1.5) {
+                    for (let x = centerX - scanMargin; x < centerX + scanMargin; x += 1.5) {
                         const checkX = x - offsetX;
                         const checkY = y - offsetY;
 
-                        if (isInsideFigure(checkX, checkY, figure)) {
-                            // Add wobble based on position
+                        if (isInsideFigure(checkX, checkY, centerX, centerY, figureHeight, pose)) {
                             const wobbleY = y + Math.sin(x * wobbleFreq + phase) * wobbleAmp;
 
-                            // Zigzag effect for lower portion (legs)
                             let finalY = wobbleY;
                             if (yRatio > 0.55) {
                                 const zigFreq = 0.15;
@@ -193,7 +215,6 @@
                         }
                     }
 
-                    // Draw continuous line segments
                     if (points.length > 1) {
                         ctx.beginPath();
                         let drawing = false;
@@ -206,12 +227,11 @@
                                 drawing = true;
                                 lastX = p.x;
                             } else {
-                                // Check for gap (limb separation)
                                 if (p.x - lastX > 8) {
                                     ctx.stroke();
                                     ctx.beginPath();
                                     ctx.moveTo(p.x, p.y);
-                                }else {
+                                } else {
                                     ctx.lineTo(p.x, p.y);
                                 }
                                 lastX = p.x;
@@ -223,15 +243,62 @@
             }
         }
 
-        draw();
+        // Main draw function
+        function draw(time) {
+            ctx.fillStyle = '#fafaf8';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Redraw on resize
-        window.addEventListener('resize', () => {
-            const size = Math.min(window.innerWidth, window.innerHeight) * 0.9;
-            canvas.width = size;
-            canvas.height = size * 1.3;
-            draw();
-        });
+            // Subtle background dots
+            ctx.fillStyle = '#e8e8e4';
+            for (let x = 0; x < canvas.width; x += 15) {
+                for (let y = 0; y < canvas.height; y += 15) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Calculate cell size
+            const cellWidth = canvas.width / COLS;
+            const cellHeight = canvas.height / ROWS;
+            const figureHeight = Math.min(cellWidth, cellHeight) * 0.85;
+
+            ctx.lineCap = 'round';
+            ctx.lineWidth = 1.2;
+
+            // Draw each figure in the grid
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    const index = row * COLS + col;
+                    const figure = figures[index];
+                    const centerX = cellWidth * (col + 0.5);
+                    const centerY = cellHeight * (row + 0.5);
+                    const pose = figure.getPose(time);
+
+                    drawFigure(centerX, centerY, figureHeight, pose, figure.colors);
+                }
+            }
+        }
+
+        // Animation loop
+        let startTime = null;
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const time = (timestamp - startTime) / 1000;
+
+            draw(time);
+            requestAnimationFrame(animate);
+        }
+
+        // Resize handler
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+        requestAnimationFrame(animate);
     </script>
 </body>
 </html>

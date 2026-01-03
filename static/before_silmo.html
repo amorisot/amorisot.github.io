@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sisyphus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #fff;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        // Mountain parameters
+        function getPeakX() { return canvas.width / 2; }
+        function getPeakY() { return canvas.height * 0.3; }
+        function getBaseY() { return canvas.height * 0.75; }
+        function getLeftX() { return canvas.width * 0.1; }
+        function getRightX() { return canvas.width * 0.9; }
+
+        function getMountainY(x) {
+            const peakX = getPeakX();
+            const peakY = getPeakY();
+            const baseY = getBaseY();
+            const dist = Math.abs(x - peakX);
+            const maxDist = Math.max(peakX - getLeftX(), getRightX() - peakX);
+            return peakY + (baseY - peakY) * (dist / maxDist);
+        }
+
+        function getSlopeAngle(x) {
+            const peakX = getPeakX();
+            const peakY = getPeakY();
+            const baseY = getBaseY();
+            const maxDist = (getRightX() - getLeftX()) / 2;
+            const slope = (baseY - peakY) / maxDist;
+            return x < peakX ? -Math.atan(slope) : Math.atan(slope);
+        }
+
+        // Physics constants
+        const gravity = 0.0004;
+        const pushSpeed = 0.018; // Slow, arduous climb
+        const walkBackSpeed = 0.05; // Walking back down
+        const friction = 0.995;
+
+        // Rock state
+        const rockRadius = 35;
+        let rockX = 0;
+        let rockVel = 0;
+        let rockRotation = 0;
+        // States: 'left_pushing', 'rolling_right', 'right_pushing', 'rolling_left'
+        let state = 'left_pushing';
+
+        // Stickman parameters
+        const scale = 0.9;
+        const headRadius = 20 * scale;
+        const bodyLen = 60 * scale;
+        const upperArm = 30 * scale;
+        const lowerArm = 28 * scale;
+        const upperLeg = 35 * scale;
+        const lowerLeg = 33 * scale;
+        const legLength = upperLeg + lowerLeg;
+
+        // Two stickmen - each has a rest position at the bottom of their side
+        let leftStickman = { x: 0, walkPhase: 0, lean: 0.4 };
+        let rightStickman = { x: 0, walkPhase: 0, lean: -0.4 };
+
+        function getLeftRestX() { return getLeftX() + 80; }
+        function getRightRestX() { return getRightX() - 80; }
+
+        function init() {
+            // Start at the bottom of the left side
+            rockX = getLeftRestX() + rockRadius + 50;
+            rockVel = 0;
+            rockRotation = 0;
+            state = 'left_pushing';
+
+            leftStickman.x = rockX - rockRadius - 35;
+            leftStickman.lean = 0.4;
+            rightStickman.x = getRightRestX();
+            rightStickman.lean = 0; // Relaxed, waiting
+        }
+        init();
+
+        function drawLimb(ctx, startX, startY, targetX, targetY, len1, len2, flip = 1) {
+            const dx = targetX - startX;
+            const dy = targetY - startY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const maxLen = len1 + len2;
+            const clampedDist = Math.min(dist, maxLen * 0.99);
+
+            const a = len1;
+            const b = len2;
+            const c = clampedDist;
+
+            let elbowAngle = Math.acos((a * a + b * b - c * c) / (2 * a * b));
+            if (isNaN(elbowAngle)) elbowAngle = Math.PI;
+
+            const angleToTarget = Math.atan2(dy, dx);
+
+            let shoulderAngle = Math.acos((a * a + c * c - b * b) / (2 * a * c));
+            if (isNaN(shoulderAngle)) shoulderAngle = 0;
+
+            const angle1 = angleToTarget + shoulderAngle * flip;
+
+            const elbowX = startX + Math.cos(angle1) * len1;
+            const elbowY = startY + Math.sin(angle1) * len1;
+
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(elbowX, elbowY);
+            ctx.lineTo(targetX, targetY);
+            ctx.stroke();
+        }
+
+        function drawStickman(stickman, isPushing, facingRight, rockX, rockY, isWalkingBack = false) {
+            const x = stickman.x;
+            const slopeAngle = getSlopeAngle(x);
+
+            // Smooth lean transition - more slouched when walking back defeated
+            let targetLean;
+            if (isPushing) {
+                targetLean = facingRight ? 0.45 : -0.45; // Leaning hard into the push
+            } else if (isWalkingBack) {
+                targetLean = facingRight ? -0.15 : 0.15; // Slight backward lean, tired
+            } else {
+                targetLean = facingRight ? 0.1 : -0.1; // Ready to catch
+            }
+            stickman.lean += (targetLean - stickman.lean) * 0.03;
+            const leanAngle = stickman.lean;
+
+            // Calculate foot positions on the mountain
+            const strideLength = 20;
+            const leftFootPhase = Math.sin(stickman.walkPhase);
+            const rightFootPhase = Math.sin(stickman.walkPhase + Math.PI);
+
+            const leftFootX = x + leftFootPhase * strideLength;
+            const rightFootX = x + rightFootPhase * strideLength;
+            const leftFootY = getMountainY(leftFootX);
+            const rightFootY = getMountainY(rightFootX);
+
+            const midFootX = (leftFootX + rightFootX) / 2;
+            const midFootY = (leftFootY + rightFootY) / 2;
+
+            const walkBob = Math.abs(Math.sin(stickman.walkPhase * 2)) * 4;
+            const hipHeight = legLength * 0.85 - walkBob;
+
+            const perpAngle = slopeAngle - Math.PI / 2;
+            const hipX = midFootX + Math.cos(perpAngle) * hipHeight * 0.2;
+            const hipY = midFootY + Math.sin(perpAngle) * hipHeight;
+
+            const shoulderX = hipX + Math.sin(leanAngle) * bodyLen;
+            const shoulderY = hipY - Math.cos(leanAngle) * bodyLen;
+
+            const neckLen = headRadius + 5;
+            const headX = shoulderX + Math.sin(leanAngle * 0.7) * neckLen;
+            const headY = shoulderY - Math.cos(leanAngle * 0.7) * neckLen;
+
+            // Hands
+            let leftHandX, leftHandY, rightHandX, rightHandY;
+            if (isPushing) {
+                if (facingRight) {
+                    leftHandX = rockX - rockRadius + 5;
+                    leftHandY = rockY + 8;
+                    rightHandX = rockX - rockRadius + 5;
+                    rightHandY = rockY - 12;
+                } else {
+                    leftHandX = rockX + rockRadius - 5;
+                    leftHandY = rockY - 12;
+                    rightHandX = rockX + rockRadius - 5;
+                    rightHandY = rockY + 8;
+                }
+            } else {
+                // Arms relaxed at sides
+                const armHang = facingRight ? 1 : -1;
+                leftHandX = shoulderX - 15 * armHang;
+                leftHandY = shoulderY + 50;
+                rightHandX = shoulderX + 5 * armHang;
+                rightHandY = shoulderY + 50;
+            }
+
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 3 * scale;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Body
+            ctx.beginPath();
+            ctx.moveTo(shoulderX, shoulderY);
+            ctx.lineTo(hipX, hipY);
+            ctx.stroke();
+
+            // Neck
+            ctx.beginPath();
+            ctx.moveTo(headX, headY + headRadius * 0.7);
+            ctx.lineTo(shoulderX, shoulderY);
+            ctx.stroke();
+
+            // Arms
+            drawLimb(ctx, shoulderX, shoulderY, leftHandX, leftHandY, upperArm, lowerArm, 1);
+            drawLimb(ctx, shoulderX, shoulderY, rightHandX, rightHandY, upperArm, lowerArm, -1);
+
+            // Legs
+            drawLimb(ctx, hipX, hipY, leftFootX, leftFootY, upperLeg, lowerLeg, 1);
+            drawLimb(ctx, hipX, hipY, rightFootX, rightFootY, upperLeg, lowerLeg, -1);
+
+            // Head
+            ctx.beginPath();
+            ctx.arc(headX, headY, headRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            ctx.stroke();
+
+            // Eyes
+            const eyeDir = facingRight ? 1 : -1;
+            ctx.fillStyle = '#222';
+            ctx.beginPath();
+            ctx.arc(headX + (4 * eyeDir) * scale, headY - 2 * scale, 3 * scale, 0, Math.PI * 2);
+            ctx.arc(headX + (12 * eyeDir) * scale, headY - 2 * scale, 3 * scale, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Mouth
+            const mouthX = headX + 8 * eyeDir;
+            const mouthY = headY + 8;
+            // Grimace when pushing, frown when walking back defeated, neutral otherwise
+            const mouthCurve = isPushing ? -4 : (isWalkingBack ? -2 : 1);
+            ctx.beginPath();
+            ctx.moveTo(mouthX - 5 * scale, mouthY);
+            ctx.quadraticCurveTo(mouthX, mouthY + mouthCurve, mouthX + 5 * scale, mouthY);
+            ctx.stroke();
+
+            // Sweat drops when pushing hard
+            if (isPushing) {
+                const time = performance.now();
+                const sweatX = headX - eyeDir * (headRadius + 3);
+                const sweatY = headY - 5 + Math.sin(time * 0.008) * 4;
+                ctx.fillStyle = '#6cf';
+                ctx.beginPath();
+                ctx.ellipse(sweatX, sweatY, 2.5 * scale, 4 * scale, 0, 0, Math.PI * 2);
+                ctx.fill();
+                // Second drop, offset
+                if (Math.sin(time * 0.003) > 0.3) {
+                    ctx.beginPath();
+                    ctx.ellipse(sweatX - eyeDir * 8, sweatY + 8 + Math.sin(time * 0.01) * 3, 2 * scale, 3 * scale, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        let lastTime = 0;
+
+        function draw(time) {
+            const dt = Math.min(time - lastTime, 50);
+            lastTime = time;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const peakX = getPeakX();
+            const slopeAccel = gravity * Math.sin(Math.abs(getSlopeAngle(rockX)));
+
+            // Physics update based on state
+            if (state === 'left_pushing') {
+                // Constant slow push - arduous climb
+                rockVel = pushSpeed;
+                rockX += rockVel * dt;
+                leftStickman.x = rockX - rockRadius - 35;
+                leftStickman.walkPhase += pushSpeed * dt * 0.1;
+
+                if (rockX >= peakX - 20) {
+                    state = 'rolling_right';
+                    rockVel = 0.01;
+                }
+            } else if (state === 'rolling_right') {
+                rockVel += slopeAccel * dt;
+                rockVel *= friction;
+                rockX += rockVel * dt;
+
+                // Left stickman walks back down to rest position (defeated)
+                const leftRestX = getLeftRestX();
+                if (leftStickman.x > leftRestX + 5) {
+                    leftStickman.x -= walkBackSpeed * dt;
+                    leftStickman.walkPhase -= walkBackSpeed * dt * 0.1;
+                }
+
+                // Right stickman moves to catch the rock
+                const targetX = rockX + rockRadius + 35;
+                if (rightStickman.x > targetX + 5) {
+                    rightStickman.x -= walkBackSpeed * 1.2 * dt;
+                    rightStickman.walkPhase += walkBackSpeed * dt * 0.1;
+                } else {
+                    rightStickman.x = targetX;
+                    state = 'right_pushing';
+                    rockVel = 0;
+                }
+
+                // Stop rock at right edge
+                if (rockX > getRightRestX() - rockRadius - 50) {
+                    rockX = getRightRestX() - rockRadius - 50;
+                    rockVel = 0;
+                }
+            } else if (state === 'right_pushing') {
+                // Constant slow push - arduous climb
+                rockVel = -pushSpeed;
+                rockX += rockVel * dt;
+                rightStickman.x = rockX + rockRadius + 35;
+                rightStickman.walkPhase += pushSpeed * dt * 0.1;
+
+                if (rockX <= peakX + 20) {
+                    state = 'rolling_left';
+                    rockVel = -0.01;
+                }
+            } else if (state === 'rolling_left') {
+                rockVel -= slopeAccel * dt;
+                rockVel *= friction;
+                rockX += rockVel * dt;
+
+                // Right stickman walks back down to rest position (defeated)
+                const rightRestX = getRightRestX();
+                if (rightStickman.x < rightRestX - 5) {
+                    rightStickman.x += walkBackSpeed * dt;
+                    rightStickman.walkPhase += walkBackSpeed * dt * 0.1;
+                }
+
+                // Left stickman moves to catch the rock
+                const targetX = rockX - rockRadius - 35;
+                if (leftStickman.x < targetX - 5) {
+                    leftStickman.x += walkBackSpeed * 1.2 * dt;
+                    leftStickman.walkPhase += walkBackSpeed * dt * 0.1;
+                } else {
+                    leftStickman.x = targetX;
+                    state = 'left_pushing';
+                    rockVel = 0;
+                }
+
+                // Stop rock at left edge
+                if (rockX < getLeftRestX() + rockRadius + 50) {
+                    rockX = getLeftRestX() + rockRadius + 50;
+                    rockVel = 0;
+                }
+            }
+
+            // Update rock rotation
+            rockRotation += (rockVel * dt) / rockRadius;
+
+            const rockY = getMountainY(rockX) - rockRadius;
+
+            // Draw mountain
+            ctx.fillStyle = '#e8e8e8';
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height);
+            ctx.lineTo(0, getBaseY());
+            ctx.lineTo(getLeftX(), getBaseY());
+            ctx.lineTo(getPeakX(), getPeakY());
+            ctx.lineTo(getRightX(), getBaseY());
+            ctx.lineTo(canvas.width, getBaseY());
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(getLeftX(), getBaseY());
+            ctx.lineTo(getPeakX(), getPeakY());
+            ctx.lineTo(getRightX(), getBaseY());
+            ctx.stroke();
+
+            // Draw rock
+            ctx.save();
+            ctx.translate(rockX, rockY);
+            ctx.rotate(rockRotation);
+
+            ctx.beginPath();
+            ctx.arc(0, 0, rockRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#888';
+            ctx.fill();
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.fillStyle = '#666';
+            ctx.beginPath();
+            ctx.arc(-8, -6, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(10, 4, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(-4, 10, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+
+            // Draw stickmen
+            const leftPushing = state === 'left_pushing';
+            const rightPushing = state === 'right_pushing';
+            const leftWalkingBack = state === 'rolling_right';
+            const rightWalkingBack = state === 'rolling_left';
+
+            // Left stickman: faces right when pushing/catching, faces left when walking back
+            const leftFacing = leftWalkingBack ? false : true;
+            // Right stickman: faces left when pushing/catching, faces right when walking back
+            const rightFacing = rightWalkingBack ? true : false;
+
+            drawStickman(leftStickman, leftPushing, leftFacing, rockX, rockY, leftWalkingBack);
+            drawStickman(rightStickman, rightPushing, rightFacing, rockX, rockY, rightWalkingBack);
+
+            requestAnimationFrame(draw);
+        }
+
+        window.addEventListener('resize', () => {
+            resize();
+            init();
+        });
+
+        requestAnimationFrame(draw);
+    </script>
+</body>
+</html>
