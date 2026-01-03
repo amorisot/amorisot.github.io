@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Figure Studies</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #f5f5f0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            draw();
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        // Human figure silhouette as a series of points
+        function getFigurePoints(centerX, centerY, height) {
+            const h = height;
+            const points = [];
+
+            // Head
+            const headRadius = h * 0.08;
+            const headY = centerY - h * 0.42;
+            for (let a = 0; a < Math.PI * 2; a += 0.2) {
+                points.push({
+                    x: centerX + Math.cos(a) * headRadius,
+                    y: headY + Math.sin(a) * headRadius * 1.1,
+                    part: 'head'
+                });
+            }
+
+            // Neck
+            points.push({ x: centerX - h * 0.03, y: centerY - h * 0.34, part: 'neck' });
+            points.push({ x: centerX + h * 0.03, y: centerY - h * 0.34, part: 'neck' });
+
+            // Shoulders
+            points.push({ x: centerX - h * 0.15, y: centerY - h * 0.30, part: 'shoulder' });
+            points.push({ x: centerX + h * 0.15, y: centerY - h * 0.30, part: 'shoulder' });
+
+            // Torso outline
+            const torsoPoints = [
+                { x: centerX - h * 0.14, y: centerY - h * 0.28 },
+                { x: centerX - h * 0.12, y: centerY - h * 0.15 },
+                { x: centerX - h * 0.10, y: centerY },
+                { x: centerX - h * 0.08, y: centerY + h * 0.05 },
+                { x: centerX + h * 0.08, y: centerY + h * 0.05 },
+                { x: centerX + h * 0.10, y: centerY },
+                { x: centerX + h * 0.12, y: centerY - h * 0.15 },
+                { x: centerX + h * 0.14, y: centerY - h * 0.28 },
+            ];
+
+            // Arms
+            const armPoints = [
+                // Left arm
+                { x: centerX - h * 0.15, y: centerY - h * 0.28 },
+                { x: centerX - h * 0.20, y: centerY - h * 0.15 },
+                { x: centerX - h * 0.18, y: centerY },
+                { x: centerX - h * 0.12, y: centerY + h * 0.05 },
+                // Right arm
+                { x: centerX + h * 0.15, y: centerY - h * 0.28 },
+                { x: centerX + h * 0.20, y: centerY - h * 0.15 },
+                { x: centerX + h * 0.18, y: centerY },
+                { x: centerX + h * 0.12, y: centerY + h * 0.05 },
+            ];
+
+            // Legs
+            const legPoints = [
+                // Left leg
+                { x: centerX - h * 0.06, y: centerY + h * 0.08 },
+                { x: centerX - h * 0.08, y: centerY + h * 0.20 },
+                { x: centerX - h * 0.07, y: centerY + h * 0.35 },
+                { x: centerX - h * 0.06, y: centerY + h * 0.50 },
+                // Right leg
+                { x: centerX + h * 0.06, y: centerY + h * 0.08 },
+                { x: centerX + h * 0.08, y: centerY + h * 0.20 },
+                { x: centerX + h * 0.07, y: centerY + h * 0.35 },
+                { x: centerX + h * 0.06, y: centerY + h * 0.50 },
+            ];
+
+            return { torsoPoints, armPoints, legPoints, headY, headRadius, centerX, centerY, h };
+        }
+
+        // Check if point is inside figure silhouette
+        function isInsideFigure(px, py, figure) {
+            const { centerX, centerY, h, headY, headRadius } = figure;
+
+            // Check head (ellipse)
+            const headDx = (px - centerX) / headRadius;
+            const headDy = (py - headY) / (headRadius * 1.1);
+            if (headDx * headDx + headDy * headDy < 1) return true;
+
+            // Neck
+            if (py > headY + headRadius * 0.8 && py < centerY - h * 0.28) {
+                const neckWidth = h * 0.04;
+                if (Math.abs(px - centerX) < neckWidth) return true;
+            }
+
+            // Shoulders and upper torso
+            if (py >= centerY - h * 0.30 && py < centerY - h * 0.15) {
+                const t = (py - (centerY - h * 0.30)) / (h * 0.15);
+                const shoulderWidth = h * 0.15 + (h * 0.05) * (1 - Math.abs(t - 0.5) * 2);
+                if (Math.abs(px - centerX) < shoulderWidth) return true;
+            }
+
+            // Mid torso
+            if (py >= centerY - h * 0.15 && py < centerY + h * 0.08) {
+                const t = (py - (centerY - h * 0.15)) / (h * 0.23);
+                const torsoWidth = h * 0.13 - t * h * 0.03;
+                if (Math.abs(px - centerX) < torsoWidth) return true;
+            }
+
+            // Arms
+            const armCenterY = centerY - h * 0.12;
+            const armDist = Math.abs(py - armCenterY);
+            if (armDist < h * 0.18) {
+                const armX = h * 0.16 + (1 - armDist / (h * 0.18)) * h * 0.04;
+                const armWidth = h * 0.035;
+                if (Math.abs(Math.abs(px - centerX) - armX) < armWidth) return true;
+            }
+
+            // Legs
+            if (py >= centerY + h * 0.05 && py < centerY + h * 0.52) {
+                const t = (py - (centerY + h * 0.05)) / (h * 0.47);
+                const legSep = h * 0.07 - t * h * 0.01;
+                const legWidth = h * 0.045 - t * h * 0.01;
+                if (Math.abs(Math.abs(px - centerX) - legSep) < legWidth) return true;
+            }
+
+            return false;
+        }
+
+        // Different hatching styles
+        const hatchingStyles = [
+            // Horizontal lines
+            function(ctx, figure, density = 1) {
+                const { centerX, centerY, h } = figure;
+                const startY = centerY - h * 0.52;
+                const endY = centerY + h * 0.52;
+                const step = 4 / density;
+
+                for (let y = startY; y < endY; y += step) {
+                    let inFigure = false;
+                    let startX = null;
+
+                    for (let x = centerX - h * 0.25; x < centerX + h * 0.25; x += 1) {
+                        if (isInsideFigure(x, y, figure)) {
+                            if (!inFigure) {
+                                startX = x;
+                                inFigure = true;
+                            }
+                        } else if (inFigure) {
+                            ctx.beginPath();
+                            ctx.moveTo(startX, y);
+                            ctx.lineTo(x, y);
+                            ctx.stroke();
+                            inFigure = false;
+                        }
+                    }
+                    if (inFigure && startX !== null) {
+                        ctx.beginPath();
+                        ctx.moveTo(startX, y);
+                        ctx.lineTo(centerX + h * 0.25, y);
+                        ctx.stroke();
+                    }
+                }
+            },
+
+            // Diagonal lines (/)
+            function(ctx, figure, density = 1) {
+                const { centerX, centerY, h } = figure;
+                const step = 5 / density;
+
+                for (let offset = -h; offset < h; offset += step) {
+                    const segments = [];
+                    let inFigure = false;
+                    let startPt = null;
+
+                    for (let t = 0; t < h * 1.2; t += 1) {
+                        const x = centerX - h * 0.3 + t;
+                        const y = centerY - h * 0.6 + t + offset;
+
+                        if (isInsideFigure(x, y, figure)) {
+                            if (!inFigure) {
+                                startPt = { x, y };
+                                inFigure = true;
+                            }
+                        } else if (inFigure) {
+                            ctx.beginPath();
+                            ctx.moveTo(startPt.x, startPt.y);
+                            ctx.lineTo(x, y);
+                            ctx.stroke();
+                            inFigure = false;
+                        }
+                    }
+                }
+            },
+
+            // Diagonal lines (\)
+            function(ctx, figure, density = 1) {
+                const { centerX, centerY, h } = figure;
+                const step = 5 / density;
+
+                for (let offset = -h; offset < h; offset += step) {
+                    let inFigure = false;
+                    let startPt = null;
+
+                    for (let t = 0; t < h * 1.2; t += 1) {
+                        const x = centerX + h * 0.3 - t;
+                        const y = centerY - h * 0.6 + t + offset;
+
+                        if (isInsideFigure(x, y, figure)) {
+                            if (!inFigure) {
+                                startPt = { x, y };
+                                inFigure = true;
+                            }
+                        } else if (inFigure) {
+                            ctx.beginPath();
+                            ctx.moveTo(startPt.x, startPt.y);
+                            ctx.lineTo(x, y);
+                            ctx.stroke();
+                            inFigure = false;
+                        }
+                    }
+                }
+            },
+
+            // Vertical lines
+            function(ctx, figure, density = 1) {
+                const { centerX, centerY, h } = figure;
+                const startX = centerX - h * 0.25;
+                const endX = centerX + h * 0.25;
+                const step = 4 / density;
+
+                for (let x = startX; x < endX; x += step) {
+                    let inFigure = false;
+                    let startY = null;
+
+                    for (let y = centerY - h * 0.55; y < centerY + h * 0.55; y += 1) {
+                        if (isInsideFigure(x, y, figure)) {
+                            if (!inFigure) {
+                                startY = y;
+                                inFigure = true;
+                            }
+                        } else if (inFigure) {
+                            ctx.beginPath();
+                            ctx.moveTo(x, startY);
+                            ctx.lineTo(x, y);
+                            ctx.stroke();
+                            inFigure = false;
+                        }
+                    }
+                    if (inFigure && startY !== null) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, startY);
+                        ctx.lineTo(x, centerY + h * 0.55);
+                        ctx.stroke();
+                    }
+                }
+            },
+
+            // Zigzag horizontal
+            function(ctx, figure, density = 1) {
+                const { centerX, centerY, h } = figure;
+                const startY = centerY - h * 0.50;
+                const endY = centerY + h * 0.50;
+                const step = 8 / density;
+                const zigSize = 4;
+
+                for (let y = startY; y < endY; y += step) {
+                    const points = [];
+
+                    for (let x = centerX - h * 0.25; x < centerX + h * 0.25; x += 2) {
+                        if (isInsideFigure(x, y, figure)) {
+                            const zigY = y + (Math.floor(x / zigSize) % 2 === 0 ? -zigSize/2 : zigSize/2);
+                            points.push({ x, y: zigY });
+                        }
+                    }
+
+                    if (points.length > 1) {
+                        ctx.beginPath();
+                        ctx.moveTo(points[0].x, points[0].y);
+                        for (let i = 1; i < points.length; i++) {
+                            ctx.lineTo(points[i].x, points[i].y);
+                        }
+                        ctx.stroke();
+                    }
+                }
+            },
+
+            // Crosshatch
+            function(ctx, figure, density = 1) {
+                const { centerX, centerY, h } = figure;
+                const step = 6 / density;
+
+                // First diagonal
+                for (let offset = -h; offset < h; offset += step) {
+                    let inFigure = false;
+                    let startPt = null;
+
+                    for (let t = 0; t < h * 1.2; t += 1) {
+                        const x = centerX - h * 0.3 + t;
+                        const y = centerY - h * 0.6 + t + offset;
+
+                        if (isInsideFigure(x, y, figure)) {
+                            if (!inFigure) {
+                                startPt = { x, y };
+                                inFigure = true;
+                            }
+                        } else if (inFigure) {
+                            ctx.beginPath();
+                            ctx.moveTo(startPt.x, startPt.y);
+                            ctx.lineTo(x, y);
+                            ctx.stroke();
+                            inFigure = false;
+                        }
+                    }
+                }
+
+                // Second diagonal
+                for (let offset = -h; offset < h; offset += step) {
+                    let inFigure = false;
+                    let startPt = null;
+
+                    for (let t = 0; t < h * 1.2; t += 1) {
+                        const x = centerX + h * 0.3 - t;
+                        const y = centerY - h * 0.6 + t + offset;
+
+                        if (isInsideFigure(x, y, figure)) {
+                            if (!inFigure) {
+                                startPt = { x, y };
+                                inFigure = true;
+                            }
+                        } else if (inFigure) {
+                            ctx.beginPath();
+                            ctx.moveTo(startPt.x, startPt.y);
+                            ctx.lineTo(x, y);
+                            ctx.stroke();
+                            inFigure = false;
+                        }
+                    }
+                }
+            },
+
+            // Scribble
+            function(ctx, figure, density = 1) {
+                const { centerX, centerY, h } = figure;
+                const iterations = 200 * density;
+
+                ctx.beginPath();
+                let lastX = centerX, lastY = centerY - h * 0.4;
+                let foundStart = false;
+
+                for (let i = 0; i < iterations; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 3 + Math.random() * 8;
+                    const newX = lastX + Math.cos(angle) * dist;
+                    const newY = lastY + Math.sin(angle) * dist;
+
+                    if (isInsideFigure(newX, newY, figure)) {
+                        if (!foundStart) {
+                            ctx.moveTo(newX, newY);
+                            foundStart = true;
+                        } else {
+                            ctx.lineTo(newX, newY);
+                        }
+                        lastX = newX;
+                        lastY = newY;
+                    } else {
+                        // Try to find a point inside
+                        const tryX = centerX + (Math.random() - 0.5) * h * 0.3;
+                        const tryY = centerY + (Math.random() - 0.5) * h * 0.8;
+                        if (isInsideFigure(tryX, tryY, figure)) {
+                            ctx.moveTo(tryX, tryY);
+                            lastX = tryX;
+                            lastY = tryY;
+                        }
+                    }
+                }
+                ctx.stroke();
+            },
+
+            // Contour lines
+            function(ctx, figure, density = 1) {
+                const { centerX, centerY, h, headY, headRadius } = figure;
+                const step = 5 / density;
+
+                // Draw concentric outlines
+                for (let scale = 1; scale > 0.1; scale -= 0.08 / density) {
+                    const scaledH = h * scale;
+                    const scaledFigure = {
+                        centerX,
+                        centerY,
+                        h: scaledH,
+                        headY: centerY - scaledH * 0.42,
+                        headRadius: scaledH * 0.08
+                    };
+
+                    // Trace outline
+                    const points = [];
+                    for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
+                        for (let r = 0; r < scaledH * 0.6; r += 2) {
+                            const x = centerX + Math.cos(angle) * r;
+                            const y = centerY + Math.sin(angle) * r;
+                            if (isInsideFigure(x, y, scaledFigure)) {
+                                points.push({ x, y, angle });
+                            }
+                        }
+                    }
+                }
+
+                // Horizontal contours with slight wave
+                for (let y = centerY - h * 0.50; y < centerY + h * 0.50; y += step) {
+                    const points = [];
+                    for (let x = centerX - h * 0.25; x < centerX + h * 0.25; x += 1) {
+                        if (isInsideFigure(x, y, figure)) {
+                            points.push({ x, y: y + Math.sin(x * 0.1) * 1 });
+                        }
+                    }
+                    if (points.length > 1) {
+                        ctx.beginPath();
+                        ctx.moveTo(points[0].x, points[0].y);
+                        for (let i = 1; i < points.length; i++) {
+                            ctx.lineTo(points[i].x, points[i].y);
+                        }
+                        ctx.stroke();
+                    }
+                }
+            },
+
+            // Dense horizontal with varying weight
+            function(ctx, figure, density = 1) {
+                const { centerX, centerY, h } = figure;
+                const startY = centerY - h * 0.52;
+                const endY = centerY + h * 0.52;
+                const step = 2.5 / density;
+
+                for (let y = startY; y < endY; y += step) {
+                    let inFigure = false;
+                    let startX = null;
+
+                    // Vary line weight based on position
+                    const distFromCenter = Math.abs(y - centerY) / (h * 0.5);
+                    ctx.lineWidth = 0.5 + (1 - distFromCenter) * 1.5;
+
+                    for (let x = centerX - h * 0.25; x < centerX + h * 0.25; x += 1) {
+                        if (isInsideFigure(x, y, figure)) {
+                            if (!inFigure) {
+                                startX = x;
+                                inFigure = true;
+                            }
+                        } else if (inFigure) {
+                            ctx.beginPath();
+                            ctx.moveTo(startX, y);
+                            ctx.lineTo(x, y);
+                            ctx.stroke();
+                            inFigure = false;
+                        }
+                    }
+                    if (inFigure && startX !== null) {
+                        ctx.beginPath();
+                        ctx.moveTo(startX, y);
+                        ctx.lineTo(centerX + h * 0.25, y);
+                        ctx.stroke();
+                    }
+                }
+                ctx.lineWidth = 1;
+            },
+
+            // Spiral fill
+            function(ctx, figure, density = 1) {
+                const { centerX, centerY, h } = figure;
+
+                ctx.beginPath();
+                let angle = 0;
+                let r = 0;
+                let lastInside = false;
+                let lastX, lastY;
+
+                while (r < h * 0.6) {
+                    const x = centerX + Math.cos(angle) * r;
+                    const y = centerY + Math.sin(angle) * r;
+
+                    if (isInsideFigure(x, y, figure)) {
+                        if (!lastInside) {
+                            ctx.moveTo(x, y);
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                        lastInside = true;
+                    } else {
+                        lastInside = false;
+                    }
+
+                    angle += 0.15 / density;
+                    r += 0.3 / density;
+                }
+                ctx.stroke();
+            },
+
+            // Short random strokes
+            function(ctx, figure, density = 1) {
+                const { centerX, centerY, h } = figure;
+                const strokes = 400 * density;
+
+                for (let i = 0; i < strokes; i++) {
+                    const x = centerX + (Math.random() - 0.5) * h * 0.5;
+                    const y = centerY + (Math.random() - 0.5) * h * 1.1;
+
+                    if (isInsideFigure(x, y, figure)) {
+                        const angle = Math.random() * Math.PI;
+                        const len = 3 + Math.random() * 6;
+                        ctx.beginPath();
+                        ctx.moveTo(x - Math.cos(angle) * len, y - Math.sin(angle) * len);
+                        ctx.lineTo(x + Math.cos(angle) * len, y + Math.sin(angle) * len);
+                        ctx.stroke();
+                    }
+                }
+            },
+
+            // Wobbly horizontal lines
+            function(ctx, figure, density = 1) {
+                const { centerX, centerY, h } = figure;
+                const startY = centerY - h * 0.50;
+                const endY = centerY + h * 0.50;
+                const step = 5 / density;
+
+                for (let y = startY; y < endY; y += step) {
+                    const points = [];
+                    const wobbleFreq = 0.3 + Math.random() * 0.3;
+                    const wobbleAmp = 2 + Math.random() * 3;
+                    const phase = Math.random() * Math.PI * 2;
+
+                    for (let x = centerX - h * 0.25; x < centerX + h * 0.25; x += 2) {
+                        if (isInsideFigure(x, y, figure)) {
+                            const wobbleY = y + Math.sin(x * wobbleFreq + phase) * wobbleAmp;
+                            points.push({ x, y: wobbleY });
+                        }
+                    }
+
+                    if (points.length > 1) {
+                        ctx.beginPath();
+                        ctx.moveTo(points[0].x, points[0].y);
+                        for (let i = 1; i < points.length; i++) {
+                            ctx.lineTo(points[i].x, points[i].y);
+                        }
+                        ctx.stroke();
+                    }
+                }
+            }
+        ];
+
+        function draw() {
+            ctx.fillStyle = '#f8f8f5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const cols = 4;
+            const rows = 3;
+            const cellWidth = canvas.width / cols;
+            const cellHeight = canvas.height / rows;
+            const figureHeight = Math.min(cellWidth, cellHeight) * 0.75;
+
+            ctx.strokeStyle = '#1a1a1a';
+            ctx.lineWidth = 0.8;
+            ctx.lineCap = 'round';
+
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const index = row * cols + col;
+                    if (index >= hatchingStyles.length) break;
+
+                    const centerX = cellWidth * (col + 0.5);
+                    const centerY = cellHeight * (row + 0.5);
+
+                    const figure = getFigurePoints(centerX, centerY, figureHeight);
+                    Object.assign(figure, { centerX, centerY, h: figureHeight });
+
+                    ctx.save();
+                    hatchingStyles[index](ctx, figure, 1);
+                    ctx.restore();
+                }
+            }
+        }
+
+        draw();
+    </script>
+</body>
+</html>
