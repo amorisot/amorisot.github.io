@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hatched Figure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #f9f9f7;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        canvas {
+            display: block;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        const size = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+        canvas.width = size;
+        canvas.height = size * 1.3;
+
+        // Color palette (warm gradient like the reference)
+        const colors = [
+            '#ff4500', // orange-red
+            '#ff6b35', // orange
+            '#ff8c42', // light orange
+            '#ffa94d', // yellow-orange
+            '#ffc857', // yellow
+        ];
+
+        // Figure silhouette check - walking pose
+        function isInsideFigure(px, py, figure) {
+            const { centerX, centerY, h } = figure;
+            const relX = px - centerX;
+            const relY = py - centerY;
+
+            // Head (tilted slightly)
+            const headCenterX = centerX + h * 0.02;
+            const headCenterY = centerY - h * 0.40;
+            const headRadiusX = h * 0.09;
+            const headRadiusY = h * 0.10;
+            const headDx = (px - headCenterX) / headRadiusX;
+            const headDy = (py - headCenterY) / headRadiusY;
+            if (headDx * headDx + headDy * headDy < 1) return true;
+
+            // Neck
+            if (py > headCenterY + headRadiusY * 0.7 && py < centerY - h * 0.28) {
+                const neckWidth = h * 0.045;
+                if (Math.abs(px - (centerX + h * 0.01)) < neckWidth) return true;
+            }
+
+            // Torso (slightly twisted walking pose)
+            if (py >= centerY - h * 0.30 && py < centerY + h * 0.08) {
+                const t = (py - (centerY - h * 0.30)) / (h * 0.38);
+                // Shoulders wider at top, narrowing to waist
+                const torsoWidth = h * 0.16 * (1 - t * 0.4);
+                const torsoOffset = t * h * 0.02; // slight lean
+                if (Math.abs(px - (centerX + torsoOffset)) < torsoWidth) return true;
+            }
+
+            // Left arm (forward swing)
+            const leftArmStartY = centerY - h * 0.28;
+            const leftArmEndY = centerY + h * 0.05;
+            if (py >= leftArmStartY && py <= leftArmEndY) {
+                const t = (py - leftArmStartY) / (leftArmEndY - leftArmStartY);
+                // Arm swings forward
+                const armX = centerX - h * 0.14 - t * h * 0.08 + t * t * h * 0.12;
+                const armWidth = h * 0.04 * (1 - t * 0.3);
+                if (Math.abs(px - armX) < armWidth) return true;
+            }
+
+            // Right arm (backward swing)
+            const rightArmStartY = centerY - h * 0.28;
+            const rightArmEndY = centerY + h * 0.12;
+            if (py >= rightArmStartY && py <= rightArmEndY) {
+                const t = (py - rightArmStartY) / (rightArmEndY - rightArmStartY);
+                // Arm swings backward
+                const armX = centerX + h * 0.14 + t * h * 0.15;
+                const armWidth = h * 0.04 * (1 - t * 0.3);
+                if (Math.abs(px - armX) < armWidth) return true;
+            }
+
+            // Left leg (forward stride)
+            const leftLegStartY = centerY + h * 0.06;
+            const leftLegEndY = centerY + h * 0.50;
+            if (py >= leftLegStartY && py <= leftLegEndY) {
+                const t = (py - leftLegStartY) / (leftLegEndY - leftLegStartY);
+                // Forward stride with knee bend
+                const kneeT = 0.45;
+                let legX;
+                if (t < kneeT) {
+                    // Upper leg going forward
+                    legX = centerX - h * 0.04 - (t / kneeT) * h * 0.12;
+                } else {
+                    // Lower leg angling back down
+                    const lowerT = (t - kneeT) / (1 - kneeT);
+                    legX = centerX - h * 0.16 + lowerT * h * 0.08;
+                }
+                const legWidth = h * 0.05 * (1 - t * 0.3);
+                if (Math.abs(px - legX) < legWidth) return true;
+            }
+
+            // Right leg (backward stride)
+            const rightLegStartY = centerY + h * 0.06;
+            const rightLegEndY = centerY + h * 0.48;
+            if (py >= rightLegStartY && py <= rightLegEndY) {
+                const t = (py - rightLegStartY) / (rightLegEndY - rightLegStartY);
+                // Backward stride
+                const legX = centerX + h * 0.04 + t * h * 0.10;
+                const legWidth = h * 0.045 * (1 - t * 0.35);
+                if (Math.abs(px - legX) < legWidth) return true;
+            }
+
+            return false;
+        }
+
+        // Draw with colored hatching
+        function draw() {
+            ctx.fillStyle = '#fafaf8';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Add subtle dots like in the reference image
+            ctx.fillStyle = '#e8e8e4';
+            for (let x = 0; x < canvas.width; x += 15) {
+                for (let y = 0; y < canvas.height; y += 15) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            const figureHeight = canvas.height * 0.75;
+            const centerX = canvas.width * 0.45;
+            const centerY = canvas.height * 0.48;
+            const figure = { centerX, centerY, h: figureHeight };
+
+            ctx.lineCap = 'round';
+            ctx.lineWidth = 1.2;
+
+            const startY = centerY - figureHeight * 0.52;
+            const endY = centerY + figureHeight * 0.52;
+            const step = 3.5;
+
+            // Draw hatching with color layers
+            for (let colorIndex = 0; colorIndex < colors.length; colorIndex++) {
+                ctx.strokeStyle = colors[colorIndex];
+
+                const offsetY = (colorIndex - 2) * 1.2; // Slight vertical offset per color
+                const offsetX = (colorIndex - 2) * 0.8; // Slight horizontal offset
+
+                for (let y = startY; y < endY; y += step) {
+                    const points = [];
+                    // Wobble parameters that vary by line
+                    const wobbleFreq = 0.08 + Math.sin(y * 0.02) * 0.02;
+                    const wobbleAmp = 2 + Math.sin(y * 0.05 + colorIndex) * 1.5;
+                    const phase = y * 0.1 + colorIndex * 0.5;
+
+                    // Horizontal position varies with y (walking motion)
+                    const yRatio = (y - startY) / (endY - startY);
+
+                    for (let x = centerX - figureHeight * 0.30; x < centerX + figureHeight * 0.35; x += 1.5) {
+                        const checkX = x - offsetX;
+                        const checkY = y - offsetY;
+
+                        if (isInsideFigure(checkX, checkY, figure)) {
+                            // Add wobble based on position
+                            const wobbleY = y + Math.sin(x * wobbleFreq + phase) * wobbleAmp;
+
+                            // Zigzag effect for lower portion (legs)
+                            let finalY = wobbleY;
+                            if (yRatio > 0.55) {
+                                const zigFreq = 0.15;
+                                const zigAmp = 4 + (yRatio - 0.55) * 15;
+                                finalY = wobbleY + (Math.floor(x * zigFreq) % 2 === 0 ? -zigAmp : zigAmp);
+                            }
+
+                            points.push({ x, y: finalY });
+                        }
+                    }
+
+                    // Draw continuous line segments
+                    if (points.length > 1) {
+                        ctx.beginPath();
+                        let drawing = false;
+                        let lastX = 0;
+
+                        for (let i = 0; i < points.length; i++) {
+                            const p = points[i];
+                            if (!drawing) {
+                                ctx.moveTo(p.x, p.y);
+                                drawing = true;
+                                lastX = p.x;
+                            } else {
+                                // Check for gap (limb separation)
+                                if (p.x - lastX > 8) {
+                                    ctx.stroke();
+                                    ctx.beginPath();
+                                    ctx.moveTo(p.x, p.y);
+                                }else {
+                                    ctx.lineTo(p.x, p.y);
+                                }
+                                lastX = p.x;
+                            }
+                        }
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        draw();
+
+        // Redraw on resize
+        window.addEventListener('resize', () => {
+            const size = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+            canvas.width = size;
+            canvas.height = size * 1.3;
+            draw();
+        });
+    </script>
+</body>
+</html>

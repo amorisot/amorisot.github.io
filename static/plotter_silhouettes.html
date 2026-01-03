@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plotter Silhouettes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #1a1a1a;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        canvas {
+            display: block;
+            background: #f8f8f5;
+            cursor: pointer;
+        }
+        .info {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #888;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="info">click to regenerate</div>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        function resize() {
+            const padding = 40;
+            canvas.width = Math.min(window.innerWidth - padding, 800);
+            canvas.height = Math.min(window.innerHeight - padding, 1000);
+        }
+        resize();
+
+        // Random seed for reproducible randomness
+        let seed = Date.now();
+        function random() {
+            seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+            return seed / 0x7fffffff;
+        }
+
+        // Hatching style generators
+        const hatchingStyles = {
+            horizontal: (ctx, figure, params) => {
+                const { centerX, centerY, h, isInside } = figure;
+                const step = params.step || 4;
+
+                for (let y = centerY - h * 0.52; y < centerY + h * 0.52; y += step) {
+                    let inFigure = false;
+                    let startX = null;
+
+                    for (let x = centerX - h * 0.30; x < centerX + h * 0.30; x += 1) {
+                        if (isInside(x, y)) {
+                            if (!inFigure) {
+                                startX = x;
+                                inFigure = true;
+                            }
+                        } else if (inFigure) {
+                            ctx.beginPath();
+                            ctx.moveTo(startX, y);
+                            ctx.lineTo(x, y);
+                            ctx.stroke();
+                            inFigure = false;
+                        }
+                    }
+                    if (inFigure) {
+                        ctx.beginPath();
+                        ctx.moveTo(startX, y);
+                        ctx.lineTo(centerX + h * 0.30, y);
+                        ctx.stroke();
+                    }
+                }
+            },
+
+            vertical: (ctx, figure, params) => {
+                const { centerX, centerY, h, isInside } = figure;
+                const step = params.step || 4;
+
+                for (let x = centerX - h * 0.30; x < centerX + h * 0.30; x += step) {
+                    let inFigure = false;
+                    let startY = null;
+
+                    for (let y = centerY - h * 0.55; y < centerY + h * 0.55; y += 1) {
+                        if (isInside(x, y)) {
+                            if (!inFigure) {
+                                startY = y;
+                                inFigure = true;
+                            }
+                        } else if (inFigure) {
+                            ctx.beginPath();
+                            ctx.moveTo(x, startY);
+                            ctx.lineTo(x, y);
+                            ctx.stroke();
+                            inFigure = false;
+                        }
+                    }
+                    if (inFigure) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, startY);
+                        ctx.lineTo(x, centerY + h * 0.55);
+                        ctx.stroke();
+                    }
+                }
+            },
+
+            diagonal: (ctx, figure, params) => {
+                const { centerX, centerY, h, isInside } = figure;
+                const step = params.step || 5;
+                const direction = params.direction || 1;
+
+                for (let offset = -h; offset < h; offset += step) {
+                    let inFigure = false;
+                    let startPt = null;
+
+                    for (let t = 0; t < h * 1.2; t += 1) {
+                        const x = direction > 0 ? centerX - h * 0.3 + t : centerX + h * 0.3 - t;
+                        const y = centerY - h * 0.6 + t + offset;
+
+                        if (isInside(x, y)) {
+                            if (!inFigure) {
+                                startPt = { x, y };
+                                inFigure = true;
+                            }
+                        } else if (inFigure) {
+                            ctx.beginPath();
+                            ctx.moveTo(startPt.x, startPt.y);
+                            ctx.lineTo(x, y);
+                            ctx.stroke();
+                            inFigure = false;
+                        }
+                    }
+                }
+            },
+
+            zigzag: (ctx, figure, params) => {
+                const { centerX, centerY, h, isInside } = figure;
+                const step = params.step || 6;
+                const zigSize = params.zigSize || 5;
+
+                for (let y = centerY - h * 0.50; y < centerY + h * 0.50; y += step) {
+                    const points = [];
+
+                    for (let x = centerX - h * 0.28; x < centerX + h * 0.28; x += 2) {
+                        if (isInside(x, y)) {
+                            const zigY = y + (Math.floor(x / zigSize) % 2 === 0 ? -zigSize : zigSize);
+                            points.push({ x, y: zigY });
+                        }
+                    }
+
+                    if (points.length > 1) {
+                        ctx.beginPath();
+                        ctx.moveTo(points[0].x, points[0].y);
+                        for (let i = 1; i < points.length; i++) {
+                            ctx.lineTo(points[i].x, points[i].y);
+                        }
+                        ctx.stroke();
+                    }
+                }
+            },
+
+            scribble: (ctx, figure, params) => {
+                const { centerX, centerY, h, isInside } = figure;
+                const iterations = params.iterations || 300;
+
+                ctx.beginPath();
+                let lastX = centerX;
+                let lastY = centerY - h * 0.3;
+                let foundStart = false;
+
+                for (let i = 0; i < iterations; i++) {
+                    const angle = random() * Math.PI * 2;
+                    const dist = 3 + random() * 10;
+                    const newX = lastX + Math.cos(angle) * dist;
+                    const newY = lastY + Math.sin(angle) * dist;
+
+                    if (isInside(newX, newY)) {
+                        if (!foundStart) {
+                            ctx.moveTo(newX, newY);
+                            foundStart = true;
+                        } else {
+                            ctx.lineTo(newX, newY);
+                        }
+                        lastX = newX;
+                        lastY = newY;
+                    } else {
+                        const tryX = centerX + (random() - 0.5) * h * 0.4;
+                        const tryY = centerY + (random() - 0.5) * h * 0.9;
+                        if (isInside(tryX, tryY)) {
+                            ctx.moveTo(tryX, tryY);
+                            lastX = tryX;
+                            lastY = tryY;
+                        }
+                    }
+                }
+                ctx.stroke();
+            },
+
+            crosshatch: (ctx, figure, params) => {
+                hatchingStyles.diagonal(ctx, figure, { ...params, direction: 1 });
+                hatchingStyles.diagonal(ctx, figure, { ...params, direction: -1 });
+            },
+
+            wobbly: (ctx, figure, params) => {
+                const { centerX, centerY, h, isInside } = figure;
+                const step = params.step || 5;
+
+                for (let y = centerY - h * 0.50; y < centerY + h * 0.50; y += step) {
+                    const points = [];
+                    const wobbleFreq = 0.15 + random() * 0.2;
+                    const wobbleAmp = 2 + random() * 4;
+                    const phase = random() * Math.PI * 2;
+
+                    for (let x = centerX - h * 0.28; x < centerX + h * 0.28; x += 2) {
+                        if (isInside(x, y)) {
+                            const wobbleY = y + Math.sin(x * wobbleFreq + phase) * wobbleAmp;
+                            points.push({ x, y: wobbleY });
+                        }
+                    }
+
+                    if (points.length > 1) {
+                        ctx.beginPath();
+                        ctx.moveTo(points[0].x, points[0].y);
+                        for (let i = 1; i < points.length; i++) {
+                            ctx.lineTo(points[i].x, points[i].y);
+                        }
+                        ctx.stroke();
+                    }
+                }
+            },
+
+            spiral: (ctx, figure, params) => {
+                const { centerX, centerY, h, isInside } = figure;
+
+                ctx.beginPath();
+                let angle = 0;
+                let r = 0;
+                let lastInside = false;
+
+                while (r < h * 0.6) {
+                    const x = centerX + Math.cos(angle) * r;
+                    const y = centerY + Math.sin(angle) * r;
+
+                    if (isInside(x, y)) {
+                        if (!lastInside) {
+                            ctx.moveTo(x, y);
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                        lastInside = true;
+                    } else {
+                        lastInside = false;
+                    }
+
+                    angle += 0.12;
+                    r += 0.25;
+                }
+                ctx.stroke();
+            },
+
+            dots: (ctx, figure, params) => {
+                const { centerX, centerY, h, isInside } = figure;
+                const step = params.step || 5;
+
+                for (let y = centerY - h * 0.52; y < centerY + h * 0.52; y += step) {
+                    for (let x = centerX - h * 0.28; x < centerX + h * 0.28; x += step) {
+                        if (isInside(x, y)) {
+                            const distFromCenter = Math.sqrt(
+                                Math.pow((x - centerX) / (h * 0.3), 2) +
+                                Math.pow((y - centerY) / (h * 0.5), 2)
+                            );
+                            const radius = 0.5 + (1 - distFromCenter * 0.5) * 2;
+                            ctx.beginPath();
+                            ctx.arc(x, y, radius, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                }
+            }
+        };
+
+        // Figure silhouette definitions
+        function createFigure(centerX, centerY, h, pose = 'standing') {
+            const poses = {
+                standing: (px, py) => {
+                    // Head
+                    const headY = centerY - h * 0.42;
+                    const headRadius = h * 0.08;
+                    const headDx = (px - centerX) / headRadius;
+                    const headDy = (py - headY) / (headRadius * 1.1);
+                    if (headDx * headDx + headDy * headDy < 1) return true;
+
+                    // Neck
+                    if (py > headY + headRadius * 0.8 && py < centerY - h * 0.28) {
+                        if (Math.abs(px - centerX) < h * 0.035) return true;
+                    }
+
+                    // Torso
+                    if (py >= centerY - h * 0.30 && py < centerY + h * 0.08) {
+                        const t = (py - (centerY - h * 0.30)) / (h * 0.38);
+                        const torsoWidth = h * 0.14 * (1 - t * 0.3);
+                        if (Math.abs(px - centerX) < torsoWidth) return true;
+                    }
+
+                    // Arms
+                    if (py >= centerY - h * 0.28 && py < centerY + h * 0.08) {
+                        const armX = h * 0.16;
+                        const armWidth = h * 0.035;
+                        if (Math.abs(Math.abs(px - centerX) - armX) < armWidth) return true;
+                    }
+
+                    // Legs
+                    if (py >= centerY + h * 0.05 && py < centerY + h * 0.52) {
+                        const t = (py - (centerY + h * 0.05)) / (h * 0.47);
+                        const legSep = h * 0.06;
+                        const legWidth = h * 0.045 * (1 - t * 0.2);
+                        if (Math.abs(Math.abs(px - centerX) - legSep) < legWidth) return true;
+                    }
+
+                    return false;
+                },
+
+                walking: (px, py) => {
+                    // Head
+                    const headY = centerY - h * 0.40;
+                    const headRadius = h * 0.085;
+                    if (Math.pow((px - centerX - h * 0.02) / headRadius, 2) +
+                        Math.pow((py - headY) / (headRadius * 1.1), 2) < 1) return true;
+
+                    // Neck
+                    if (py > headY + headRadius * 0.7 && py < centerY - h * 0.26) {
+                        if (Math.abs(px - centerX) < h * 0.04) return true;
+                    }
+
+                    // Torso
+                    if (py >= centerY - h * 0.28 && py < centerY + h * 0.08) {
+                        const t = (py - (centerY - h * 0.28)) / (h * 0.36);
+                        const width = h * 0.15 * (1 - t * 0.35);
+                        if (Math.abs(px - centerX) < width) return true;
+                    }
+
+                    // Left arm forward
+                    if (py >= centerY - h * 0.26 && py < centerY + h * 0.06) {
+                        const t = (py - (centerY - h * 0.26)) / (h * 0.32);
+                        const armX = centerX - h * 0.13 - t * h * 0.06;
+                        if (Math.abs(px - armX) < h * 0.035) return true;
+                    }
+
+                    // Right arm back
+                    if (py >= centerY - h * 0.26 && py < centerY + h * 0.10) {
+                        const t = (py - (centerY - h * 0.26)) / (h * 0.36);
+                        const armX = centerX + h * 0.13 + t * h * 0.12;
+                        if (Math.abs(px - armX) < h * 0.035) return true;
+                    }
+
+                    // Left leg forward
+                    if (py >= centerY + h * 0.06 && py < centerY + h * 0.50) {
+                        const t = (py - (centerY + h * 0.06)) / (h * 0.44);
+                        const legX = centerX - h * 0.04 - t * h * 0.08;
+                        const width = h * 0.045 * (1 - t * 0.25);
+                        if (Math.abs(px - legX) < width) return true;
+                    }
+
+                    // Right leg back
+                    if (py >= centerY + h * 0.06 && py < centerY + h * 0.48) {
+                        const t = (py - (centerY + h * 0.06)) / (h * 0.42);
+                        const legX = centerX + h * 0.04 + t * h * 0.10;
+                        const width = h * 0.045 * (1 - t * 0.3);
+                        if (Math.abs(px - legX) < width) return true;
+                    }
+
+                    return false;
+                },
+
+                armsUp: (px, py) => {
+                    // Head
+                    const headY = centerY - h * 0.38;
+                    const headRadius = h * 0.08;
+                    if (Math.pow((px - centerX) / headRadius, 2) +
+                        Math.pow((py - headY) / (headRadius * 1.1), 2) < 1) return true;
+
+                    // Neck
+                    if (py > headY + headRadius * 0.7 && py < centerY - h * 0.25) {
+                        if (Math.abs(px - centerX) < h * 0.035) return true;
+                    }
+
+                    // Torso
+                    if (py >= centerY - h * 0.27 && py < centerY + h * 0.10) {
+                        const t = (py - (centerY - h * 0.27)) / (h * 0.37);
+                        const width = h * 0.14 * (1 - t * 0.3);
+                        if (Math.abs(px - centerX) < width) return true;
+                    }
+
+                    // Arms going up
+                    if (py >= centerY - h * 0.50 && py < centerY - h * 0.05) {
+                        const armY = centerY - h * 0.27;
+                        if (py < armY) {
+                            // Upper arms
+                            const t = (armY - py) / (h * 0.23);
+                            const armSpread = h * 0.14 + t * h * 0.08;
+                            const armWidth = h * 0.035;
+                            if (Math.abs(Math.abs(px - centerX) - armSpread) < armWidth) return true;
+                        } else {
+                            // Arm connection
+                            const armWidth = h * 0.035;
+                            if (Math.abs(Math.abs(px - centerX) - h * 0.14) < armWidth) return true;
+                        }
+                    }
+
+                    // Legs
+                    if (py >= centerY + h * 0.08 && py < centerY + h * 0.52) {
+                        const t = (py - (centerY + h * 0.08)) / (h * 0.44);
+                        const legSep = h * 0.055 + t * h * 0.02;
+                        const legWidth = h * 0.045 * (1 - t * 0.2);
+                        if (Math.abs(Math.abs(px - centerX) - legSep) < legWidth) return true;
+                    }
+
+                    return false;
+                }
+            };
+
+            return {
+                centerX,
+                centerY,
+                h,
+                isInside: poses[pose] || poses.standing
+            };
+        }
+
+        // Generate random parameters for variety
+        function randomParams() {
+            const styles = Object.keys(hatchingStyles);
+            return {
+                style: styles[Math.floor(random() * styles.length)],
+                step: 3 + random() * 5,
+                zigSize: 3 + random() * 6,
+                iterations: 200 + random() * 200,
+                lineWidth: 0.5 + random() * 1.5
+            };
+        }
+
+        // Main draw function
+        function draw() {
+            seed = Date.now();
+
+            ctx.fillStyle = '#f8f8f5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const cols = 3;
+            const rows = 4;
+            const cellWidth = canvas.width / cols;
+            const cellHeight = canvas.height / rows;
+            const figureHeight = Math.min(cellWidth, cellHeight) * 0.80;
+
+            const poses = ['standing', 'walking', 'armsUp'];
+
+            ctx.lineCap = 'round';
+            ctx.fillStyle = '#1a1a1a';
+            ctx.strokeStyle = '#1a1a1a';
+
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const centerX = cellWidth * (col + 0.5);
+                    const centerY = cellHeight * (row + 0.5);
+
+                    const pose = poses[Math.floor(random() * poses.length)];
+                    const figure = createFigure(centerX, centerY, figureHeight, pose);
+
+                    const params = randomParams();
+                    ctx.lineWidth = params.lineWidth;
+
+                    const styleFunc = hatchingStyles[params.style];
+                    if (styleFunc) {
+                        styleFunc(ctx, figure, params);
+                    }
+                }
+            }
+        }
+
+        draw();
+
+        // Regenerate on click
+        canvas.addEventListener('click', draw);
+
+        // Redraw on resize
+        window.addEventListener('resize', () => {
+            resize();
+            draw();
+        });
+    </script>
+</body>
+</html>
