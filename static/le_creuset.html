@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Creuset Colors</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #1a1a1a;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        canvas {
+            display: block;
+            background: #f5f0e8;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Le Creuset color palette
+        const colors = {
+            cerise: '#c41e3a',
+            flame: '#e25822',
+            nectar: '#f4a460',
+            artichaut: '#2d4a3e',
+            caribbean: '#00a693',
+            marseille: '#2e5090',
+            rhone: '#722f37',
+            olive: '#6b7b3c',
+            seaSalt: '#a8c8c8',
+            chambray: '#8db4d2',
+            azure: '#4682b4',
+            agave: '#1e3a5f',
+            thyme: '#4a5548',
+            matteNavy: '#1c2841',
+            oyster: '#8b8b83',
+            meringue: '#f5f0e8',
+            brioche: '#c9a86c',
+            white: '#faf9f6'
+        };
+
+        const colorNames = Object.keys(colors);
+
+        // Set canvas size (6x3 aspect ratio)
+        function resize() {
+            const padding = 40;
+            const maxWidth = Math.min(window.innerWidth - padding, 960);
+            const maxHeight = Math.min(window.innerHeight - padding, 600);
+
+            // Maintain 6:3 (2:1) aspect ratio
+            if (maxWidth / 2 <= maxHeight) {
+                canvas.width = maxWidth;
+                canvas.height = maxWidth / 2;
+            } else {
+                canvas.height = maxHeight;
+                canvas.width = maxHeight * 2;
+            }
+        }
+        resize();
+
+        // Random seed for reproducible randomness
+        let seed = Date.now();
+        function random() {
+            seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+            return seed / 0x7fffffff;
+        }
+
+        function randomInt(min, max) {
+            return Math.floor(random() * (max - min + 1)) + min;
+        }
+
+        function pick(arr) {
+            return arr[Math.floor(random() * arr.length)];
+        }
+
+        function shuffle(arr) {
+            const result = [...arr];
+            for (let i = result.length - 1; i > 0; i--) {
+                const j = Math.floor(random() * (i + 1));
+                [result[i], result[j]] = [result[j], result[i]];
+            }
+            return result;
+        }
+
+        // Darken color for shadows
+        function darken(hex, amount) {
+            const num = parseInt(hex.slice(1), 16);
+            const r = Math.max(0, (num >> 16) - amount);
+            const g = Math.max(0, ((num >> 8) & 0xff) - amount);
+            const b = Math.max(0, (num & 0xff) - amount);
+            return `rgb(${r},${g},${b})`;
+        }
+
+        // Lighten color for highlights
+        function lighten(hex, amount) {
+            const num = parseInt(hex.slice(1), 16);
+            const r = Math.min(255, (num >> 16) + amount);
+            const g = Math.min(255, ((num >> 8) & 0xff) + amount);
+            const b = Math.min(255, (num & 0xff) + amount);
+            return `rgb(${r},${g},${b})`;
+        }
+
+        // Check if color is light (needs outline)
+        function isLightColor(hex) {
+            const num = parseInt(hex.slice(1), 16);
+            const r = num >> 16;
+            const g = (num >> 8) & 0xff;
+            const b = num & 0xff;
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            return luminance > 0.75;
+        }
+
+        // Draw a Dutch oven (round) - 3/4 view
+        function drawDutchOven(x, y, size, color) {
+            const w = size;
+            const needsOutline = isLightColor(color);
+
+            // Shadow under pot
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.beginPath();
+            ctx.ellipse(x, y + size * 0.38, w * 0.48, size * 0.08, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Pot body - cylinder with elliptical top and bottom
+            const bodyTop = y + size * 0.05;
+            const bodyBottom = y + size * 0.35;
+            const bodyWidth = w * 0.44;
+            const ellipseHeight = size * 0.12;
+
+            // Body side (gradient from darker bottom to lighter top)
+            const bodyGrad = ctx.createLinearGradient(x - bodyWidth, bodyTop, x - bodyWidth, bodyBottom);
+            bodyGrad.addColorStop(0, lighten(color, 20));
+            bodyGrad.addColorStop(0.7, color);
+            bodyGrad.addColorStop(1, darken(color, 40));
+            ctx.fillStyle = bodyGrad;
+            ctx.beginPath();
+            ctx.moveTo(x - bodyWidth, bodyTop);
+            ctx.lineTo(x - bodyWidth, bodyBottom);
+            ctx.quadraticCurveTo(x - bodyWidth, bodyBottom + ellipseHeight, x, bodyBottom + ellipseHeight);
+            ctx.quadraticCurveTo(x + bodyWidth, bodyBottom + ellipseHeight, x + bodyWidth, bodyBottom);
+            ctx.lineTo(x + bodyWidth, bodyTop);
+            ctx.closePath();
+            ctx.fill();
+
+            // Body bottom ellipse
+            ctx.fillStyle = darken(color, 50);
+            ctx.beginPath();
+            ctx.ellipse(x, bodyBottom, bodyWidth, ellipseHeight, 0, 0, Math.PI);
+            ctx.fill();
+
+            // Body top rim
+            ctx.fillStyle = darken(color, 20);
+            ctx.beginPath();
+            ctx.ellipse(x, bodyTop, bodyWidth, ellipseHeight * 0.8, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Interior (cream colored)
+            ctx.fillStyle = '#f5f0e0';
+            ctx.beginPath();
+            ctx.ellipse(x, bodyTop, bodyWidth * 0.88, ellipseHeight * 0.6, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Handles (loop style)
+            ctx.strokeStyle = needsOutline ? darken(color, 30) : color;
+            ctx.lineWidth = size * 0.045;
+            ctx.lineCap = 'round';
+
+            // Left handle
+            ctx.beginPath();
+            ctx.moveTo(x - bodyWidth + size * 0.02, bodyTop + size * 0.08);
+            ctx.quadraticCurveTo(x - bodyWidth - size * 0.12, bodyTop + size * 0.12, x - bodyWidth + size * 0.02, bodyTop + size * 0.18);
+            ctx.stroke();
+
+            // Right handle
+            ctx.beginPath();
+            ctx.moveTo(x + bodyWidth - size * 0.02, bodyTop + size * 0.08);
+            ctx.quadraticCurveTo(x + bodyWidth + size * 0.12, bodyTop + size * 0.12, x + bodyWidth - size * 0.02, bodyTop + size * 0.18);
+            ctx.stroke();
+
+            // Lid - domed with concentric rings
+            const lidBottom = y - size * 0.02;
+            const lidTop = y - size * 0.22;
+            const lidWidth = bodyWidth * 1.02;
+
+            // Lid edge/rim
+            ctx.fillStyle = darken(color, 15);
+            ctx.beginPath();
+            ctx.ellipse(x, lidBottom, lidWidth, ellipseHeight * 0.7, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Lid dome
+            const lidGrad = ctx.createLinearGradient(x, lidTop, x, lidBottom);
+            lidGrad.addColorStop(0, lighten(color, 35));
+            lidGrad.addColorStop(0.5, color);
+            lidGrad.addColorStop(1, darken(color, 10));
+            ctx.fillStyle = lidGrad;
+            ctx.beginPath();
+            ctx.moveTo(x - lidWidth, lidBottom);
+            ctx.quadraticCurveTo(x - lidWidth * 0.9, lidTop + size * 0.06, x, lidTop + size * 0.02);
+            ctx.quadraticCurveTo(x + lidWidth * 0.9, lidTop + size * 0.06, x + lidWidth, lidBottom);
+            ctx.closePath();
+            ctx.fill();
+
+            // Concentric rings on lid
+            ctx.strokeStyle = darken(color, 25);
+            ctx.lineWidth = 1;
+            for (let i = 1; i <= 3; i++) {
+                const ringY = lidBottom - size * 0.04 * i;
+                const ringWidth = lidWidth * (1 - i * 0.22);
+                const ringHeight = ellipseHeight * 0.5 * (1 - i * 0.15);
+                ctx.beginPath();
+                ctx.ellipse(x, ringY, ringWidth, ringHeight, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Knob (stainless steel look)
+            ctx.fillStyle = '#4a4a4a';
+            ctx.beginPath();
+            ctx.ellipse(x, lidTop + size * 0.02, size * 0.06, size * 0.025, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#6a6a6a';
+            ctx.beginPath();
+            ctx.arc(x, lidTop - size * 0.01, size * 0.04, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Knob highlight
+            ctx.fillStyle = '#9a9a9a';
+            ctx.beginPath();
+            ctx.arc(x - size * 0.015, lidTop - size * 0.02, size * 0.015, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Outline for light colors
+            if (needsOutline) {
+                ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x - bodyWidth, bodyTop);
+                ctx.lineTo(x - bodyWidth, bodyBottom);
+                ctx.quadraticCurveTo(x - bodyWidth, bodyBottom + ellipseHeight, x, bodyBottom + ellipseHeight);
+                ctx.quadraticCurveTo(x + bodyWidth, bodyBottom + ellipseHeight, x + bodyWidth, bodyBottom);
+                ctx.lineTo(x + bodyWidth, bodyTop);
+                ctx.stroke();
+            }
+        }
+
+        // Draw a braiser (shallow, wide) - 3/4 view
+        function drawBraiser(x, y, size, color) {
+            const w = size * 0.55;
+            const needsOutline = isLightColor(color);
+
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.beginPath();
+            ctx.ellipse(x, y + size * 0.22, w * 1.1, size * 0.06, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Body - shallow pan shape
+            const bodyTop = y + size * 0.08;
+            const bodyBottom = y + size * 0.18;
+            const ellipseHeight = size * 0.1;
+
+            // Body gradient
+            const bodyGrad = ctx.createLinearGradient(x, bodyTop, x, bodyBottom + ellipseHeight);
+            bodyGrad.addColorStop(0, lighten(color, 15));
+            bodyGrad.addColorStop(0.6, color);
+            bodyGrad.addColorStop(1, darken(color, 35));
+            ctx.fillStyle = bodyGrad;
+
+            ctx.beginPath();
+            ctx.ellipse(x, bodyBottom, w, ellipseHeight, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Body sides
+            ctx.beginPath();
+            ctx.moveTo(x - w, bodyTop);
+            ctx.lineTo(x - w, bodyBottom);
+            ctx.moveTo(x + w, bodyTop);
+            ctx.lineTo(x + w, bodyBottom);
+            ctx.ellipse(x, bodyTop, w, ellipseHeight * 0.8, 0, Math.PI, 0, true);
+            ctx.lineTo(x + w, bodyBottom);
+            ctx.ellipse(x, bodyBottom, w, ellipseHeight, 0, 0, Math.PI, false);
+            ctx.closePath();
+            ctx.fill();
+
+            // Rim
+            ctx.fillStyle = darken(color, 15);
+            ctx.beginPath();
+            ctx.ellipse(x, bodyTop, w, ellipseHeight * 0.8, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Interior
+            ctx.fillStyle = '#f5f0e0';
+            ctx.beginPath();
+            ctx.ellipse(x, bodyTop, w * 0.9, ellipseHeight * 0.65, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Handles
+            ctx.strokeStyle = needsOutline ? darken(color, 30) : color;
+            ctx.lineWidth = size * 0.04;
+            ctx.lineCap = 'round';
+
+            ctx.beginPath();
+            ctx.moveTo(x - w + size * 0.02, bodyTop + size * 0.02);
+            ctx.quadraticCurveTo(x - w - size * 0.1, bodyTop + size * 0.05, x - w + size * 0.02, bodyTop + size * 0.09);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(x + w - size * 0.02, bodyTop + size * 0.02);
+            ctx.quadraticCurveTo(x + w + size * 0.1, bodyTop + size * 0.05, x + w - size * 0.02, bodyTop + size * 0.09);
+            ctx.stroke();
+
+            // Lid
+            const lidBottom = y - size * 0.0;
+            const lidTop = y - size * 0.12;
+            const lidWidth = w * 0.95;
+
+            // Lid rim
+            ctx.fillStyle = darken(color, 12);
+            ctx.beginPath();
+            ctx.ellipse(x, lidBottom, lidWidth, ellipseHeight * 0.6, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Lid dome (shallow)
+            const lidGrad = ctx.createLinearGradient(x, lidTop, x, lidBottom);
+            lidGrad.addColorStop(0, lighten(color, 30));
+            lidGrad.addColorStop(0.6, color);
+            lidGrad.addColorStop(1, darken(color, 8));
+            ctx.fillStyle = lidGrad;
+            ctx.beginPath();
+            ctx.moveTo(x - lidWidth, lidBottom);
+            ctx.quadraticCurveTo(x - lidWidth * 0.8, lidTop + size * 0.03, x, lidTop);
+            ctx.quadraticCurveTo(x + lidWidth * 0.8, lidTop + size * 0.03, x + lidWidth, lidBottom);
+            ctx.closePath();
+            ctx.fill();
+
+            // Concentric rings
+            ctx.strokeStyle = darken(color, 20);
+            ctx.lineWidth = 0.8;
+            for (let i = 1; i <= 2; i++) {
+                const ringY = lidBottom - size * 0.025 * i;
+                const ringW = lidWidth * (1 - i * 0.28);
+                ctx.beginPath();
+                ctx.ellipse(x, ringY, ringW, ellipseHeight * 0.35 * (1 - i * 0.2), 0, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Gold knob
+            ctx.fillStyle = '#8b7355';
+            ctx.beginPath();
+            ctx.ellipse(x, lidTop + size * 0.01, size * 0.045, size * 0.018, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#a08060';
+            ctx.beginPath();
+            ctx.arc(x, lidTop - size * 0.005, size * 0.028, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#c4a87c';
+            ctx.beginPath();
+            ctx.arc(x - size * 0.01, lidTop - size * 0.012, size * 0.01, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (needsOutline) {
+                ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.ellipse(x, bodyBottom, w, ellipseHeight, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        // Draw a kettle - Le Creuset classic kettle
+        function drawKettle(x, y, size, color) {
+            const needsOutline = isLightColor(color);
+
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.beginPath();
+            ctx.ellipse(x, y + size * 0.32, size * 0.4, size * 0.06, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Body - rounded kettle shape
+            const bodyGrad = ctx.createLinearGradient(x - size * 0.4, y, x + size * 0.2, y);
+            bodyGrad.addColorStop(0, lighten(color, 30));
+            bodyGrad.addColorStop(0.35, color);
+            bodyGrad.addColorStop(1, darken(color, 25));
+
+            ctx.fillStyle = bodyGrad;
+            ctx.beginPath();
+            // Start from bottom left, go up and around
+            ctx.moveTo(x - size * 0.28, y + size * 0.25);
+            // Left side going up
+            ctx.quadraticCurveTo(x - size * 0.38, y + size * 0.1, x - size * 0.38, y - size * 0.05);
+            // Shoulder to neck
+            ctx.quadraticCurveTo(x - size * 0.35, y - size * 0.2, x - size * 0.18, y - size * 0.28);
+            // Neck top
+            ctx.lineTo(x + size * 0.12, y - size * 0.28);
+            // Right shoulder down
+            ctx.quadraticCurveTo(x + size * 0.28, y - size * 0.22, x + size * 0.32, y - size * 0.05);
+            // Right side down
+            ctx.quadraticCurveTo(x + size * 0.32, y + size * 0.15, x + size * 0.22, y + size * 0.25);
+            // Bottom
+            ctx.quadraticCurveTo(x, y + size * 0.3, x - size * 0.28, y + size * 0.25);
+            ctx.closePath();
+            ctx.fill();
+
+            // Body highlight
+            ctx.fillStyle = lighten(color, 45);
+            ctx.beginPath();
+            ctx.ellipse(x - size * 0.2, y - size * 0.05, size * 0.08, size * 0.15, -0.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Neck/lid area
+            ctx.fillStyle = darken(color, 15);
+            ctx.beginPath();
+            ctx.ellipse(x - size * 0.03, y - size * 0.28, size * 0.18, size * 0.045, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Lid cap
+            ctx.fillStyle = darken(color, 25);
+            ctx.beginPath();
+            ctx.ellipse(x - size * 0.03, y - size * 0.30, size * 0.12, size * 0.03, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Spout
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x + size * 0.25, y - size * 0.08);
+            ctx.quadraticCurveTo(x + size * 0.38, y - size * 0.12, x + size * 0.42, y - size * 0.28);
+            ctx.quadraticCurveTo(x + size * 0.44, y - size * 0.35, x + size * 0.40, y - size * 0.38);
+            // Spout tip
+            ctx.lineTo(x + size * 0.36, y - size * 0.36);
+            ctx.quadraticCurveTo(x + size * 0.38, y - size * 0.32, x + size * 0.36, y - size * 0.26);
+            ctx.quadraticCurveTo(x + size * 0.32, y - size * 0.1, x + size * 0.22, y - size * 0.02);
+            ctx.closePath();
+            ctx.fill();
+
+            // Spout highlight
+            ctx.fillStyle = lighten(color, 30);
+            ctx.beginPath();
+            ctx.moveTo(x + size * 0.28, y - size * 0.12);
+            ctx.quadraticCurveTo(x + size * 0.34, y - size * 0.18, x + size * 0.36, y - size * 0.28);
+            ctx.lineTo(x + size * 0.33, y - size * 0.26);
+            ctx.quadraticCurveTo(x + size * 0.31, y - size * 0.16, x + size * 0.26, y - size * 0.10);
+            ctx.closePath();
+            ctx.fill();
+
+            // Handle (black arched)
+            ctx.strokeStyle = '#2a2a2a';
+            ctx.lineWidth = size * 0.055;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(x - size * 0.22, y - size * 0.25);
+            ctx.quadraticCurveTo(x - size * 0.15, y - size * 0.52, x + size * 0.08, y - size * 0.52);
+            ctx.quadraticCurveTo(x + size * 0.25, y - size * 0.52, x + size * 0.22, y - size * 0.30);
+            ctx.stroke();
+
+            // Handle highlight
+            ctx.strokeStyle = '#4a4a4a';
+            ctx.lineWidth = size * 0.02;
+            ctx.beginPath();
+            ctx.moveTo(x - size * 0.18, y - size * 0.32);
+            ctx.quadraticCurveTo(x - size * 0.1, y - size * 0.48, x + size * 0.05, y - size * 0.48);
+            ctx.stroke();
+
+            if (needsOutline) {
+                ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x - size * 0.28, y + size * 0.25);
+                ctx.quadraticCurveTo(x - size * 0.38, y + size * 0.1, x - size * 0.38, y - size * 0.05);
+                ctx.quadraticCurveTo(x - size * 0.35, y - size * 0.2, x - size * 0.18, y - size * 0.28);
+                ctx.stroke();
+            }
+        }
+
+        // Draw a mug - classic Le Creuset stoneware mug
+        function drawMug(x, y, size, color) {
+            const h = size * 0.65;
+            const w = size * 0.42;
+            const needsOutline = isLightColor(color);
+
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.beginPath();
+            ctx.ellipse(x, y + h * 0.52, w * 1.1, size * 0.05, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Body with slight taper (wider at top)
+            const topY = y - h * 0.45;
+            const bottomY = y + h * 0.45;
+            const topWidth = w;
+            const bottomWidth = w * 0.85;
+
+            // Main body gradient
+            const bodyGrad = ctx.createLinearGradient(x - topWidth, y, x + topWidth * 0.3, y);
+            bodyGrad.addColorStop(0, lighten(color, 25));
+            bodyGrad.addColorStop(0.4, color);
+            bodyGrad.addColorStop(1, darken(color, 20));
+            ctx.fillStyle = bodyGrad;
+
+            ctx.beginPath();
+            ctx.moveTo(x - topWidth, topY);
+            ctx.lineTo(x - bottomWidth, bottomY);
+            ctx.quadraticCurveTo(x, bottomY + size * 0.04, x + bottomWidth, bottomY);
+            ctx.lineTo(x + topWidth, topY);
+            ctx.closePath();
+            ctx.fill();
+
+            // Ribbing - the signature Le Creuset horizontal lines
+            const numRibs = 12;
+            ctx.strokeStyle = darken(color, 18);
+            ctx.lineWidth = 1.5;
+            for (let i = 1; i < numRibs; i++) {
+                const t = i / numRibs;
+                const ribY = topY + t * (bottomY - topY);
+                const ribWidth = topWidth - t * (topWidth - bottomWidth);
+                ctx.beginPath();
+                ctx.moveTo(x - ribWidth + size * 0.01, ribY);
+                ctx.lineTo(x + ribWidth - size * 0.01, ribY);
+                ctx.stroke();
+            }
+
+            // Rim
+            ctx.fillStyle = darken(color, 15);
+            ctx.beginPath();
+            ctx.ellipse(x, topY, topWidth, size * 0.045, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Interior (cream)
+            ctx.fillStyle = '#f5f0e0';
+            ctx.beginPath();
+            ctx.ellipse(x, topY, topWidth * 0.85, size * 0.032, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Handle - chunky curved handle
+            ctx.fillStyle = color;
+            ctx.strokeStyle = needsOutline ? darken(color, 30) : color;
+            ctx.lineWidth = size * 0.09;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(x + topWidth - size * 0.02, topY + h * 0.15);
+            ctx.quadraticCurveTo(x + topWidth + size * 0.18, y, x + bottomWidth - size * 0.02, bottomY - h * 0.15);
+            ctx.stroke();
+
+            // Handle inner (darker)
+            ctx.strokeStyle = darken(color, 30);
+            ctx.lineWidth = size * 0.04;
+            ctx.beginPath();
+            ctx.moveTo(x + topWidth + size * 0.02, topY + h * 0.22);
+            ctx.quadraticCurveTo(x + topWidth + size * 0.12, y, x + bottomWidth + size * 0.02, bottomY - h * 0.22);
+            ctx.stroke();
+
+            // Outline for light colors
+            if (needsOutline) {
+                ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x - topWidth, topY);
+                ctx.lineTo(x - bottomWidth, bottomY);
+                ctx.quadraticCurveTo(x, bottomY + size * 0.04, x + bottomWidth, bottomY);
+                ctx.lineTo(x + topWidth, topY);
+                ctx.stroke();
+            }
+        }
+
+        // Draw a skillet - Le Creuset signature skillet with long handle
+        function drawSkillet(x, y, size, color) {
+            const needsOutline = isLightColor(color);
+            const panRadius = size * 0.38;
+
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.beginPath();
+            ctx.ellipse(x - size * 0.05, y + size * 0.18, panRadius * 1.1, size * 0.05, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Handle first (behind pan)
+            const handleStartX = x + panRadius * 0.7;
+            const handleEndX = x + panRadius + size * 0.42;
+            const handleWidth = size * 0.09;
+
+            // Handle gradient
+            const handleGrad = ctx.createLinearGradient(handleStartX, y - handleWidth, handleStartX, y + handleWidth);
+            handleGrad.addColorStop(0, lighten(color, 20));
+            handleGrad.addColorStop(0.5, color);
+            handleGrad.addColorStop(1, darken(color, 25));
+            ctx.fillStyle = handleGrad;
+
+            ctx.beginPath();
+            ctx.moveTo(handleStartX, y - handleWidth);
+            ctx.lineTo(handleEndX - size * 0.08, y - handleWidth * 0.7);
+            ctx.quadraticCurveTo(handleEndX, y - handleWidth * 0.5, handleEndX, y);
+            ctx.quadraticCurveTo(handleEndX, y + handleWidth * 0.5, handleEndX - size * 0.08, y + handleWidth * 0.7);
+            ctx.lineTo(handleStartX, y + handleWidth);
+            ctx.closePath();
+            ctx.fill();
+
+            // Handle hole
+            ctx.fillStyle = '#f5f0e8';
+            ctx.beginPath();
+            ctx.ellipse(handleEndX - size * 0.06, y, size * 0.03, size * 0.022, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Handle ridges
+            ctx.strokeStyle = darken(color, 20);
+            ctx.lineWidth = 1;
+            for (let i = 1; i < 5; i++) {
+                const rx = handleStartX + i * (handleEndX - handleStartX - size * 0.15) / 5;
+                ctx.beginPath();
+                ctx.moveTo(rx, y - handleWidth * 0.85 + i * 0.01 * size);
+                ctx.lineTo(rx, y + handleWidth * 0.85 - i * 0.01 * size);
+                ctx.stroke();
+            }
+
+            // Pan body - outer rim
+            const bodyGrad = ctx.createLinearGradient(x - panRadius, y, x + panRadius * 0.5, y);
+            bodyGrad.addColorStop(0, lighten(color, 25));
+            bodyGrad.addColorStop(0.4, color);
+            bodyGrad.addColorStop(1, darken(color, 20));
+            ctx.fillStyle = bodyGrad;
+
+            ctx.beginPath();
+            ctx.ellipse(x, y, panRadius, panRadius * 0.35, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Pan inner rim
+            ctx.fillStyle = darken(color, 30);
+            ctx.beginPath();
+            ctx.ellipse(x, y + size * 0.01, panRadius * 0.88, panRadius * 0.28, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Cooking surface (black enamel)
+            ctx.fillStyle = '#1a1a1a';
+            ctx.beginPath();
+            ctx.ellipse(x, y, panRadius * 0.82, panRadius * 0.24, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Subtle reflection on cooking surface
+            ctx.fillStyle = 'rgba(255,255,255,0.08)';
+            ctx.beginPath();
+            ctx.ellipse(x - panRadius * 0.25, y - panRadius * 0.05, panRadius * 0.25, panRadius * 0.08, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Helper handle (opposite side)
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x - panRadius + size * 0.02, y - size * 0.04);
+            ctx.quadraticCurveTo(x - panRadius - size * 0.08, y, x - panRadius + size * 0.02, y + size * 0.04);
+            ctx.lineTo(x - panRadius + size * 0.06, y + size * 0.03);
+            ctx.quadraticCurveTo(x - panRadius - size * 0.03, y, x - panRadius + size * 0.06, y - size * 0.03);
+            ctx.closePath();
+            ctx.fill();
+
+            if (needsOutline) {
+                ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.ellipse(x, y, panRadius, panRadius * 0.35, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        // Draw a lid (top-down view) - like the Le Creuset color chart
+        function drawLid(x, y, size, color) {
+            const r = size * 0.45;
+            const needsOutline = isLightColor(color);
+
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.08)';
+            ctx.beginPath();
+            ctx.arc(x + size * 0.02, y + size * 0.02, r * 1.02, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Outer rim
+            const rimGrad = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, 0, x, y, r);
+            rimGrad.addColorStop(0, lighten(color, 35));
+            rimGrad.addColorStop(0.5, color);
+            rimGrad.addColorStop(1, darken(color, 20));
+            ctx.fillStyle = rimGrad;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+
+            // First concentric ring (groove)
+            ctx.strokeStyle = darken(color, 35);
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(x, y, r * 0.82, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Inner raised area
+            const innerGrad = ctx.createRadialGradient(x - r * 0.2, y - r * 0.2, 0, x, y, r * 0.78);
+            innerGrad.addColorStop(0, lighten(color, 40));
+            innerGrad.addColorStop(0.4, lighten(color, 15));
+            innerGrad.addColorStop(1, color);
+            ctx.fillStyle = innerGrad;
+            ctx.beginPath();
+            ctx.arc(x, y, r * 0.78, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Second concentric ring
+            ctx.strokeStyle = darken(color, 30);
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(x, y, r * 0.6, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Third concentric ring
+            ctx.beginPath();
+            ctx.arc(x, y, r * 0.42, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Center depression for knob
+            ctx.fillStyle = darken(color, 25);
+            ctx.beginPath();
+            ctx.arc(x, y, r * 0.22, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Knob base (stainless steel)
+            const knobGrad = ctx.createRadialGradient(x - r * 0.05, y - r * 0.05, 0, x, y, r * 0.16);
+            knobGrad.addColorStop(0, '#9a9a9a');
+            knobGrad.addColorStop(0.5, '#6a6a6a');
+            knobGrad.addColorStop(1, '#4a4a4a');
+            ctx.fillStyle = knobGrad;
+            ctx.beginPath();
+            ctx.arc(x, y, r * 0.16, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Knob rim
+            ctx.strokeStyle = '#3a3a3a';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(x, y, r * 0.16, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Knob highlight
+            ctx.fillStyle = '#b0b0b0';
+            ctx.beginPath();
+            ctx.ellipse(x - r * 0.05, y - r * 0.05, r * 0.06, r * 0.05, -0.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Outer outline for light colors
+            if (needsOutline) {
+                ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        // Draw small cocotte (mini dutch oven) - cute round mini pot
+        function drawCocotte(x, y, size, color) {
+            const needsOutline = isLightColor(color);
+            const w = size * 0.32;
+
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.beginPath();
+            ctx.ellipse(x, y + size * 0.28, w * 1.15, size * 0.05, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Body
+            const bodyTop = y + size * 0.05;
+            const bodyBottom = y + size * 0.24;
+            const ellipseH = size * 0.09;
+
+            // Body gradient
+            const bodyGrad = ctx.createLinearGradient(x - w, y, x + w * 0.3, y);
+            bodyGrad.addColorStop(0, lighten(color, 25));
+            bodyGrad.addColorStop(0.4, color);
+            bodyGrad.addColorStop(1, darken(color, 30));
+            ctx.fillStyle = bodyGrad;
+
+            // Body cylinder
+            ctx.beginPath();
+            ctx.moveTo(x - w, bodyTop);
+            ctx.lineTo(x - w, bodyBottom);
+            ctx.quadraticCurveTo(x - w, bodyBottom + ellipseH, x, bodyBottom + ellipseH);
+            ctx.quadraticCurveTo(x + w, bodyBottom + ellipseH, x + w, bodyBottom);
+            ctx.lineTo(x + w, bodyTop);
+            ctx.closePath();
+            ctx.fill();
+
+            // Body bottom curve
+            ctx.fillStyle = darken(color, 40);
+            ctx.beginPath();
+            ctx.ellipse(x, bodyBottom, w, ellipseH, 0, 0, Math.PI);
+            ctx.fill();
+
+            // Body rim
+            ctx.fillStyle = darken(color, 15);
+            ctx.beginPath();
+            ctx.ellipse(x, bodyTop, w, ellipseH * 0.7, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Interior
+            ctx.fillStyle = '#f5f0e0';
+            ctx.beginPath();
+            ctx.ellipse(x, bodyTop, w * 0.85, ellipseH * 0.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Handles
+            ctx.strokeStyle = needsOutline ? darken(color, 30) : color;
+            ctx.lineWidth = size * 0.035;
+            ctx.lineCap = 'round';
+
+            ctx.beginPath();
+            ctx.moveTo(x - w + size * 0.015, bodyTop + size * 0.05);
+            ctx.quadraticCurveTo(x - w - size * 0.08, bodyTop + size * 0.08, x - w + size * 0.015, bodyTop + size * 0.12);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(x + w - size * 0.015, bodyTop + size * 0.05);
+            ctx.quadraticCurveTo(x + w + size * 0.08, bodyTop + size * 0.08, x + w - size * 0.015, bodyTop + size * 0.12);
+            ctx.stroke();
+
+            // Lid
+            const lidBottom = y - size * 0.02;
+            const lidTop = y - size * 0.15;
+            const lidW = w * 0.98;
+
+            // Lid rim
+            ctx.fillStyle = darken(color, 12);
+            ctx.beginPath();
+            ctx.ellipse(x, lidBottom, lidW, ellipseH * 0.6, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Lid dome
+            const lidGrad = ctx.createLinearGradient(x, lidTop, x, lidBottom);
+            lidGrad.addColorStop(0, lighten(color, 35));
+            lidGrad.addColorStop(0.5, color);
+            lidGrad.addColorStop(1, darken(color, 10));
+            ctx.fillStyle = lidGrad;
+            ctx.beginPath();
+            ctx.moveTo(x - lidW, lidBottom);
+            ctx.quadraticCurveTo(x - lidW * 0.85, lidTop + size * 0.04, x, lidTop);
+            ctx.quadraticCurveTo(x + lidW * 0.85, lidTop + size * 0.04, x + lidW, lidBottom);
+            ctx.closePath();
+            ctx.fill();
+
+            // Lid rings
+            ctx.strokeStyle = darken(color, 25);
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.ellipse(x, lidBottom - size * 0.03, lidW * 0.7, ellipseH * 0.35, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(x, lidBottom - size * 0.055, lidW * 0.45, ellipseH * 0.25, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Knob
+            ctx.fillStyle = '#4a4a4a';
+            ctx.beginPath();
+            ctx.ellipse(x, lidTop + size * 0.01, size * 0.04, size * 0.018, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#6a6a6a';
+            ctx.beginPath();
+            ctx.arc(x, lidTop - size * 0.008, size * 0.028, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#9a9a9a';
+            ctx.beginPath();
+            ctx.arc(x - size * 0.01, lidTop - size * 0.015, size * 0.01, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (needsOutline) {
+                ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x - w, bodyTop);
+                ctx.lineTo(x - w, bodyBottom);
+                ctx.stroke();
+            }
+        }
+
+        const productTypes = [
+            { draw: drawLid, name: 'Lid' }
+        ];
+
+        // Animation state
+        let offset = 0;
+        const speed = 0.5;
+
+        // Fixed color rows (consistent order)
+        const rowColors = [
+            ['cerise', 'flame', 'nectar', 'artichaut', 'caribbean', 'marseille'],
+            ['rhone', 'olive', 'seaSalt', 'chambray', 'azure', 'agave'],
+            ['thyme', 'matteNavy', 'oyster', 'meringue', 'brioche', 'white']
+        ];
+
+        // Main draw function
+        function draw() {
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const cols = 6;
+            const rows = 3;
+            const cellWidth = canvas.width / cols;
+            const cellHeight = canvas.height / rows;
+            const lidSize = Math.min(cellWidth, cellHeight) * 0.85;
+            const totalWidth = cellWidth * cols; // Full row width
+
+            for (let row = 0; row < rows; row++) {
+                const rowColorList = rowColors[row];
+                const direction = (row === 1) ? -1 : 1;
+                const centerY = cellHeight * (row + 0.5);
+
+                // Scroll offset for this row, wrapped to totalWidth
+                const scrollOffset = ((offset * direction) % totalWidth + totalWidth) % totalWidth;
+
+                // Draw two complete sets of 6 colors to ensure seamless wrap
+                for (let set = 0; set < 2; set++) {
+                    for (let colorIdx = 0; colorIdx < 6; colorIdx++) {
+                        // Each color has a fixed position in its set
+                        const baseX = cellWidth * (colorIdx + 0.5) + set * totalWidth;
+                        const drawX = baseX - scrollOffset;
+
+                        // Only draw if visible (with margin for partial visibility)
+                        if (drawX > -cellWidth && drawX < canvas.width + cellWidth) {
+                            const color = colors[rowColorList[colorIdx]];
+                            drawLid(drawX, centerY, lidSize, color);
+                        }
+                    }
+                }
+            }
+
+            offset += speed;
+            requestAnimationFrame(draw);
+        }
+
+        draw();
+
+        // Redraw on resize
+        window.addEventListener('resize', () => {
+            resize();
+            draw();
+        });
+    </script>
+</body>
+</html>
