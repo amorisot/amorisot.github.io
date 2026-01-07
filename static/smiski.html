@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smiskis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #fff;
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+        body.dark {
+            background: #111;
+        }
+        canvas {
+            display: block;
+        }
+        #toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 28px;
+            background: #f5f5f5;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        #toggle:hover {
+            transform: scale(1.1);
+        }
+        body.dark #toggle {
+            background: #333;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <button id="toggle">☀️</button>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const toggle = document.getElementById('toggle');
+
+        let isDark = false;
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        toggle.addEventListener('click', () => {
+            isDark = !isDark;
+            document.body.classList.toggle('dark', isDark);
+            toggle.textContent = isDark ? '🌙' : '☀️';
+        });
+
+        class WanderingPoint {
+            constructor(x, y, range, biasX = 0, biasY = 0) {
+                this.x = x;
+                this.y = y;
+                this.targetX = x;
+                this.targetY = y;
+                this.baseX = x;
+                this.baseY = y;
+                this.range = range;
+                this.biasX = biasX;
+                this.biasY = biasY;
+                this.speed = 0.015 + Math.random() * 0.015;
+                this.pickNewTarget();
+            }
+
+            pickNewTarget() {
+                this.targetX = this.baseX + (Math.random() - 0.5) * this.range * 2;
+                this.targetY = this.baseY + (Math.random() - 0.5) * this.range * 2;
+                this.timeToNext = 2000 + Math.random() * 4000;
+                this.timer = 0;
+            }
+
+            update(dt) {
+                this.timer += dt;
+                if (this.timer > this.timeToNext) {
+                    this.pickNewTarget();
+                }
+                this.x += (this.targetX - this.x) * this.speed;
+                this.y += (this.targetY - this.y) * this.speed;
+                this.baseX += this.biasX * dt;
+                this.baseY += this.biasY * dt;
+            }
+        }
+
+        // Smiski pose types
+        const POSES = {
+            STANDING: 0,
+            SITTING: 1,
+            WAVING: 2,
+            PEEKING: 3,
+            MEDITATING: 4
+        };
+
+        class Smiski {
+            constructor(x, y, scale = 1) {
+                this.scale = scale;
+                this.pose = Math.floor(Math.random() * Object.keys(POSES).length);
+
+                // Body proportions - Smiskis have BIG heads relative to body
+                this.headRadius = 38 * scale;
+                this.bodyWidth = 32 * scale;
+                this.bodyHeight = 40 * scale;
+
+                // Subtle movement - Smiskis don't move much, they're sneaky
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 0.0002 + Math.random() * 0.0002;
+                const biasX = Math.cos(angle) * speed;
+                const biasY = Math.sin(angle) * speed;
+
+                this.bodyAnchor = new WanderingPoint(x, y, 2 * scale, biasX, biasY);
+                this.headTilt = new WanderingPoint(0, 0, 3 * scale, 0, 0);
+
+                // Arms - small stubby positions relative to body
+                if (this.pose === POSES.WAVING) {
+                    this.leftArmAngle = new WanderingPoint(-0.3, 0, 0.1, 0, 0);
+                    this.rightArmAngle = new WanderingPoint(-1.2, 0, 0.15, 0, 0); // Raised
+                } else if (this.pose === POSES.MEDITATING) {
+                    this.leftArmAngle = new WanderingPoint(0.8, 0, 0.05, 0, 0);
+                    this.rightArmAngle = new WanderingPoint(-0.8 + Math.PI, 0, 0.05, 0, 0);
+                } else if (this.pose === POSES.PEEKING) {
+                    this.leftArmAngle = new WanderingPoint(0.5, 0, 0.1, 0, 0);
+                    this.rightArmAngle = new WanderingPoint(-0.5 + Math.PI, 0, 0.1, 0, 0);
+                } else {
+                    this.leftArmAngle = new WanderingPoint(0.4, 0, 0.15, 0, 0);
+                    this.rightArmAngle = new WanderingPoint(-0.4 + Math.PI, 0, 0.15, 0, 0);
+                }
+
+                // Expression - Smiskis have very simple, slightly worried expressions
+                this.eyeSpacing = 12 + Math.random() * 4;
+                this.eyeY = 2 + Math.random() * 3;
+                this.eyeSize = 2.5 + Math.random() * 0.8;
+                this.mouthY = 14 + Math.random() * 3;
+                this.mouthWidth = 5 + Math.random() * 3;
+                this.mouthType = Math.floor(Math.random() * 4); // 0: line, 1: open oval, 2: slight downturn, 3: small o
+
+                // Breathing animation phase
+                this.breathPhase = Math.random() * Math.PI * 2;
+                this.breathSpeed = 0.0008 + Math.random() * 0.0004;
+            }
+
+            update(dt) {
+                this.bodyAnchor.update(dt);
+                this.headTilt.update(dt);
+                this.leftArmAngle.update(dt);
+                this.rightArmAngle.update(dt);
+                this.breathPhase += this.breathSpeed * dt;
+            }
+
+            draw(ctx) {
+                const s = this.scale;
+                const x = this.bodyAnchor.x;
+                const y = this.bodyAnchor.y;
+
+                // Breathing effect - very subtle
+                const breathScale = 1 + Math.sin(this.breathPhase) * 0.01;
+
+                // Colors based on mode - creamy pale green in light, glowing green in dark
+                const bodyColor = isDark ? 'hsl(110, 100%, 62%)' : '#e5edd8';
+                const shadowColor = isDark ? 'hsl(110, 70%, 45%)' : '#d0dcc0';
+                const outlineColor = isDark ? 'hsl(110, 50%, 40%)' : '#b8c8a8';
+                const eyeColor = isDark ? 'hsl(110, 40%, 22%)' : '#505848';
+
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.scale(breathScale, breathScale);
+                ctx.translate(-x, -y);
+
+                // Glow effect in dark mode
+                if (isDark) {
+                    ctx.shadowColor = 'rgba(120, 255, 120, 0.9)';
+                    ctx.shadowBlur = 40 * s;
+                }
+
+                ctx.fillStyle = bodyColor;
+                ctx.strokeStyle = outlineColor;
+                ctx.lineWidth = 1.5 * s;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                // Draw based on pose
+                if (this.pose === POSES.SITTING || this.pose === POSES.MEDITATING) {
+                    this.drawSitting(ctx, x, y, s, shadowColor);
+                } else {
+                    this.drawStanding(ctx, x, y, s, shadowColor);
+                }
+
+                // Reset shadow for face
+                ctx.shadowBlur = 0;
+
+                // Draw face on head - calculate position based on pose
+                let headCenterY;
+                if (this.pose === POSES.SITTING || this.pose === POSES.MEDITATING) {
+                    const bodyH = this.bodyHeight * 0.6;
+                    headCenterY = y - bodyH * 0.5 - this.headRadius * 0.6;
+                } else {
+                    headCenterY = y - this.bodyHeight * 0.55 - this.headRadius * 0.65;
+                }
+                const headCenterX = x + this.headTilt.x;
+
+                ctx.fillStyle = eyeColor;
+
+                // Eyes - simple dots, slightly apart
+                const eyeXOffset = this.eyeSpacing * s * 0.5;
+                const eyeYPos = headCenterY + this.eyeY * s;
+
+                ctx.beginPath();
+                ctx.arc(headCenterX - eyeXOffset, eyeYPos, this.eyeSize * s, 0, Math.PI * 2);
+                ctx.arc(headCenterX + eyeXOffset, eyeYPos, this.eyeSize * s, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Mouth - simple shapes
+                const mouthYPos = headCenterY + this.mouthY * s;
+                ctx.strokeStyle = eyeColor;
+                ctx.fillStyle = eyeColor;
+                ctx.lineWidth = 1.5 * s;
+
+                ctx.beginPath();
+                if (this.mouthType === 0) {
+                    // Simple horizontal line
+                    ctx.moveTo(headCenterX - this.mouthWidth * s, mouthYPos);
+                    ctx.lineTo(headCenterX + this.mouthWidth * s, mouthYPos);
+                    ctx.stroke();
+                } else if (this.mouthType === 1) {
+                    // Open oval mouth
+                    ctx.ellipse(headCenterX, mouthYPos, this.mouthWidth * s * 0.5, this.mouthWidth * s * 0.35, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.mouthType === 2) {
+                    // Slight downturn (worried look)
+                    ctx.moveTo(headCenterX - this.mouthWidth * s, mouthYPos);
+                    ctx.quadraticCurveTo(headCenterX, mouthYPos + 3 * s, headCenterX + this.mouthWidth * s, mouthYPos);
+                    ctx.stroke();
+                } else {
+                    // Small 'o'
+                    ctx.arc(headCenterX, mouthYPos, this.mouthWidth * s * 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+
+            drawStanding(ctx, x, y, s, shadowColor) {
+                const headR = this.headRadius;
+                const bodyW = this.bodyWidth;
+                const bodyH = this.bodyHeight;
+                const headX = x + this.headTilt.x;
+                const headY = y - bodyH * 0.55 - headR * 0.65;
+
+                // Draw arms first (behind body)
+                this.drawArm(ctx, x, y, s, -1, this.leftArmAngle.x);
+                this.drawArm(ctx, x, y, s, 1, this.rightArmAngle.x);
+
+                // Draw body blob - smooth rounded blob shape
+                ctx.beginPath();
+
+                // Start at bottom left foot area
+                ctx.moveTo(x - bodyW * 0.45, y + bodyH * 0.45);
+
+                // Bottom curve with subtle feet bumps
+                ctx.quadraticCurveTo(x - bodyW * 0.15, y + bodyH * 0.55, x, y + bodyH * 0.5);
+                ctx.quadraticCurveTo(x + bodyW * 0.15, y + bodyH * 0.55, x + bodyW * 0.45, y + bodyH * 0.45);
+
+                // Right side - smooth curve up
+                ctx.quadraticCurveTo(x + bodyW * 0.7, y + bodyH * 0.2, x + bodyW * 0.55, y - bodyH * 0.1);
+
+                // Upper right shoulder area - wider, less neck-like
+                ctx.quadraticCurveTo(x + bodyW * 0.4, y - bodyH * 0.35, x, y - bodyH * 0.4);
+
+                // Upper left shoulder area
+                ctx.quadraticCurveTo(x - bodyW * 0.4, y - bodyH * 0.35, x - bodyW * 0.55, y - bodyH * 0.1);
+
+                // Left side - smooth curve down
+                ctx.quadraticCurveTo(x - bodyW * 0.7, y + bodyH * 0.2, x - bodyW * 0.45, y + bodyH * 0.45);
+
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Draw head - perfectly round circle, overlapping body slightly
+                ctx.beginPath();
+                ctx.arc(headX, headY, headR, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            drawSitting(ctx, x, y, s, shadowColor) {
+                const headR = this.headRadius;
+                const bodyW = this.bodyWidth * 1.2;
+                const bodyH = this.bodyHeight * 0.6;
+                const headX = x + this.headTilt.x;
+                const headY = y - bodyH * 0.5 - headR * 0.6;
+
+                // Draw arms first (behind body)
+                this.drawArm(ctx, x, y - bodyH * 0.2, s, -1, this.leftArmAngle.x, true);
+                this.drawArm(ctx, x, y - bodyH * 0.2, s, 1, this.rightArmAngle.x, true);
+
+                // Sitting body - wider and squatter blob
+                ctx.beginPath();
+
+                // Start bottom left
+                ctx.moveTo(x - bodyW * 0.7, y + bodyH * 0.35);
+
+                // Bottom - wider for sitting
+                ctx.quadraticCurveTo(x - bodyW * 0.3, y + bodyH * 0.5, x, y + bodyH * 0.45);
+                ctx.quadraticCurveTo(x + bodyW * 0.3, y + bodyH * 0.5, x + bodyW * 0.7, y + bodyH * 0.35);
+
+                // Right side up to neck
+                ctx.quadraticCurveTo(x + bodyW * 0.65, y, x + bodyW * 0.35, y - bodyH * 0.3);
+
+                // Neck
+                ctx.quadraticCurveTo(x + bodyW * 0.2, y - bodyH * 0.45, x, y - bodyH * 0.5);
+                ctx.quadraticCurveTo(x - bodyW * 0.2, y - bodyH * 0.45, x - bodyW * 0.35, y - bodyH * 0.3);
+
+                // Left side down
+                ctx.quadraticCurveTo(x - bodyW * 0.65, y, x - bodyW * 0.7, y + bodyH * 0.35);
+
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Head - round circle
+                ctx.beginPath();
+                ctx.arc(headX, headY, headR, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // Little feet poking out front
+                ctx.beginPath();
+                ctx.ellipse(x - bodyW * 0.35, y + bodyH * 0.45, 9 * s, 5 * s, -0.2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.ellipse(x + bodyW * 0.35, y + bodyH * 0.45, 9 * s, 5 * s, 0.2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            drawArm(ctx, x, y, s, side, angle, sitting = false) {
+                const armLength = 18 * s;
+                const armWidth = 10 * s;
+
+                // Arm origin on side of body
+                const originX = x + side * this.bodyWidth * 0.65;
+                const originY = y - this.bodyHeight * (sitting ? 0.1 : 0.15);
+
+                // End point based on angle
+                const endX = originX + Math.cos(angle) * armLength * side;
+                const endY = originY + Math.sin(angle) * armLength + armLength * 0.3;
+
+                // Draw stubby arm as ellipse/blob
+                ctx.beginPath();
+
+                const midX = (originX + endX) / 2;
+                const midY = (originY + endY) / 2;
+                const armAngle = Math.atan2(endY - originY, (endX - originX) * side);
+
+                ctx.ellipse(midX, midY, armLength * 0.6, armWidth * 0.5, armAngle, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+        }
+
+        const smiskis = [];
+
+        function init() {
+            smiskis.length = 0;
+            const count = Math.max(3, Math.floor(canvas.width / 250));
+
+            for (let i = 0; i < count; i++) {
+                const x = (canvas.width / (count + 1)) * (i + 1) + (Math.random() - 0.5) * 60;
+                const y = canvas.height * 0.4 + Math.random() * canvas.height * 0.25;
+                const scale = 0.8 + Math.random() * 0.5;
+                smiskis.push(new Smiski(x, y, scale));
+            }
+        }
+
+        init();
+        window.addEventListener('resize', () => {
+            resize();
+            init();
+        });
+
+        let lastTime = 0;
+
+        function draw(time) {
+            const dt = time - lastTime;
+            lastTime = time;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (const smiski of smiskis) {
+                smiski.update(dt);
+                smiski.draw(ctx);
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        requestAnimationFrame(draw);
+    </script>
+</body>
+</html>
