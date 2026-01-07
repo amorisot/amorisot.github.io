@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m http.server:*)",
+      "Bash(node:*)",
+      "Bash(cd /tmp*)",
+      "Bash(npm:*)",
+      "Bash(cat >*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Read",
+      "Write",
+      "Edit"
+    ]
+  }
+}
