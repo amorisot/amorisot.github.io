@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            background: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Dice configuration
+        const DICE_SIZE = 40;
+        const DICE_GAP = 4;
+        const DICE_RADIUS = 4;
+        const DOT_RADIUS_RATIO = 0.08;
+
+        let cols, rows;
+        let diceGrid = [];
+        let isRolling = false;
+        let hasRolledOnce = false;
+        let rollStartTime = 0;
+        const ROLL_DURATION = 800;
+        const ROLL_INTERVAL = 50;
+
+        // Perlin noise implementation
+        class PerlinNoise {
+            constructor(seed = Math.random() * 10000) {
+                this.seed = seed;
+                this.permutation = this.generatePermutation();
+            }
+
+            generatePermutation() {
+                const p = [];
+                for (let i = 0; i < 256; i++) p[i] = i;
+
+                // Fisher-Yates shuffle with seed
+                let seed = this.seed;
+                for (let i = 255; i > 0; i--) {
+                    seed = (seed * 16807) % 2147483647;
+                    const j = seed % (i + 1);
+                    [p[i], p[j]] = [p[j], p[i]];
+                }
+
+                // Duplicate for overflow
+                return [...p, ...p];
+            }
+
+            fade(t) {
+                return t * t * t * (t * (t * 6 - 15) + 10);
+            }
+
+            lerp(a, b, t) {
+                return a + t * (b - a);
+            }
+
+            grad(hash, x, y) {
+                const h = hash & 3;
+                const u = h < 2 ? x : y;
+                const v = h < 2 ? y : x;
+                return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
+            }
+
+            noise(x, y) {
+                const X = Math.floor(x) & 255;
+                const Y = Math.floor(y) & 255;
+
+                x -= Math.floor(x);
+                y -= Math.floor(y);
+
+                const u = this.fade(x);
+                const v = this.fade(y);
+
+                const p = this.permutation;
+                const A = p[X] + Y;
+                const B = p[X + 1] + Y;
+
+                return this.lerp(
+                    this.lerp(this.grad(p[A], x, y), this.grad(p[B], x - 1, y), u),
+                    this.lerp(this.grad(p[A + 1], x, y - 1), this.grad(p[B + 1], x - 1, y - 1), u),
+                    v
+                );
+            }
+
+            // Fractal Brownian motion for more interesting patterns
+            fbm(x, y, octaves = 4) {
+                let value = 0;
+                let amplitude = 1;
+                let frequency = 1;
+                let maxValue = 0;
+
+                for (let i = 0; i < octaves; i++) {
+                    value += amplitude * this.noise(x * frequency, y * frequency);
+                    maxValue += amplitude;
+                    amplitude *= 0.5;
+                    frequency *= 2;
+                }
+
+                return value / maxValue;
+            }
+        }
+
+        let perlin = new PerlinNoise();
+
+        // Die class
+        class Die {
+            constructor(col, row, targetValue) {
+                this.col = col;
+                this.row = row;
+                this.currentValue = 1;
+                this.targetValue = targetValue;
+                this.displayValue = 1;
+                this.lastFlipTime = 0;
+            }
+
+            getX() {
+                const totalWidth = cols * (DICE_SIZE + DICE_GAP) - DICE_GAP;
+                const startX = (canvas.width - totalWidth) / 2;
+                return startX + this.col * (DICE_SIZE + DICE_GAP);
+            }
+
+            getY() {
+                const totalHeight = rows * (DICE_SIZE + DICE_GAP) - DICE_GAP;
+                const startY = (canvas.height - totalHeight) / 2;
+                return startY + this.row * (DICE_SIZE + DICE_GAP);
+            }
+
+            update(time, rollProgress, hasRolledOnce) {
+                if (!hasRolledOnce) {
+                    // Before first roll, keep displaying initial value (1)
+                    return;
+                }
+                if (rollProgress < 1) {
+                    // During roll, flip through random values
+                    if (time - this.lastFlipTime > ROLL_INTERVAL) {
+                        this.displayValue = Math.floor(Math.random() * 6) + 1;
+                        this.lastFlipTime = time;
+                    }
+                } else {
+                    // Settle to target
+                    this.displayValue = this.targetValue;
+                    this.currentValue = this.targetValue;
+                }
+            }
+
+            draw(ctx) {
+                const x = this.getX();
+                const y = this.getY();
+                const size = DICE_SIZE;
+                const dotRadius = size * DOT_RADIUS_RATIO;
+
+                // Draw die body
+                ctx.fillStyle = '#f5f5f5';
+                ctx.beginPath();
+                ctx.roundRect(x, y, size, size, DICE_RADIUS);
+                ctx.fill();
+
+                // Draw subtle shadow/border
+                ctx.strokeStyle = '#ddd';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // Draw dots based on value
+                ctx.fillStyle = '#222';
+                const positions = this.getDotPositions(x, y, size, dotRadius);
+
+                for (const pos of positions) {
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y, dotRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            getDotPositions(x, y, size, dotRadius) {
+                const cx = x + size / 2;
+                const cy = y + size / 2;
+                const offset = size * 0.25;
+
+                const positions = {
+                    1: [{ x: cx, y: cy }],
+                    2: [
+                        { x: cx - offset, y: cy - offset },
+                        { x: cx + offset, y: cy + offset }
+                    ],
+                    3: [
+                        { x: cx - offset, y: cy - offset },
+                        { x: cx, y: cy },
+                        { x: cx + offset, y: cy + offset }
+                    ],
+                    4: [
+                        { x: cx - offset, y: cy - offset },
+                        { x: cx + offset, y: cy - offset },
+                        { x: cx - offset, y: cy + offset },
+                        { x: cx + offset, y: cy + offset }
+                    ],
+                    5: [
+                        { x: cx - offset, y: cy - offset },
+                        { x: cx + offset, y: cy - offset },
+                        { x: cx, y: cy },
+                        { x: cx - offset, y: cy + offset },
+                        { x: cx + offset, y: cy + offset }
+                    ],
+                    6: [
+                        { x: cx - offset, y: cy - offset },
+                        { x: cx + offset, y: cy - offset },
+                        { x: cx - offset, y: cy },
+                        { x: cx + offset, y: cy },
+                        { x: cx - offset, y: cy + offset },
+                        { x: cx + offset, y: cy + offset }
+                    ]
+                };
+
+                return positions[this.displayValue] || positions[1];
+            }
+        }
+
+        // Convert noise value to weighted die roll
+        function noiseToWeightedRoll(noiseValue) {
+            // noiseValue is roughly -1 to 1, normalize to 0-1
+            const normalized = (noiseValue + 1) / 2;
+
+            // Create weighted probability based on noise
+            // Higher noise = higher numbers more likely
+            const weights = [];
+            for (let i = 1; i <= 6; i++) {
+                // Bias towards certain numbers based on noise
+                const center = 1 + normalized * 5; // 1-6 based on noise
+                const distance = Math.abs(i - center);
+                const weight = Math.exp(-distance * 1.5); // Gaussian-like falloff
+                weights.push(weight);
+            }
+
+            // Normalize weights
+            const totalWeight = weights.reduce((a, b) => a + b, 0);
+            const normalizedWeights = weights.map(w => w / totalWeight);
+
+            // Random selection based on weights
+            let rand = Math.random();
+            let cumulative = 0;
+            for (let i = 0; i < 6; i++) {
+                cumulative += normalizedWeights[i];
+                if (rand < cumulative) {
+                    return i + 1;
+                }
+            }
+            return 6;
+        }
+
+        function initDice() {
+            const cellSize = DICE_SIZE + DICE_GAP;
+            cols = Math.floor(canvas.width / cellSize);
+            rows = Math.floor(canvas.height / cellSize);
+
+            // Add extra to ensure full coverage
+            cols = Math.min(cols + 2, Math.ceil(canvas.width / cellSize) + 1);
+            rows = Math.min(rows + 2, Math.ceil(canvas.height / cellSize) + 1);
+
+            diceGrid = [];
+
+            const noiseScale = 0.08; // Adjust for different pattern sizes
+
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const noiseValue = perlin.fbm(col * noiseScale, row * noiseScale, 3);
+                    const targetValue = noiseToWeightedRoll(noiseValue);
+                    const die = new Die(col, row, targetValue);
+                    die.displayValue = 1; // Start with all 1s
+                    die.currentValue = 1;
+                    diceGrid.push(die);
+                }
+            }
+        }
+
+        function rollAllDice() {
+            if (isRolling) return;
+
+            isRolling = true;
+            hasRolledOnce = true;
+            rollStartTime = performance.now();
+
+            // Generate new noise pattern
+            perlin = new PerlinNoise();
+
+            const noiseScale = 0.08;
+
+            // Set new target values based on new noise
+            for (const die of diceGrid) {
+                const noiseValue = perlin.fbm(die.col * noiseScale, die.row * noiseScale, 3);
+                die.targetValue = noiseToWeightedRoll(noiseValue);
+                die.lastFlipTime = 0;
+            }
+        }
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initDice();
+        }
+
+        function draw(time) {
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let rollProgress = 1;
+            if (isRolling) {
+                const elapsed = time - rollStartTime;
+                rollProgress = Math.min(elapsed / ROLL_DURATION, 1);
+
+                // Easing
+                rollProgress = 1 - Math.pow(1 - rollProgress, 3);
+
+                if (rollProgress >= 1) {
+                    isRolling = false;
+                }
+            }
+
+            // Stagger the dice settling based on position
+            for (const die of diceGrid) {
+                // Add slight delay based on distance from center
+                const centerCol = cols / 2;
+                const centerRow = rows / 2;
+                const dist = Math.sqrt(
+                    Math.pow(die.col - centerCol, 2) +
+                    Math.pow(die.row - centerRow, 2)
+                );
+                const maxDist = Math.sqrt(centerCol * centerCol + centerRow * centerRow);
+                const delay = (dist / maxDist) * 0.3; // 0-30% delay based on distance
+
+                const adjustedProgress = Math.max(0, Math.min(1, (rollProgress - delay) / (1 - delay)));
+
+                die.update(time, adjustedProgress, hasRolledOnce);
+                die.draw(ctx);
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        // Event listeners
+        window.addEventListener('resize', resize);
+
+        canvas.addEventListener('click', rollAllDice);
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            rollAllDice();
+        });
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'Enter') {
+                e.preventDefault();
+                rollAllDice();
+            }
+        });
+
+        // Initialize
+        resize();
+
+        // Initial roll to show the force field effect
+        setTimeout(() => {
+            rollAllDice();
+        }, 500);
+
+        requestAnimationFrame(draw);
+    </script>
+</body>
+</html>
