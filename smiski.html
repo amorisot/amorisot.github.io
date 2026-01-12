@@ -13,184 +13,74 @@
             min-height: 100vh;
             margin: 0;
         }
-
-        .smiski {
-            position: relative;
-            width: 120px;
-            height: 180px;
-        }
-
-        /* Head */
-        .head {
-            position: absolute;
-            width: 70px;
-            height: 65px;
-            background: linear-gradient(135deg, #e8e4d9 0%, #d4d0c4 50%, #c9c5b8 100%);
-            border-radius: 50%;
-            top: 0;
-            left: 25px;
-            box-shadow:
-                inset -3px -3px 8px rgba(0,0,0,0.1),
-                inset 3px 3px 8px rgba(255,255,255,0.3),
-                0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        /* Eyes */
-        .eye {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: #3a3a3a;
-            border-radius: 50%;
-            top: 28px;
-        }
-
-        .eye.left {
-            left: 20px;
-        }
-
-        .eye.right {
-            right: 20px;
-        }
-
-        /* Mouth */
-        .mouth {
-            position: absolute;
-            width: 10px;
-            height: 5px;
-            border: 2px solid #3a3a3a;
-            border-top: none;
-            border-radius: 0 0 10px 10px;
-            top: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        /* Body/Torso */
-        .body {
-            position: absolute;
-            width: 50px;
-            height: 45px;
-            background: linear-gradient(135deg, #e8e4d9 0%, #d4d0c4 50%, #c9c5b8 100%);
-            border-radius: 25px 25px 20px 20px;
-            top: 55px;
-            left: 35px;
-            box-shadow:
-                inset -2px -2px 6px rgba(0,0,0,0.1),
-                inset 2px 2px 6px rgba(255,255,255,0.2);
-        }
-
-        /* Arms */
-        .arm {
-            position: absolute;
-            width: 18px;
-            height: 45px;
-            background: linear-gradient(135deg, #e8e4d9 0%, #d4d0c4 100%);
-            border-radius: 9px;
-            top: 60px;
-            box-shadow:
-                inset -1px -1px 4px rgba(0,0,0,0.1),
-                inset 1px 1px 4px rgba(255,255,255,0.2);
-        }
-
-        .arm.left {
-            left: 22px;
-            transform: rotate(25deg);
-        }
-
-        .arm.right {
-            right: 22px;
-            transform: rotate(-25deg);
-        }
-
-        /* Hands clasped together */
-        .hands {
-            position: absolute;
-            width: 30px;
-            height: 22px;
-            background: linear-gradient(135deg, #e8e4d9 0%, #d4d0c4 100%);
-            border-radius: 50%;
-            top: 95px;
-            left: 45px;
-            box-shadow:
-                inset -1px -1px 4px rgba(0,0,0,0.1),
-                inset 1px 1px 4px rgba(255,255,255,0.2),
-                0 2px 5px rgba(0,0,0,0.15);
-        }
-
-        /* Legs */
-        .leg {
-            position: absolute;
-            width: 22px;
-            height: 40px;
-            background: linear-gradient(135deg, #e8e4d9 0%, #d4d0c4 100%);
-            border-radius: 11px;
-            top: 95px;
-            box-shadow:
-                inset -1px -1px 4px rgba(0,0,0,0.1),
-                inset 1px 1px 4px rgba(255,255,255,0.2);
-        }
-
-        .leg.left {
-            left: 30px;
-            transform: rotate(40deg);
-        }
-
-        .leg.right {
-            right: 30px;
-            transform: rotate(-40deg);
-        }
-
-        /* Feet */
-        .foot {
-            position: absolute;
-            width: 20px;
-            height: 14px;
-            background: linear-gradient(135deg, #e8e4d9 0%, #d4d0c4 100%);
-            border-radius: 50%;
-            top: 130px;
-            box-shadow:
-                inset -1px -1px 3px rgba(0,0,0,0.1),
-                inset 1px 1px 3px rgba(255,255,255,0.2);
-        }
-
-        .foot.left {
-            left: 18px;
-        }
-
-        .foot.right {
-            right: 18px;
-        }
-
-        /* Glow effect */
-        .smiski::after {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            background: radial-gradient(ellipse at center, rgba(200, 230, 180, 0.15) 0%, transparent 70%);
-            pointer-events: none;
-            border-radius: 50%;
+        svg {
+            width: 400px;
+            height: 400px;
         }
     </style>
 </head>
 <body>
-    <div class="smiski">
-        <div class="head">
-            <div class="eye left"></div>
-            <div class="eye right"></div>
-            <div class="mouth"></div>
-        </div>
-        <div class="body"></div>
-        <div class="arm left"></div>
-        <div class="arm right"></div>
-        <div class="hands"></div>
-        <div class="leg left"></div>
-        <div class="leg right"></div>
-        <div class="foot left"></div>
-        <div class="foot right"></div>
-    </div>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+        <rect fill="#1a1a2e" width="400" height="400"/>
+        <g transform="translate(200, 180)">
+            <defs>
+                <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ebe7dc"/>
+                    <stop offset="50%" style="stop-color:#ddd9cc"/>
+                    <stop offset="100%" style="stop-color:#d0ccbf"/>
+                </linearGradient>
+                <filter id="glow">
+                    <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                    <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+
+            <g filter="url(#glow)">
+                <!-- Left leg - thick thigh -->
+                <ellipse cx="-18" cy="50" rx="14" ry="18" fill="url(#bodyGrad)" transform="rotate(-30 -18 50)"/>
+                <!-- Left lower leg -->
+                <ellipse cx="-28" cy="68" rx="11" ry="14" fill="url(#bodyGrad)" transform="rotate(-15 -28 68)"/>
+                <!-- Left foot -->
+                <ellipse cx="-30" cy="80" rx="12" ry="7" fill="url(#bodyGrad)"/>
+
+                <!-- Right leg - thick thigh -->
+                <ellipse cx="18" cy="50" rx="14" ry="18" fill="url(#bodyGrad)" transform="rotate(30 18 50)"/>
+                <!-- Right lower leg -->
+                <ellipse cx="28" cy="68" rx="11" ry="14" fill="url(#bodyGrad)" transform="rotate(15 28 68)"/>
+                <!-- Right foot -->
+                <ellipse cx="30" cy="80" rx="12" ry="7" fill="url(#bodyGrad)"/>
+
+                <!-- Body/torso - large and round -->
+                <ellipse cx="0" cy="28" rx="24" ry="28" fill="url(#bodyGrad)"/>
+
+                <!-- Left upper arm -->
+                <ellipse cx="-20" cy="14" rx="10" ry="16" fill="url(#bodyGrad)" transform="rotate(15 -20 14)"/>
+                <!-- Left forearm -->
+                <ellipse cx="-12" cy="32" rx="8" ry="14" fill="url(#bodyGrad)" transform="rotate(40 -12 32)"/>
+
+                <!-- Right upper arm -->
+                <ellipse cx="20" cy="14" rx="10" ry="16" fill="url(#bodyGrad)" transform="rotate(-15 20 14)"/>
+                <!-- Right forearm -->
+                <ellipse cx="12" cy="32" rx="8" ry="14" fill="url(#bodyGrad)" transform="rotate(-40 12 32)"/>
+
+                <!-- Hands clasped together -->
+                <ellipse cx="0" cy="44" rx="12" ry="10" fill="url(#bodyGrad)"/>
+
+                <!-- Head - vertically elongated oval -->
+                <ellipse cx="0" cy="-22" rx="30" ry="36" fill="url(#bodyGrad)"/>
+
+                <!-- Left eye -->
+                <circle cx="-9" cy="-24" r="2.8" fill="#3a3a3a"/>
+                <!-- Right eye -->
+                <circle cx="9" cy="-24" r="2.8" fill="#3a3a3a"/>
+
+                <!-- Mouth - small downturned frown -->
+                <path d="M -5 -12 Q 0 -16 5 -12" stroke="#3a3a3a" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            </g>
+        </g>
+    </svg>
 </body>
 </html>
