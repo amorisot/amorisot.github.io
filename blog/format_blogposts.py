@@ -119,10 +119,11 @@ When we were raising for Silmo in the valley, we got some snarky comments about 
 At the time, I didn't have a good answer. But on contemplating the question, I realised something that I hadn't appreciated before: if you take the ratio of current valuation versus initial funding put into the company, Cohere performs better than the bigger labs.
 
 These numbers aren't exact, but let's just say:
-OpenAI initial funding: ~1B. Current valuation: ~1T. Ratio: 1000x.
-Anthropic initial funding: ~500M. Current valuation: ~0.5T. Ratio: 1000x.
-Cohere initial funding: 2M. Current valuation: ~7B. Ratio: 3,500x!
-Mistral initial funding: 100M. Current valuation: ~10B. Ratio: 100x.
+
+- OpenAI initial funding: ~1B. Current valuation: ~1T. Ratio: 1000x.
+- Anthropic initial funding: ~500M. Current valuation: ~0.5T. Ratio: 1000x.
+- Cohere initial funding: 2M. Current valuation: ~7B. Ratio: 3,500x!
+- Mistral initial funding: 100M. Current valuation: ~10B. Ratio: 100x.
 
 The others (gemini, llama, qwen, kimi, moonshot, deepseek) count less, since they are too new, or attached to hyperscalers that print money and have near-unlimited compute.
 
