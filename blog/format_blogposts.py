@@ -129,7 +129,22 @@ The others (gemini, llama, qwen, kimi, moonshot, deepseek) count less, since the
 
 In short, Cohere did well, and is in some respects a bigger success than OpenAI!
 """.strip(),
+  },
+  "A surprising pre-pmf startup feeling": {
+    "published": "2026-02-07",
+    "content": """
+There are of course many feelings I've been feeling since starting the company, most of which are predictable: stress, excitement, impatience, satisfaction at making progress, are with me frequently.
+
+But there's a particular feeling that I wasn't anticipating, that I end up spending lots of time with. It's hard to describe, but in broad strokes, I am trying to wrap my mind around a firm vision of the thing we are aspiring to build, both in the short term, the medium term, and the very long term, and in so doing I feel my mind stretching.
+
+This is perhaps an unusual analogy, but it's how I imagine a model feels when it is trying to <a href="https://arxiv.org/pdf/2201.02177">grok</a> a dataset. It struggles and struggles and the loss is sometimes going down, but and sometimes stubbornly plateau-ing, and sometimes going up again. And the general trend is one of progress, fast at first, and then slower and slower as it tries to compress and model every last bit of information in the data.
+
+I think it is my brain's attempt at trying to compress the vision for the company into maximally clear, truthful, simple statements and action plans (like a famous one <a href="https://www.tesla.com/en_ca/secret-master-plan">here</a>), and at the same time all the uncertainties in the vision and counterarguments to the assumptions rear their heads and in turn mold the thought process.
+
+I wonder whether this feeling will fade or grow stronger once we find pmf.
+  """.strip()
   }
+
 }
 
 def get_git_dates(filepath: str) -> tuple[str | None, str | None]:
