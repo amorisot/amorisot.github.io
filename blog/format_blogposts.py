@@ -150,6 +150,7 @@ I wonder whether this feeling will fade or grow stronger once we find pmf.
 Crocs are an oft-derided piece of footwear. This is wrong.
 
 To start, here is the set of professions that wear crocs in the line of duty:
+
 - Chefs
 - Nurses
 - Surgeons
