@@ -143,6 +143,25 @@ I think it is my brain's attempt at trying to compress the vision for the compan
 
 I wonder whether this feeling will fade or grow stronger once we find pmf.
   """.strip()
+  },
+  "The croc manifesto": {
+    "published": "2026-02-07",
+    "content": """
+Crocs are an oft-derided piece of footwear. This is wrong.
+
+To start, here is the set of professions that wear crocs in the line of duty:
+- Chefs
+- Nurses
+- Surgeons
+- Quantum clean-room technicians
+
+What an august set of professions to be included amongst.
+
+Other arguments in favour of crocs are self-evident: they are comfortable, waterproof, breathable, playful, and stylish.
+They are perhaps the customiseable footwear, both in look (jibbitz), and in function (relax-mode or sport-mode).
+
+At Silmo, every employee is gifted a pair of onboarding crocs of their choosing, and if they help close a customer, they get a commemorative jibbit.
+    """.strip()
   }
 
 }
