@@ -9,5 +9,9 @@
 * Things that compound (skills, relationships, knowledge, company abilities, trees).
 * Micro-PMF --inspired by micro-morts and micro-marriages.
 * I wonder what it is about people that makes us love seeing people who have truly mastered a discipline. It's such a treat to watch Federer or Magnus or Mbappe play, or watch Dwarkesh or Dylan or Tyler talk.
-- Are places with more ideal climes better suited to deep thinking than places where you need to always think about the weather? E.g. would SF produce as many companies if it were moved degrees north to Vanderhoof, BC?
-- Technology allows for both easier creation, and easier consumption. It seems right now like consuming is winning: feeds are populated systems that learn to maximise time spent on them, whereas if you're someone trying to get ranked high on the feed, you still need to do the work with your own brain of figuring out what is likely to do well or not...
+* Are places with more ideal climes better suited to deep thinking than places where you need to always think about the weather? E.g. would SF produce as many companies if it were moved degrees north to Vanderhoof, BC?
+* Technology allows for both easier creation, and easier consumption. It seems right now like consuming is winning: feeds are populated systems that learn to maximise time spent on them, whereas if you're someone trying to get ranked high on the feed, you still need to do the work with your own brain of figuring out what is likely to do well or not...
+* Chess set where if you move your queen you get an electric shock, if you move your rook you get a smaller electric shock etc, and if you move your pawns you don't get an electric shock.
+* Chess set where all the pieces are made of pure tungsten. Excellent for blitz.
+* Alcohol chess set where every piece is a glass and if you take that piece you drink whatever is in that glass. The great equaliser.
+* 
