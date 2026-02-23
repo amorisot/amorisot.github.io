@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fleece to Fashion</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  :root{
+    --bg:#f5f0e8;
+    --header:#ede7dc;
+    --border:#d9d0c3;
+    --text:#4a3f35;
+    --text-dim:#8a7e72;
+    --accent:#7b9e6b;
+
+    --pasture:#e4ecda;
+    --pasture-back:#d6e2c8;
+    --mill:#fce8d0;
+    --mill-back:#f5d8b8;
+    --shop:#d4a5a5;
+    --shop-front:#f2e0e0;
+    --shop-back:#e8cece;
+    --studio:#c4b7d4;
+    --studio-front:#ebe4f2;
+    --studio-back:#ddd4e8;
+
+    --card-radius:14px;
+    --shadow:0 2px 12px rgba(74,63,53,.1);
+    --flip-dur:.6s;
+  }
+
+  html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text)}
+
+  /* ── Header ── */
+  .header{
+    position:sticky;top:0;z-index:100;
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 20px;
+    padding:10px 20px;
+    background:var(--header);border-bottom:1px solid var(--border);
+    box-shadow:0 1px 6px rgba(74,63,53,.06);
+  }
+  .header h1{font-size:1.1rem;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+  .header h1 span{font-weight:400;opacity:.65;font-size:.9rem}
+  .resources{display:flex;gap:14px;flex-wrap:wrap}
+  .res{
+    display:flex;align-items:center;gap:5px;
+    padding:5px 12px;border-radius:8px;
+    background:rgba(255,255,255,.6);border:1px solid var(--border);
+    font-size:.82rem;font-weight:600;white-space:nowrap;
+  }
+  .res .icon{font-size:1rem}
+  .res .val{color:var(--accent);min-width:24px;text-align:right;display:inline-block}
+  .res .val.pulse{animation:res-pulse .35s ease}
+  @keyframes res-pulse{0%{transform:scale(1)}50%{transform:scale(1.18);color:#5a7}100%{transform:scale(1)}}
+
+  /* ── Grid ── */
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 1fr;
+    gap:12px;padding:12px;
+    height:calc(100vh - 92px);
+    min-height:480px;
+  }
+  @media(max-width:720px){
+    .grid{grid-template-columns:1fr;grid-template-rows:repeat(4,minmax(320px,1fr));height:auto;min-height:auto}
+  }
+
+  /* ── Flip Card ── */
+  .flip-card{perspective:1000px}
+  .flip-inner{
+    position:relative;width:100%;height:100%;
+    transition:transform var(--flip-dur) cubic-bezier(.4,.2,.2,1);
+    transform-style:preserve-3d;
+  }
+  .flip-card.flipped .flip-inner{transform:rotateY(180deg)}
+  .flip-front,.flip-back{
+    position:absolute;inset:0;
+    backface-visibility:hidden;
+    border-radius:var(--card-radius);
+    display:flex;flex-direction:column;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    border:1px solid var(--border);
+  }
+  .flip-back{transform:rotateY(180deg)}
+
+  /* ── Pane Chrome ── */
+  .pane-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 14px 6px;flex-shrink:0;
+  }
+  .pane-header h2{font-size:.95rem;font-weight:700;display:flex;align-items:center;gap:6px}
+  .pane-header h2 .emoji{font-size:1.1rem}
+  .flip-btn{
+    background:none;border:none;cursor:pointer;
+    font-size:.78rem;color:var(--text-dim);
+    display:flex;align-items:center;gap:3px;
+    padding:3px 6px;border-radius:5px;
+    transition:background .2s,color .2s;
+  }
+  .flip-btn:hover{background:rgba(0,0,0,.06);color:var(--text)}
+  .flip-btn svg{width:14px;height:14px}
+
+  .pane-body{
+    flex:1;display:flex;flex-direction:column;
+    padding:4px 14px 14px;gap:6px;
+    overflow-y:auto;
+  }
+  .pane-body::-webkit-scrollbar{width:4px}
+  .pane-body::-webkit-scrollbar-track{background:transparent}
+  .pane-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+  .rate-summary{font-size:.76rem;color:var(--text-dim);font-style:italic;padding:2px 0 4px;border-bottom:1px solid rgba(0,0,0,.06);margin-bottom:4px}
+
+  /* ── Pane colours ── */
+  .pane-pasture .flip-front{background:var(--pasture)}
+  .pane-pasture .flip-back{background:var(--pasture-back)}
+  .pane-mill .flip-front{background:var(--mill)}
+  .pane-mill .flip-back{background:var(--mill-back)}
+  .pane-shop .flip-front{background:var(--shop-front)}
+  .pane-shop .flip-back{background:var(--shop-back)}
+  .pane-studio .flip-front{background:var(--studio-front)}
+  .pane-studio .flip-back{background:var(--studio-back)}
+
+  /* ── Upgrade Row ── */
+  .upgrade-row{
+    display:flex;align-items:center;gap:8px;
+    padding:6px 8px;border-radius:8px;
+    background:rgba(255,255,255,.35);
+    transition:background .15s;
+    min-height:40px;
+  }
+  .upgrade-row:hover{background:rgba(255,255,255,.55)}
+  .upgrade-row .u-emoji{font-size:1.1rem;flex-shrink:0;width:24px;text-align:center}
+  .upgrade-row .u-info{flex:1;min-width:0}
+  .upgrade-row .u-name{font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .upgrade-row .u-desc{font-size:.68rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .upgrade-row .u-owned{font-size:.72rem;color:var(--text-dim);flex-shrink:0;min-width:20px;text-align:center}
+  .upgrade-row .u-owned.has{color:var(--accent);font-weight:700}
+  .upgrade-row .u-buy{
+    padding:5px 10px;border:none;border-radius:6px;
+    font-size:.74rem;font-weight:700;cursor:pointer;
+    color:#fff;background:var(--accent);
+    transition:transform .1s,opacity .15s;
+    flex-shrink:0;white-space:nowrap;
+  }
+  .upgrade-row .u-buy:hover{transform:translateY(-1px)}
+  .upgrade-row .u-buy:disabled{opacity:.35;cursor:not-allowed;transform:none}
+  .upgrade-row .u-buy.one-time-bought{background:#aaa;opacity:.5}
+
+  /* ── Inline Build Progress ── */
+  .u-build-bar{
+    width:60px;height:20px;flex-shrink:0;
+    background:rgba(0,0,0,.08);border-radius:4px;
+    overflow:hidden;position:relative;
+  }
+  .u-build-fill{
+    height:100%;border-radius:4px;
+    background:var(--accent);
+    transition:width .3s linear;
+  }
+  .u-build-bar::after{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(90deg,transparent 40%,rgba(255,255,255,.25) 50%,transparent 60%);
+    animation:build-shimmer 1.2s ease-in-out infinite;
+  }
+  @keyframes build-shimmer{
+    0%{transform:translateX(-100%)}
+    100%{transform:translateX(100%)}
+  }
+
+  /* sell fiber button */
+  .sell-btn{
+    padding:5px 10px;border:none;border-radius:6px;
+    font-size:.74rem;font-weight:700;cursor:pointer;
+    color:#fff;background:#8a7e60;
+    transition:transform .1s,opacity .15s;
+    flex-shrink:0;white-space:nowrap;
+  }
+  .sell-btn:hover{transform:translateY(-1px)}
+  .sell-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+
+  /* Pane-specific button colors */
+  .pane-mill .u-buy{background:#c5944a}
+  .pane-shop .u-buy{background:#b07070}
+  .pane-studio .u-buy{background:#8a6fa0}
+
+  /* ── Section Label ── */
+  .section-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);padding:6px 0 2px;opacity:.7}
+
+  /* ── Studio Progress Bar ── */
+  .progress-wrap{
+    width:100%;background:rgba(0,0,0,.08);border-radius:6px;overflow:hidden;height:22px;position:relative;
+  }
+  .progress-bar{
+    height:100%;background:linear-gradient(90deg,#c4b7d4,#8a6fa0);border-radius:6px;
+    transition:width .3s linear;width:0;
+  }
+  .progress-text{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:.72rem;font-weight:700;color:var(--text);
+  }
+  .project-status{font-size:.76rem;color:var(--text-dim);font-style:italic;text-align:center;padding:2px 0}
+
+  /* ── Back Side Visual ── */
+  .back-visual{
+    flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;
+    padding:16px;position:relative;overflow:hidden;
+  }
+  .bouncer{
+    font-size:2.4rem;
+    animation:bounce 2.4s ease-in-out infinite;
+    filter:drop-shadow(0 3px 6px rgba(0,0,0,.08));
+  }
+  @keyframes bounce{
+    0%,100%{transform:translateY(0) scale(1)}
+    50%{transform:translateY(-14px) scale(1.06)}
+  }
+  .pulser{
+    font-size:2.4rem;
+    animation:gentle-pulse 2s ease-in-out infinite;
+    filter:drop-shadow(0 3px 6px rgba(0,0,0,.08));
+  }
+  @keyframes gentle-pulse{
+    0%,100%{transform:scale(1);opacity:.85}
+    50%{transform:scale(1.12);opacity:1}
+  }
+  .spinner{
+    font-size:2.8rem;
+    animation:spin 3s linear infinite;
+    filter:drop-shadow(0 3px 6px rgba(0,0,0,.08));
+  }
+  @keyframes spin{
+    0%{transform:rotate(0deg)}
+    100%{transform:rotate(360deg)}
+  }
+  .back-label{
+    margin-top:10px;font-size:.8rem;color:var(--text-dim);font-style:italic;text-align:center;
+  }
+  .animal-grid{
+    display:flex;flex-wrap:wrap;gap:4px;justify-content:center;max-width:90%;
+  }
+  .animal-grid .mini-animal{font-size:1.2rem;animation:bounce 2.4s ease-in-out infinite}
+  .animal-grid .mini-animal:nth-child(odd){animation-delay:-.8s}
+  .animal-grid .mini-animal:nth-child(3n){animation-delay:-1.6s}
+  .animal-count{font-size:.75rem;color:var(--text-dim);margin-top:6px}
+
+  /* ── Pasture Back: Rolling Hills Scene ── */
+  .pasture-scene{width:100%;height:100%;position:relative;overflow:hidden;border-radius:0 0 var(--card-radius) var(--card-radius)}
+  .pasture-sky{
+    position:absolute;inset:0;
+    transition:background 2s ease;
+  }
+  .hill{
+    position:absolute;bottom:0;left:-10%;width:120%;border-radius:50% 50% 0 0;
+  }
+  .hill-far{height:55%;background:#a3bf8f;opacity:.5;animation:hill-sway 12s ease-in-out infinite}
+  .hill-mid{height:42%;background:#8fb37a;opacity:.7;animation:hill-sway 9s ease-in-out infinite reverse}
+  .hill-near{height:30%;background:#7ba368;opacity:.9;animation:hill-sway 7s ease-in-out infinite}
+  @keyframes hill-sway{
+    0%,100%{transform:translateX(0)}
+    50%{transform:translateX(8px)}
+  }
+  .pasture-animals-scene{
+    position:absolute;bottom:0;left:0;right:0;top:40%;
+    pointer-events:none;
+  }
+  .scene-animal{
+    position:absolute;font-size:1.3rem;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.15));
+    transition:left 3s ease-in-out,top 3s ease-in-out,transform .3s ease;
+  }
+  .pasture-info{
+    position:absolute;bottom:4px;width:100%;text-align:center;
+    font-size:.72rem;color:rgba(74,63,53,.6);font-style:italic;
+  }
+
+  /* ── Mill Back: Spinning Wheel + Conveyor ── */
+  .mill-scene{width:100%;height:100%;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+  .css-wheel{
+    position:relative;width:90px;height:90px;
+    animation:spin 3s linear infinite;
+  }
+  .wheel-rim{
+    position:absolute;inset:0;
+    border:4px solid #8b6914;border-radius:50%;
+    background:radial-gradient(circle,transparent 55%,rgba(139,105,20,.12) 56%);
+  }
+  .wheel-hub{
+    position:absolute;top:50%;left:50%;width:14px;height:14px;
+    background:#8b6914;border-radius:50%;
+    transform:translate(-50%,-50%);
+  }
+  .wheel-spoke{
+    position:absolute;top:50%;left:50%;width:2px;height:42px;
+    background:#8b6914;transform-origin:top center;border-radius:1px;
+  }
+  .conveyor{
+    width:80%;height:24px;position:relative;
+    background:rgba(0,0,0,.06);border-radius:12px;overflow:hidden;
+  }
+  .conveyor-label{font-size:.65rem;color:var(--text-dim);display:flex;justify-content:space-between;width:80%;opacity:.7}
+  .conv-dot{
+    position:absolute;top:50%;width:10px;height:10px;border-radius:50%;
+    transform:translateY(-50%);
+    animation:conv-move 2.5s linear infinite;
+  }
+  @keyframes conv-move{
+    0%{left:-10px;background:#a08060;transform:translateY(-50%) scale(.8)}
+    40%{background:#b09070}
+    60%{background:#c4a0d0}
+    100%{left:calc(100% + 10px);background:#8a6fa0;transform:translateY(-50%) scale(1)}
+  }
+  .mill-rate-label{font-size:.75rem;color:var(--text-dim);font-style:italic;text-align:center}
+
+  /* ── Shop Back: Yarn Shelves + Customers ── */
+  .shop-scene{width:100%;height:100%;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+  .yarn-shelves{
+    flex:1;display:flex;flex-direction:column;justify-content:center;gap:6px;
+    padding:8px 12px;
+  }
+  .shelf-row{
+    display:flex;align-items:flex-end;gap:3px;
+    padding:3px 6px 4px;
+    border-bottom:2px solid #b89878;
+    min-height:22px;flex-wrap:wrap;
+  }
+  .yarn-ball{
+    width:14px;height:14px;border-radius:50%;
+    animation:yarn-wobble 2s ease-in-out infinite;
+    flex-shrink:0;
+  }
+  .yarn-ball:nth-child(odd){animation-delay:-.7s}
+  .yarn-ball:nth-child(3n){animation-delay:-1.3s}
+  @keyframes yarn-wobble{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-2px)}
+  }
+  .customer-lane{
+    height:32px;position:relative;overflow:hidden;
+    border-top:1px solid rgba(0,0,0,.06);
+  }
+  .customer{
+    position:absolute;bottom:4px;
+    font-size:1.2rem;
+    animation:walk-by 5s linear forwards;
+    pointer-events:none;
+  }
+  @keyframes walk-by{
+    0%{left:-30px;opacity:0}
+    5%{opacity:1}
+    90%{opacity:1}
+    100%{left:calc(100% + 30px);opacity:0}
+  }
+  .shop-info{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    font-size:.8rem;color:var(--text-dim);font-style:italic;text-align:center;
+    pointer-events:none;opacity:.6;
+  }
+
+  /* ── Studio Back: Knitting Needles + Fabric ── */
+  .studio-scene{width:100%;height:100%;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+  .needles-wrap{position:relative;width:120px;height:80px}
+  .needle{
+    position:absolute;width:3px;height:90px;
+    background:linear-gradient(to bottom,#c0c0c0,#909090);border-radius:2px 2px 0 0;
+    bottom:0;
+  }
+  .needle::before{
+    content:'';position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+    width:7px;height:7px;background:#d4d4d4;border-radius:50%;
+  }
+  .needle-l{left:35%;transform:rotate(-12deg)}
+  .needle-r{right:35%;transform:rotate(12deg)}
+  .fabric-strip{
+    position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+    width:50px;border-radius:4px 4px 0 0;
+    background:linear-gradient(180deg,#c4b7d4 0%,#a890c0 50%,#8a6fa0 100%);
+    transition:height .5s ease;
+    overflow:hidden;
+  }
+  .fabric-strip .stitch-line{
+    width:100%;height:4px;
+    border-bottom:1px dashed rgba(255,255,255,.3);
+  }
+  .studio-project-label{font-size:.78rem;color:var(--text-dim);font-style:italic;text-align:center}
+  .studio-fo-count{font-size:.72rem;color:var(--text-dim);opacity:.7}
+
+  /* confetti burst on completion */
+  .confetti{
+    position:absolute;width:6px;height:6px;border-radius:1px;
+    animation:confetti-pop 1.2s ease-out forwards;
+    pointer-events:none;
+  }
+  @keyframes confetti-pop{
+    0%{transform:translate(0,0) rotate(0deg) scale(1);opacity:1}
+    100%{transform:translate(var(--cx),var(--cy)) rotate(720deg) scale(0);opacity:0}
+  }
+  .completion-emoji{
+    position:absolute;font-size:2rem;
+    animation:fo-pop 2s ease-out forwards;
+    pointer-events:none;
+  }
+  @keyframes fo-pop{
+    0%{transform:scale(0) translateY(0);opacity:0}
+    15%{transform:scale(1.4) translateY(-10px);opacity:1}
+    30%{transform:scale(1) translateY(-20px);opacity:1}
+    100%{transform:scale(.7) translateY(-80px);opacity:0}
+  }
+
+  /* ambient floating particles */
+  .particle{
+    position:absolute;opacity:.2;font-size:1rem;
+    animation:float linear infinite;
+    pointer-events:none;
+  }
+  @keyframes float{
+    0%{transform:translateY(100%) rotate(0deg)}
+    100%{transform:translateY(-120%) rotate(360deg)}
+  }
+
+  /* ── Ticker Tape ── */
+  .ticker{
+    position:fixed;bottom:0;left:0;right:0;z-index:100;
+    background:var(--header);border-top:1px solid var(--border);
+    padding:6px 20px;
+    font-size:.78rem;font-style:italic;color:var(--text-dim);
+    text-align:center;
+    transition:opacity .5s;
+    height:30px;display:flex;align-items:center;justify-content:center;
+  }
+  .ticker.fade{opacity:0}
+
+  /* ── Milestone Toast ── */
+  .toast{
+    position:fixed;top:-60px;left:50%;transform:translateX(-50%);
+    z-index:200;padding:10px 24px;border-radius:10px;
+    background:rgba(255,255,255,.95);border:2px solid var(--accent);
+    box-shadow:0 4px 20px rgba(0,0,0,.12);
+    font-size:.88rem;font-weight:700;color:var(--text);
+    transition:top .5s cubic-bezier(.34,1.56,.64,1);
+    pointer-events:none;white-space:nowrap;
+  }
+  .toast.show{top:16px}
+
+  /* ── Pasture Weather ── */
+  .weather-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .cloud{
+    position:absolute;top:8%;
+    width:50px;height:18px;background:rgba(255,255,255,.7);border-radius:18px;
+    animation:drift-cloud 25s linear infinite;
+  }
+  .cloud::before,.cloud::after{
+    content:'';position:absolute;background:rgba(255,255,255,.7);border-radius:50%;
+  }
+  .cloud::before{width:24px;height:24px;top:-12px;left:8px}
+  .cloud::after{width:32px;height:28px;top:-14px;left:20px}
+  .cloud:nth-child(2){top:14%;animation-duration:32s;animation-delay:-10s;width:40px;height:14px}
+  .cloud:nth-child(3){top:5%;animation-duration:20s;animation-delay:-18s;width:35px;height:12px;opacity:.5}
+  @keyframes drift-cloud{0%{left:-80px}100%{left:calc(100% + 80px)}}
+  .raindrop{
+    position:absolute;width:2px;height:10px;
+    background:rgba(120,160,200,.4);border-radius:0 0 2px 2px;
+    animation:rain-fall 1s linear infinite;
+  }
+  @keyframes rain-fall{0%{top:-10px;opacity:.7}100%{top:100%;opacity:0}}
+  .snowflake{
+    position:absolute;color:rgba(255,255,255,.8);font-size:.55rem;
+    animation:snow-fall 4s linear infinite;
+  }
+  @keyframes snow-fall{
+    0%{top:-10px;transform:translateX(0);opacity:.8}
+    50%{transform:translateX(15px)}
+    100%{top:100%;transform:translateX(-5px);opacity:0}
+  }
+
+  /* ── Pasture: Farmer ── */
+  .scene-farmer{
+    position:absolute;font-size:1.1rem;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.15));
+    transition:left 2s ease-in-out,top 2s ease-in-out,transform .3s ease;
+  }
+
+  /* ── Mill: Piles + Dye Vat ── */
+  .mill-piles{display:flex;align-items:flex-end;justify-content:space-between;width:80%;gap:8px}
+  .mill-pile{display:flex;flex-direction:column;align-items:center;font-size:.85rem;gap:1px;min-width:30px}
+  .mill-pile-label{font-size:.6rem;color:var(--text-dim);opacity:.7}
+  .mill-pile-items{display:flex;flex-wrap:wrap;gap:1px;justify-content:center}
+  .dye-vat{font-size:1.4rem;animation:bubble 2s ease-in-out infinite;opacity:0;transition:opacity .5s}
+  .dye-vat.active{opacity:1}
+  @keyframes bubble{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.05)}}
+
+  /* ── Shop: FO Display + Register ── */
+  .fo-display{
+    display:flex;gap:6px;padding:6px 10px;justify-content:center;flex-wrap:wrap;
+    min-height:24px;
+  }
+  .fo-item{
+    display:flex;flex-direction:column;align-items:center;
+    font-size:1rem;animation:yarn-wobble 2s ease-in-out infinite;
+  }
+  .fo-item:nth-child(odd){animation-delay:-.6s}
+  .fo-badge{font-size:.55rem;color:var(--text-dim);font-weight:700}
+  .register{
+    position:absolute;right:8px;bottom:6px;font-size:1.1rem;
+    animation:gentle-pulse 2s ease-in-out infinite;
+  }
+
+  /* ── Studio: Yarn Ball + FO Gallery ── */
+  .yarn-supply{
+    font-size:1.8rem;transition:transform .5s ease;
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,.1));
+  }
+  .fo-gallery{
+    display:flex;gap:3px;justify-content:center;flex-wrap:wrap;
+    max-width:90%;font-size:.85rem;opacity:.65;
+  }
+  .fo-gallery-item{display:flex;align-items:center;gap:1px}
+  .fo-gallery-count{font-size:.55rem;color:var(--text-dim)}
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="header">
+  <h1>Fleece to Fashion <span>| Idle Knitting</span></h1>
+  <div class="resources">
+    <div class="res"><span class="icon">💰</span><span class="val" id="res-cash">$50</span></div>
+    <div class="res"><span class="icon">🌿</span><span>Fiber</span><span class="val" id="res-fiber">0</span></div>
+    <div class="res"><span class="icon">🧶</span><span>Skeins</span><span class="val" id="res-skeins">0</span></div>
+    <div class="res"><span class="icon">🧶</span><span>FOs</span><span class="val" id="res-fos">0</span></div>
+  </div>
+</header>
+
+<!-- ── Grid ── -->
+<main class="grid">
+
+  <!-- Pasture -->
+  <div class="flip-card pane-pasture" id="pane-pasture">
+    <div class="flip-inner">
+      <div class="flip-front">
+        <div class="pane-header">
+          <h2><span class="emoji">🐑</span> The Pasture</h2>
+          <button class="flip-btn" onclick="flip('pane-pasture')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 3v6h6"/></svg> View</button>
+        </div>
+        <div class="pane-body" id="pasture-body">
+          <div class="rate-summary" id="rate-pasture">+0 fiber/s</div>
+        </div>
+      </div>
+      <div class="flip-back">
+        <div class="pane-header">
+          <h2><span class="emoji">🐑</span> The Pasture</h2>
+          <button class="flip-btn" onclick="flip('pane-pasture')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 0-9 9"/><path d="M21 21v-6h-6"/></svg> Back</button>
+        </div>
+        <div class="back-visual" id="back-pasture">
+          <div class="pasture-scene" id="pasture-scene">
+            <div class="pasture-sky" id="pasture-sky"></div>
+            <div class="weather-layer" id="weather-layer"></div>
+            <div class="hill hill-far"></div>
+            <div class="hill hill-mid"></div>
+            <div class="hill hill-near"></div>
+            <div class="pasture-animals-scene" id="pasture-animals"></div>
+            <div class="pasture-info" id="pasture-info"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mill -->
+  <div class="flip-card pane-mill" id="pane-mill">
+    <div class="flip-inner">
+      <div class="flip-front">
+        <div class="pane-header">
+          <h2><span class="emoji">🏭</span> The Mill</h2>
+          <button class="flip-btn" onclick="flip('pane-mill')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 3v6h6"/></svg> View</button>
+        </div>
+        <div class="pane-body" id="mill-body">
+          <div class="rate-summary" id="rate-mill">Processing: 0 fiber → 0 skeins/s</div>
+        </div>
+      </div>
+      <div class="flip-back">
+        <div class="pane-header">
+          <h2><span class="emoji">🏭</span> The Mill</h2>
+          <button class="flip-btn" onclick="flip('pane-mill')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 0-9 9"/><path d="M21 21v-6h-6"/></svg> Back</button>
+        </div>
+        <div class="back-visual" id="back-mill">
+          <div class="mill-scene" id="mill-scene">
+            <div class="css-wheel" id="mill-wheel">
+              <div class="wheel-rim"></div>
+              <div class="wheel-hub"></div>
+            </div>
+            <div class="mill-piles">
+              <div class="mill-pile"><div class="mill-pile-items" id="mill-fiber-pile"></div><div class="mill-pile-label">fiber</div></div>
+              <div class="mill-pile"><div class="mill-pile-items" id="mill-skein-pile"></div><div class="mill-pile-label">skeins</div></div>
+            </div>
+            <div class="conveyor" id="mill-conveyor"></div>
+            <div class="conveyor-label"><span>🌿 fiber</span><span>🧶 skeins</span></div>
+            <div class="dye-vat" id="mill-dye-vat">🫕</div>
+            <div class="mill-rate-label" id="mill-rate-label">No equipment yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Yarn Shop -->
+  <div class="flip-card pane-shop" id="pane-shop">
+    <div class="flip-inner">
+      <div class="flip-front">
+        <div class="pane-header">
+          <h2><span class="emoji">🏪</span> The Yarn Shop</h2>
+          <button class="flip-btn" onclick="flip('pane-shop')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 3v6h6"/></svg> View</button>
+        </div>
+        <div class="pane-body" id="shop-body">
+          <div class="rate-summary" id="rate-shop">Selling: 0 skeins/s — $0/s</div>
+        </div>
+      </div>
+      <div class="flip-back">
+        <div class="pane-header">
+          <h2><span class="emoji">🏪</span> The Yarn Shop</h2>
+          <button class="flip-btn" onclick="flip('pane-shop')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 0-9 9"/><path d="M21 21v-6h-6"/></svg> Back</button>
+        </div>
+        <div class="back-visual" id="back-shop">
+          <div class="shop-scene" id="shop-scene">
+            <div class="fo-display" id="fo-display"></div>
+            <div class="yarn-shelves" id="yarn-shelves">
+              <div class="shelf-row" id="shelf-1"></div>
+              <div class="shelf-row" id="shelf-2"></div>
+              <div class="shelf-row" id="shelf-3"></div>
+            </div>
+            <div class="customer-lane" id="customer-lane">
+              <span class="register" id="shop-register" style="display:none">💰</span>
+            </div>
+            <div class="shop-info" id="shop-info">Open your shop!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Studio -->
+  <div class="flip-card pane-studio" id="pane-studio">
+    <div class="flip-inner">
+      <div class="flip-front">
+        <div class="pane-header">
+          <h2><span class="emoji">✂️</span> The Studio</h2>
+          <button class="flip-btn" onclick="flip('pane-studio')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 3v6h6"/></svg> View</button>
+        </div>
+        <div class="pane-body" id="studio-body">
+          <div class="rate-summary" id="rate-studio">No project in progress</div>
+        </div>
+      </div>
+      <div class="flip-back">
+        <div class="pane-header">
+          <h2><span class="emoji">✂️</span> The Studio</h2>
+          <button class="flip-btn" onclick="flip('pane-studio')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 0-9 9"/><path d="M21 21v-6h-6"/></svg> Back</button>
+        </div>
+        <div class="back-visual" id="back-studio">
+          <div class="studio-scene" id="studio-scene">
+            <div class="yarn-supply" id="studio-yarn-ball">🧶</div>
+            <div class="needles-wrap">
+              <div class="needle needle-l"></div>
+              <div class="needle needle-r"></div>
+              <div class="fabric-strip" id="studio-fabric" style="height:0px"></div>
+            </div>
+            <div class="studio-project-label" id="studio-back-label">Waiting for a project...</div>
+            <div class="studio-fo-count" id="studio-fo-count"></div>
+            <div class="fo-gallery" id="studio-fo-gallery"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── Milestone Toast ── -->
+<div class="toast" id="toast"></div>
+
+<!-- ── Ticker Tape ── -->
+<div class="ticker" id="ticker">Just one more row...</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// UPGRADE & PROJECT DEFINITIONS
+// ═══════════════════════════════════════════════
+
+const PASTURE_UPGRADES = [
+  { id: 'merino',  name: 'Merino Sheep',   emoji: '🐑', baseCost: 10,    fiberPerSec: 1,   desc: '+1 fiber/s' },
+  { id: 'alpaca',  name: 'Suri Alpaca',    emoji: '🦙', baseCost: 150,   fiberPerSec: 5,   desc: '+5 fiber/s — incredible drape!' },
+  { id: 'rabbit',  name: 'Angora Rabbit',  emoji: '🐇', baseCost: 1000,  fiberPerSec: 25,  desc: '+25 fiber/s — maximum halo & fuzz!' },
+  { id: 'goat',    name: 'Cashmere Goat',  emoji: '🐐', baseCost: 5000,  fiberPerSec: 100, desc: '+100 fiber/s — pure luxury.' },
+];
+
+const PASTURE_SPECIAL = [
+  { id: 'husbander', name: 'Animal Husbander', emoji: '👨‍🌾', baseCost: 500, desc: 'Auto-buys best animal every 60s', oneTime: true },
+];
+
+const MILL_PROCESSING = [
+  { id: 'spindle',  name: 'Drop Spindle',          emoji: '🪵', baseCost: 50,   processPerSec: 1,  desc: '+1 fiber→skein/s' },
+  { id: 'wheel',    name: 'Ashford Spinning Wheel', emoji: '🎡', baseCost: 500,  processPerSec: 10, desc: '+10 fiber→skein/s' },
+  { id: 'electric', name: 'Electric Carder',        emoji: '⚡', baseCost: 3000, processPerSec: 50, desc: '+50 fiber→skein/s' },
+];
+
+const MILL_DYE = [
+  { id: 'kettle',  name: 'Kettle Dyeing',      emoji: '🫕', baseCost: 1000, multiplier: 2, desc: 'All skeins worth 2x cash', oneTime: true },
+  { id: 'speckle', name: 'Speckled Indie Dye',  emoji: '🎨', baseCost: 5000, multiplier: 5, desc: 'All skeins worth 5x cash', oneTime: true },
+];
+
+const SHOP_FIBER = [
+  { id: 'fibermerchant', name: 'Fiber Merchant', emoji: '🧺', baseCost: 100, desc: 'Auto-sells 5 fiber/s at $2 each', oneTime: true },
+];
+
+const SHOP_UPGRADES = [
+  { id: 'swift',     name: 'Swift & Ball Winder', emoji: '🧵', baseCost: 200,  skeinsPerSec: 2,  desc: '+2 skeins sold/s' },
+  { id: 'knitnight', name: 'Host Knit Night',     emoji: '🌙', baseCost: 1000, skeinsPerSec: 10, desc: '+10 skeins sold/s' },
+];
+
+const SHOP_SPECIAL = [
+  { id: 'sable', name: 'Achieve S.A.B.L.E.', emoji: '🏆', baseCost: 10000, passiveIncome: 500, desc: '+$500/s passive income!', oneTime: true },
+];
+
+const STUDIO_PROJECTS = [
+  { id: 'swatch',  name: 'Gauge Swatch',           emoji: '🧷', skeinCost: 10,    seconds: 3,   basePayout: 100,    desc: '10 skeins, 3s → $100' },
+  { id: 'socks',   name: 'Vanilla Socks',           emoji: '🧦', skeinCost: 100,   seconds: 10,  basePayout: 1500,   desc: '100 skeins, 10s → $1,500' },
+  { id: 'beanie',  name: 'Brioche Beanie',           emoji: '🧶', skeinCost: 500,   seconds: 30,  basePayout: 10000,  desc: '500 skeins, 30s → $10,000' },
+  { id: 'shawl',   name: 'Hitchhiker Shawl',         emoji: '🪶', skeinCost: 800,   seconds: 20,  basePayout: 6000,   desc: '800 skeins, 20s → $6,000' },
+  { id: 'sweater', name: 'Fair Isle Yoke Sweater',    emoji: '🧥', skeinCost: 2500,  seconds: 60,  basePayout: 100000, desc: '2,500 skeins, 60s → $100,000' },
+  { id: 'blanket', name: 'Temperature Blanket',       emoji: '🌡️', skeinCost: 10000, seconds: 120, basePayout: 500000, desc: '10,000 skeins, 2min → $500,000' },
+];
+
+const STUDIO_UPGRADE = [
+  { id: 'blocking', name: 'Blocking Mats & T-Pins', emoji: '📐', baseCost: 50000, desc: 'Doubles all project payouts', oneTime: true },
+];
+
+const STUDIO_SPECIAL = [
+  { id: 'autocrafter', name: 'Knitting Machine', emoji: '🤖', baseCost: 5000, desc: 'Auto-starts a random project every 10s', oneTime: true },
+];
+
+const ANIMAL_NAMES = [
+  'Mabel','Barnaby','Clover','Humphrey','Dotty','Professor Fluffington',
+  'Rosie','Pip','Butterscotch','Hazel','Juniper','Mochi',
+  'Biscuit','Thistle','Winifred','Cashew','Petunia','Marmalade',
+  'Sage','Pebble','Truffle','Nutmeg','Bramble','Fern',
+  'Maple','Clementine','Toffee','Willow','Poppy','Sprout',
+];
+
+const MILESTONES = [
+  { id: 'fo1',      test: () => state.fos >= 1,            msg: '🧶 First FO! Cast off!' },
+  { id: 'fo10',     test: () => state.fos >= 10,           msg: '🧶 10 FOs — Time to open an Etsy shop!' },
+  { id: 'fo50',     test: () => state.fos >= 50,           msg: '🧶 50 FOs — Master Knitter Unlocked!' },
+  { id: 'cash1k',   test: () => state.cash >= 1000,        msg: '💰 $1K — Enough for one trip to the yarn store!' },
+  { id: 'cash100k', test: () => state.cash >= 100000,      msg: '💰 $100K Yarn Empire!' },
+  { id: 'cash1m',   test: () => state.cash >= 1000000,     msg: '💰 Millionaire! But still can\'t afford cashmere.' },
+  { id: 'alpaca1',  test: () => getOwned('alpaca') >= 1,   msg: '🦙 First Alpaca — Hello, drape!' },
+  { id: 'goat1',    test: () => getOwned('goat') >= 1,     msg: '🐐 First Cashmere Goat — Pure luxury!' },
+  { id: 'sable',    test: () => getOwned('sable') >= 1,    msg: '🏆 S.A.B.L.E. — Stash Acquired Beyond Life Expectancy!' },
+];
+
+const TICKER_MESSAGES = [
+  "Just one more row...",
+  "Did I drop a stitch?",
+  "I definitely have enough yarn for this... right?",
+  "Time to weave in the ends...",
+  "Is it frogging if I only rip back two rows?",
+  "My stash is organized. Don't open that closet.",
+  "Gauge swatches are important. I just choose to ignore them.",
+  "I'm not hoarding yarn, I'm curating a collection.",
+  "Knitting: cheaper than therapy. Probably.",
+  "The yarn told me to buy it.",
+  "Don't worry I'll block it.",
+  "This yarn is blue like your eyeball.",
+  "I will never knit you socks.",
+  "The sleeves take the longest. And the second one takes longer.",
+  "The best place to knit is on the TTC.",
+  "Swatches are optional.",
+  "This yarn is too rough for you.",
+  "One second let me check Ravelry...",
+  "It's not a mistake, it's a design feature.",
+  "Yarn chicken: the noblest of gambles.",
+  "My WIP pile is a lifestyle choice.",
+  "I need this yarn. For a project. I'll decide which one later.",
+  "Frogging: rip-it, rip-it, rip-it.",
+  "Life's too short for acrylic.",
+  "The second sock is always harder.",
+  "I knit so I don't unravel.",
+];
+
+const COST_SCALE = 1.15;
+
+// ═══════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════
+
+const state = {
+  cash: 50,
+  fiber: 0,
+  skeins: 0,
+  fos: 0,
+  owned: {},          // id → count
+  dyeMultiplier: 1,
+  activeProject: null, // { id, elapsed, duration, payout, emoji }
+  activeBuild: null,   // { id, elapsed, duration }
+  husbandryTimer: 0,   // ticks since last auto-buy
+  autocraftTimer: 0,   // ticks since last auto-craft
+  milestonesHit: {},   // id → true
+  animalNames: [],     // assigned animal names
+  foTypes: {},         // projectId → count of completions
+};
+
+function getOwned(id) { return state.owned[id] || 0; }
+function getCost(baseCost, id) { return Math.floor(baseCost * Math.pow(COST_SCALE, getOwned(id))); }
+
+// ═══════════════════════════════════════════════
+// DOM HELPERS
+// ═══════════════════════════════════════════════
+
+const el = (id) => document.getElementById(id);
+
+function flip(paneId) {
+  document.getElementById(paneId).classList.toggle('flipped');
+}
+
+function pulseVal(element) {
+  element.classList.remove('pulse');
+  void element.offsetWidth;
+  element.classList.add('pulse');
+}
+
+function fmt(n) {
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e4) return (n / 1e3).toFixed(1) + 'K';
+  return n.toLocaleString();
+}
+
+// ═══════════════════════════════════════════════
+// BUY FUNCTIONS
+// ═══════════════════════════════════════════════
+
+function getBuildDuration(cost) {
+  return Math.min(4, Math.max(1, Math.ceil(Math.log10(cost)) - 1));
+}
+
+function completeBuild(id) {
+  state.owned[id] = getOwned(id) + 1;
+  if (id === 'kettle' || id === 'speckle') {
+    state.dyeMultiplier = 1;
+    if (getOwned('speckle') > 0) state.dyeMultiplier = 5;
+    else if (getOwned('kettle') > 0) state.dyeMultiplier = 2;
+  }
+}
+
+function startBuild(id, baseCost) {
+  if (state.activeBuild) return;
+  const isOneTime = [...PASTURE_SPECIAL, ...MILL_DYE, ...SHOP_SPECIAL, ...SHOP_FIBER, ...STUDIO_UPGRADE, ...STUDIO_SPECIAL].some(u => u.id === id && u.oneTime);
+  if (isOneTime && getOwned(id) > 0) return;
+  const cost = isOneTime ? baseCost : getCost(baseCost, id);
+  if (state.cash < cost) return;
+  state.cash -= cost;
+  state.activeBuild = {
+    id,
+    elapsed: 0,
+    duration: getBuildDuration(cost),
+  };
+  updateUI();
+}
+
+function sellFiber() {
+  const amount = Math.min(10, state.fiber);
+  if (amount <= 0) return;
+  state.fiber -= amount;
+  state.cash += amount * 2;
+  updateUI();
+}
+
+function startProject(proj) {
+  if (state.activeProject) return;
+  if (state.skeins < proj.skeinCost) return;
+  state.skeins -= proj.skeinCost;
+  const blockingMult = getOwned('blocking') > 0 ? 2 : 1;
+  state.activeProject = {
+    id: proj.id,
+    elapsed: 0,
+    duration: proj.seconds,
+    payout: proj.basePayout * blockingMult * state.dyeMultiplier,
+    emoji: proj.emoji,
+    name: proj.name,
+  };
+  updateUI();
+}
+
+// ═══════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════
+
+function renderUpgradeRow(u) {
+  const owned = getOwned(u.id);
+  const isOneTime = u.oneTime;
+  const bought = isOneTime && owned > 0;
+  const cost = isOneTime ? u.baseCost : getCost(u.baseCost, u.id);
+  const building = state.activeBuild !== null;
+  const isThisBuild = building && state.activeBuild.id === u.id;
+  const canAfford = state.cash >= cost && !bought && !building;
+
+  const row = document.createElement('div');
+  row.className = 'upgrade-row';
+
+  let actionHtml;
+  if (isThisBuild) {
+    const pct = Math.min(100, (state.activeBuild.elapsed / state.activeBuild.duration) * 100);
+    actionHtml = `<div class="u-build-bar"><div class="u-build-fill" style="width:${pct}%"></div></div>`;
+  } else if (bought) {
+    actionHtml = `<button class="u-buy one-time-bought" disabled>Owned</button>`;
+  } else {
+    actionHtml = `<button class="u-buy" ${!canAfford ? 'disabled' : ''}>${building ? '...' : '$' + fmt(cost)}</button>`;
+  }
+
+  row.innerHTML = `
+    <span class="u-emoji">${u.emoji}</span>
+    <div class="u-info">
+      <div class="u-name">${u.name}</div>
+      <div class="u-desc">${u.desc}</div>
+    </div>
+    ${!isOneTime ? `<span class="u-owned ${owned > 0 ? 'has' : ''}">${owned}</span>` : ''}
+    ${actionHtml}
+  `;
+  if (!bought && !isThisBuild && !building) {
+    row.querySelector('.u-buy').addEventListener('click', () => startBuild(u.id, u.baseCost));
+  }
+  return row;
+}
+
+function renderProjectRow(proj) {
+  const canStart = !state.activeProject && state.skeins >= proj.skeinCost;
+  const isActive = state.activeProject && state.activeProject.id === proj.id;
+  const blockingMult = getOwned('blocking') > 0 ? 2 : 1;
+  const effectivePayout = proj.basePayout * blockingMult * state.dyeMultiplier;
+
+  const row = document.createElement('div');
+  row.className = 'upgrade-row';
+  row.innerHTML = `
+    <span class="u-emoji">${proj.emoji}</span>
+    <div class="u-info">
+      <div class="u-name">${proj.name}</div>
+      <div class="u-desc">${proj.skeinCost} skeins, ${proj.seconds}s → $${fmt(effectivePayout)}</div>
+    </div>
+    <button class="u-buy" ${!canStart ? 'disabled' : ''}>${isActive ? 'Working...' : 'Craft'}</button>
+  `;
+  if (canStart) {
+    row.querySelector('.u-buy').addEventListener('click', () => startProject(proj));
+  }
+  return row;
+}
+
+function renderSellFiberRow() {
+  const amount = Math.min(10, state.fiber);
+  const row = document.createElement('div');
+  row.className = 'upgrade-row';
+  row.innerHTML = `
+    <span class="u-emoji">🌿</span>
+    <div class="u-info">
+      <div class="u-name">Sell Fiber</div>
+      <div class="u-desc">Sell up to 10 fiber at $2 each</div>
+    </div>
+    <button class="sell-btn" ${amount <= 0 ? 'disabled' : ''}>Sell ${amount > 0 ? amount : 0}</button>
+  `;
+  if (amount > 0) {
+    row.querySelector('.sell-btn').addEventListener('click', () => sellFiber());
+  }
+  return row;
+}
+
+function renderPane(containerId, rateSummaryId, sections) {
+  const body = el(containerId);
+
+  // preserve the rate summary element
+  while (body.children.length > 1) body.removeChild(body.lastChild);
+
+  sections.forEach(section => {
+    if (section.label) {
+      const lbl = document.createElement('div');
+      lbl.className = 'section-label';
+      lbl.textContent = section.label;
+      body.appendChild(lbl);
+    }
+    if (section.custom) {
+      body.appendChild(section.custom());
+      return;
+    }
+    section.items.forEach(item => {
+      if (section.type === 'project') {
+        body.appendChild(renderProjectRow(item));
+      } else {
+        body.appendChild(renderUpgradeRow(item));
+      }
+    });
+  });
+}
+
+function renderStudioProgress() {
+  const body = el('studio-body');
+  const existing = body.querySelector('.progress-wrap');
+  const existingStatus = body.querySelector('.project-status');
+
+  if (state.activeProject) {
+    const pct = Math.min(100, (state.activeProject.elapsed / state.activeProject.duration) * 100);
+
+    if (!existing) {
+      // insert progress bar after rate summary
+      const wrap = document.createElement('div');
+      wrap.className = 'progress-wrap';
+      wrap.innerHTML = `<div class="progress-bar"></div><div class="progress-text"></div>`;
+      body.children[0].after(wrap);
+
+      const status = document.createElement('div');
+      status.className = 'project-status';
+      wrap.after(status);
+    }
+
+    const wrap = body.querySelector('.progress-wrap');
+    const bar = wrap.querySelector('.progress-bar');
+    const text = wrap.querySelector('.progress-text');
+    const status = body.querySelector('.project-status');
+
+    bar.style.width = pct + '%';
+    text.textContent = `${state.activeProject.name} — ${Math.round(pct)}%`;
+    const remaining = state.activeProject.duration - state.activeProject.elapsed;
+    status.textContent = remaining > 0 ? `${remaining}s remaining → $${fmt(state.activeProject.payout)}` : 'Complete!';
+  } else {
+    if (existing) existing.remove();
+    if (existingStatus) existingStatus.remove();
+  }
+}
+
+// ═══════════════════════════════════════════════
+// UI UPDATE
+// ═══════════════════════════════════════════════
+
+function updateUI() {
+  // global resources
+  const ids = ['res-cash', 'res-fiber', 'res-skeins', 'res-fos'];
+  const vals = ['$' + fmt(state.cash), fmt(state.fiber), fmt(state.skeins), fmt(state.fos)];
+  ids.forEach((id, i) => {
+    const e = el(id);
+    const prev = e.textContent;
+    e.textContent = vals[i];
+    if (prev !== vals[i]) pulseVal(e);
+  });
+
+  // ── Pasture ──
+  const fiberRate = PASTURE_UPGRADES.reduce((s, u) => s + getOwned(u.id) * u.fiberPerSec, 0);
+  el('rate-pasture').textContent = `+${fmt(fiberRate)} fiber/s`;
+  renderPane('pasture-body', 'rate-pasture', [
+    { items: PASTURE_UPGRADES },
+    { label: 'Special', items: PASTURE_SPECIAL },
+  ]);
+
+  // ── Mill ──
+  const processRate = MILL_PROCESSING.reduce((s, u) => s + getOwned(u.id) * u.processPerSec, 0);
+  el('rate-mill').textContent = `Processing: ${fmt(processRate)} fiber → ${fmt(processRate)} skeins/s` +
+    (state.dyeMultiplier > 1 ? ` (${state.dyeMultiplier}x dye!)` : '');
+  renderPane('mill-body', 'rate-mill', [
+    { label: 'Processing', items: MILL_PROCESSING },
+    { label: 'Dyeing', items: MILL_DYE },
+  ]);
+
+  // ── Shop ──
+  const sellRate = SHOP_UPGRADES.reduce((s, u) => s + getOwned(u.id) * u.skeinsPerSec, 0);
+  const pricePerSkein = 5 * state.dyeMultiplier;
+  const cashRate = sellRate * pricePerSkein + (getOwned('sable') > 0 ? 500 : 0);
+  el('rate-shop').textContent = `Selling: ${fmt(sellRate)} skeins/s — $${fmt(cashRate)}/s`;
+  renderPane('shop-body', 'rate-shop', [
+    { label: 'Fiber Sales', items: SHOP_FIBER },
+    { custom: renderSellFiberRow },
+    { label: 'Sales Upgrades', items: SHOP_UPGRADES },
+    { label: 'Special', items: SHOP_SPECIAL },
+  ]);
+
+  // ── Studio ──
+  if (state.activeProject) {
+    const remaining = state.activeProject.duration - state.activeProject.elapsed;
+    el('rate-studio').textContent = `Crafting: ${state.activeProject.name} (${remaining}s)`;
+  } else {
+    el('rate-studio').textContent = 'No project in progress';
+  }
+  renderPane('studio-body', 'rate-studio', [
+    { label: 'Projects', type: 'project', items: STUDIO_PROJECTS },
+    { label: 'Upgrades', items: STUDIO_UPGRADE },
+    { label: 'Special', items: STUDIO_SPECIAL },
+  ]);
+  renderStudioProgress();
+
+  // ── Update all card backs ──
+  updatePastureBack();
+  updateMillBack();
+  updateShopBack();
+  updateStudioBack();
+}
+
+// ═══════════════════════════════════════════════
+// CARD BACK RENDERERS
+// ═══════════════════════════════════════════════
+
+// ── Pasture: rolling hills with animals + day/night sky ──
+let pastureAnimalEls = []; // stable pool of DOM elements
+let pastureAnimalKey = ''; // serialised count key to detect changes
+let farmerEl = null;       // farmer span when husbander is owned
+
+function randomAnimalPos() {
+  return { left: 5 + Math.random() * 85, top: 10 + Math.random() * 65 };
+}
+
+function wanderAnimals() {
+  pastureAnimalEls.forEach(span => {
+    const prevLeft = parseFloat(span.style.left) || 50;
+    const pos = randomAnimalPos();
+    span.style.transform = pos.left > prevLeft ? 'scaleX(-1)' : 'scaleX(1)';
+    span.style.left = pos.left + '%';
+    span.style.top = pos.top + '%';
+  });
+  // farmer wanders too
+  if (farmerEl) {
+    const prevLeft = parseFloat(farmerEl.style.left) || 50;
+    const pos = randomAnimalPos();
+    farmerEl.style.transform = pos.left > prevLeft ? 'scaleX(-1)' : 'scaleX(1)';
+    farmerEl.style.left = pos.left + '%';
+    farmerEl.style.top = pos.top + '%';
+  }
+}
+
+function updatePastureBack() {
+  // Sky colour based on real time
+  const hour = new Date().getHours();
+  let skyColor;
+  if (hour >= 6 && hour < 8) skyColor = 'linear-gradient(180deg,#fdd8a5 0%,#fceabb 50%,#d6e2c8 100%)'; // dawn
+  else if (hour >= 8 && hour < 17) skyColor = 'linear-gradient(180deg,#a8d0e6 0%,#d6e8f0 40%,#e4ecda 100%)'; // day
+  else if (hour >= 17 && hour < 20) skyColor = 'linear-gradient(180deg,#e8a87c 0%,#ddb892 40%,#d6e2c8 100%)'; // sunset
+  else skyColor = 'linear-gradient(180deg,#2c3e6b 0%,#4a5a80 40%,#6b7a60 100%)'; // night
+  el('pasture-sky').style.background = skyColor;
+
+  // Build desired animal list
+  const desired = [];
+  let total = 0;
+  PASTURE_UPGRADES.forEach(u => {
+    const count = getOwned(u.id);
+    const show = Math.min(count, 8);
+    for (let i = 0; i < show; i++) desired.push(u.emoji);
+    total += count;
+  });
+
+  // Only rebuild DOM if animal counts changed
+  const key = desired.join(',');
+  if (key !== pastureAnimalKey) {
+    pastureAnimalKey = key;
+    const container = el('pasture-animals');
+    container.innerHTML = '';
+    pastureAnimalEls = [];
+    // assign names — grow the list as needed
+    while (state.animalNames.length < desired.length) {
+      const nameIdx = state.animalNames.length % ANIMAL_NAMES.length;
+      state.animalNames.push(ANIMAL_NAMES[nameIdx]);
+    }
+    desired.forEach((emoji, i) => {
+      const span = document.createElement('span');
+      span.className = 'scene-animal';
+      span.textContent = emoji;
+      span.title = state.animalNames[i];
+      const pos = randomAnimalPos();
+      span.style.left = pos.left + '%';
+      span.style.top = pos.top + '%';
+      container.appendChild(span);
+      pastureAnimalEls.push(span);
+    });
+  }
+
+  // Farmer appears when husbander is owned
+  const container2 = el('pasture-animals');
+  if (getOwned('husbander') > 0 && !farmerEl) {
+    farmerEl = document.createElement('span');
+    farmerEl.className = 'scene-farmer';
+    farmerEl.textContent = '👨‍🌾';
+    farmerEl.title = 'The Husbander';
+    const fpos = randomAnimalPos();
+    farmerEl.style.left = fpos.left + '%';
+    farmerEl.style.top = fpos.top + '%';
+    container2.appendChild(farmerEl);
+  } else if (getOwned('husbander') === 0 && farmerEl) {
+    farmerEl.remove();
+    farmerEl = null;
+  }
+
+  const info = el('pasture-info');
+  if (total > 0 && state.animalNames.length > 0) {
+    const featuredName = state.animalNames[Math.floor(Math.random() * Math.min(total, state.animalNames.length))];
+    const others = total - 1;
+    info.textContent = others > 0 ? `${featuredName} and ${others} friend${others !== 1 ? 's' : ''} grazing` : `${featuredName} is grazing`;
+  } else {
+    info.textContent = 'Your pasture awaits...';
+  }
+}
+
+// ── Mill: conveyor dots that flow when processing ──
+let conveyorInterval = null;
+let lastProcessRate = -1;
+let lastMillFiber = -1;
+let lastMillSkeins = -1;
+function updateMillBack() {
+  const processRate = MILL_PROCESSING.reduce((s, u) => s + getOwned(u.id) * u.processPerSec, 0);
+  el('mill-rate-label').textContent = processRate > 0
+    ? `Spinning ${fmt(processRate)} fiber/s`
+    : 'No equipment yet';
+
+  // Wheel visibility
+  const wheel = el('mill-wheel');
+  wheel.style.opacity = processRate > 0 ? '1' : '.25';
+  wheel.style.animationDuration = processRate > 10 ? '1.5s' : '3s';
+
+  // Fiber & skein piles
+  const fiberCount = Math.min(5, Math.ceil(state.fiber / 50));
+  const skeinCount = Math.min(5, Math.ceil(state.skeins / 50));
+  if (fiberCount !== lastMillFiber) {
+    lastMillFiber = fiberCount;
+    const pile = el('mill-fiber-pile');
+    pile.innerHTML = '';
+    for (let i = 0; i < fiberCount; i++) pile.insertAdjacentHTML('beforeend', '<span>🌿</span>');
+  }
+  if (skeinCount !== lastMillSkeins) {
+    lastMillSkeins = skeinCount;
+    const pile = el('mill-skein-pile');
+    pile.innerHTML = '';
+    for (let i = 0; i < skeinCount; i++) pile.insertAdjacentHTML('beforeend', '<span>🧶</span>');
+  }
+
+  // Dye vat
+  const hasDye = getOwned('kettle') > 0 || getOwned('speckle') > 0;
+  const vat = el('mill-dye-vat');
+  vat.textContent = getOwned('speckle') > 0 ? '🎨' : '🫕';
+  vat.classList.toggle('active', hasDye);
+
+  // Manage conveyor dots — only update if rate changed
+  if (processRate !== lastProcessRate) {
+    lastProcessRate = processRate;
+    if (conveyorInterval) clearInterval(conveyorInterval);
+    const conveyor = el('mill-conveyor');
+    conveyor.querySelectorAll('.conv-dot').forEach(d => d.remove());
+    if (processRate > 0) {
+      const spawnRate = Math.max(300, 2000 / Math.min(processRate, 20));
+      conveyorInterval = setInterval(() => {
+        const dot = document.createElement('div');
+        dot.className = 'conv-dot';
+        dot.style.animationDuration = (1.5 + Math.random()) + 's';
+        dot.style.top = (30 + Math.random() * 40) + '%';
+        conveyor.appendChild(dot);
+        setTimeout(() => dot.remove(), 3000);
+      }, spawnRate);
+    }
+  }
+}
+
+// ── Shop: shelves fill with yarn balls + customers walk by when selling ──
+const YARN_COLORS = ['#d4a5a5','#c4b7d4','#b5c4a8','#f0d6a8','#a8c4d4','#d4c4a8','#c4a8b8','#a8b8c4','#d4b8a8','#b8d4c0'];
+let lastShelfCount = -1;
+let lastFoDisplayKey = '';
+function updateShopBack() {
+  const sellRate = SHOP_UPGRADES.reduce((s, u) => s + getOwned(u.id) * u.skeinsPerSec, 0);
+  const totalSkeins = Math.min(state.skeins, 300);
+  const ballCount = Math.min(Math.floor(totalSkeins / 5) + sellRate, 45);
+
+  const info = el('shop-info');
+  info.style.display = sellRate > 0 || ballCount > 0 || Object.keys(state.foTypes).length > 0 ? 'none' : 'block';
+
+  // FO display — show completed project emojis
+  const foKey = JSON.stringify(state.foTypes);
+  if (foKey !== lastFoDisplayKey) {
+    lastFoDisplayKey = foKey;
+    const display = el('fo-display');
+    display.innerHTML = '';
+    STUDIO_PROJECTS.forEach(proj => {
+      const count = state.foTypes[proj.id] || 0;
+      if (count > 0) {
+        const item = document.createElement('div');
+        item.className = 'fo-item';
+        item.innerHTML = `<span>${proj.emoji}</span><span class="fo-badge">x${count}</span>`;
+        item.title = proj.name;
+        display.appendChild(item);
+      }
+    });
+  }
+
+  // Register visibility
+  el('shop-register').style.display = sellRate > 0 ? 'inline' : 'none';
+
+  // Only re-render shelves when count changes significantly
+  const roundedCount = Math.floor(ballCount / 3) * 3;
+  if (roundedCount !== lastShelfCount) {
+    lastShelfCount = roundedCount;
+    for (let s = 1; s <= 3; s++) {
+      const shelf = el('shelf-' + s);
+      shelf.innerHTML = '';
+      const perShelf = Math.ceil(ballCount / 3);
+      const start = (s - 1) * perShelf;
+      const end = Math.min(start + perShelf, ballCount);
+      for (let i = start; i < end; i++) {
+        const ball = document.createElement('div');
+        ball.className = 'yarn-ball';
+        ball.style.background = YARN_COLORS[i % YARN_COLORS.length];
+        ball.style.animationDelay = (-Math.random() * 2) + 's';
+        shelf.appendChild(ball);
+      }
+    }
+  }
+}
+
+const CUSTOMER_EMOJIS = ['🧑‍🦰','👩‍🦱','🧓','👩','👨‍🦳','🧑‍🦲','👩‍🦰','👨'];
+let shopCustomerTimer = 0;
+function spawnShopCustomer() {
+  const sellRate = SHOP_UPGRADES.reduce((s, u) => s + getOwned(u.id) * u.skeinsPerSec, 0);
+  if (sellRate <= 0) return;
+  const lane = el('customer-lane');
+  // don't overload
+  if (lane.children.length > 4) return;
+  const c = document.createElement('span');
+  c.className = 'customer';
+  c.textContent = CUSTOMER_EMOJIS[Math.floor(Math.random() * CUSTOMER_EMOJIS.length)];
+  c.style.animationDuration = (3 + Math.random() * 3) + 's';
+  lane.appendChild(c);
+  setTimeout(() => c.remove(), 6000);
+}
+
+// ── Studio: fabric grows with project progress, confetti on completion ──
+let lastStudioFoKey = '';
+function updateStudioBack() {
+  const fabric = el('studio-fabric');
+  const label = el('studio-back-label');
+  const foCount = el('studio-fo-count');
+  const yarnBall = el('studio-yarn-ball');
+
+  if (state.activeProject) {
+    const pct = state.activeProject.elapsed / state.activeProject.duration;
+    const maxH = 65;
+    fabric.style.height = Math.floor(pct * maxH) + 'px';
+    const neededLines = Math.floor(pct * 10);
+    while (fabric.children.length < neededLines) {
+      const line = document.createElement('div');
+      line.className = 'stitch-line';
+      fabric.appendChild(line);
+    }
+    label.textContent = `Knitting: ${state.activeProject.name}...`;
+    // Yarn ball shrinks as project progresses
+    const scale = 1 - pct * 0.8;
+    yarnBall.style.transform = `scale(${scale.toFixed(2)})`;
+    yarnBall.style.opacity = '1';
+  } else {
+    fabric.style.height = '0px';
+    fabric.innerHTML = '';
+    label.textContent = 'Waiting for a project...';
+    yarnBall.style.transform = 'scale(1)';
+    yarnBall.style.opacity = state.fos > 0 ? '.4' : '1';
+  }
+
+  foCount.textContent = state.fos > 0 ? `${state.fos} finished object${state.fos !== 1 ? 's' : ''} crafted` : '';
+
+  // FO gallery
+  const foKey = JSON.stringify(state.foTypes);
+  if (foKey !== lastStudioFoKey) {
+    lastStudioFoKey = foKey;
+    const gallery = el('studio-fo-gallery');
+    gallery.innerHTML = '';
+    STUDIO_PROJECTS.forEach(proj => {
+      const count = state.foTypes[proj.id] || 0;
+      if (count > 0) {
+        const item = document.createElement('span');
+        item.className = 'fo-gallery-item';
+        item.innerHTML = `${proj.emoji}<span class="fo-gallery-count">x${count}</span>`;
+        item.title = proj.name;
+        gallery.appendChild(item);
+      }
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════
+// GAME LOOP
+// ═══════════════════════════════════════════════
+
+function tick() {
+  // 1. Advance active build
+  if (state.activeBuild) {
+    state.activeBuild.elapsed++;
+    if (state.activeBuild.elapsed >= state.activeBuild.duration) {
+      completeBuild(state.activeBuild.id);
+      state.activeBuild = null;
+    }
+  }
+
+  // 2. Animal Husbander — auto-buy most expensive affordable animal every 60s
+  if (getOwned('husbander') > 0) {
+    state.husbandryTimer++;
+    if (state.husbandryTimer >= 60 && state.activeBuild === null) {
+      // find most expensive animal we can afford
+      let best = null;
+      for (let i = PASTURE_UPGRADES.length - 1; i >= 0; i--) {
+        const u = PASTURE_UPGRADES[i];
+        const cost = getCost(u.baseCost, u.id);
+        if (state.cash >= cost) { best = u; break; }
+      }
+      if (best) {
+        startBuild(best.id, best.baseCost);
+        state.husbandryTimer = 0;
+      }
+    }
+  }
+
+  // 3. Pasture: generate fiber
+  PASTURE_UPGRADES.forEach(u => {
+    state.fiber += getOwned(u.id) * u.fiberPerSec;
+  });
+
+  // 4. Fiber Merchant: auto-sell fiber at $2 each (before mill)
+  if (getOwned('fibermerchant') > 0) {
+    const fiberSold = Math.min(5, state.fiber);
+    state.fiber -= fiberSold;
+    state.cash += fiberSold * 2;
+  }
+
+  // 5. Mill: convert fiber → skeins
+  const processRate = MILL_PROCESSING.reduce((s, u) => s + getOwned(u.id) * u.processPerSec, 0);
+  const processed = Math.min(processRate, state.fiber);
+  state.fiber -= processed;
+  state.skeins += processed;
+
+  // 6. Studio: advance active project
+  if (state.activeProject) {
+    state.activeProject.elapsed++;
+    if (state.activeProject.elapsed >= state.activeProject.duration) {
+      state.cash += state.activeProject.payout;
+      state.fos++;
+      state.foTypes[state.activeProject.id] = (state.foTypes[state.activeProject.id] || 0) + 1;
+      spawnCompletionEmoji(state.activeProject.emoji);
+      state.activeProject = null;
+    }
+  }
+
+  // 6b. Auto-crafter: start random affordable project every 10s
+  if (getOwned('autocrafter') > 0 && !state.activeProject) {
+    state.autocraftTimer++;
+    if (state.autocraftTimer >= 10) {
+      const affordable = STUDIO_PROJECTS.filter(p => state.skeins >= p.skeinCost);
+      if (affordable.length > 0) {
+        const pick = affordable[Math.floor(Math.random() * affordable.length)];
+        startProject(pick);
+        state.autocraftTimer = 0;
+      }
+    }
+  } else if (state.activeProject) {
+    state.autocraftTimer = 0;
+  }
+
+  // 7. Shop: sell skeins (NO base rate)
+  const sellRate = SHOP_UPGRADES.reduce((s, u) => s + getOwned(u.id) * u.skeinsPerSec, 0);
+  const sold = Math.min(sellRate, state.skeins);
+  state.skeins -= sold;
+  state.cash += sold * 5 * state.dyeMultiplier;
+
+  // 8. S.A.B.L.E. passive income
+  if (getOwned('sable') > 0) {
+    state.cash += 500;
+  }
+
+  updateUI();
+  checkMilestones();
+}
+
+// ═══════════════════════════════════════════════
+// STUDIO BACK: COMPLETION EMOJIS
+// ═══════════════════════════════════════════════
+
+function spawnCompletionEmoji(emoji) {
+  const container = el('studio-scene');
+  // big emoji pop
+  const span = document.createElement('span');
+  span.className = 'completion-emoji';
+  span.textContent = emoji;
+  span.style.left = (30 + Math.random() * 40) + '%';
+  span.style.bottom = '35%';
+  container.appendChild(span);
+  setTimeout(() => span.remove(), 2000);
+
+  // confetti burst
+  const confettiColors = ['#d4a5a5','#c4b7d4','#b5c4a8','#f0d6a8','#e8a87c','#a8d0e6'];
+  for (let i = 0; i < 18; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.background = confettiColors[i % confettiColors.length];
+    c.style.left = '50%';
+    c.style.top = '40%';
+    const angle = (Math.PI * 2 / 18) * i;
+    const dist = 40 + Math.random() * 60;
+    c.style.setProperty('--cx', Math.cos(angle) * dist + 'px');
+    c.style.setProperty('--cy', Math.sin(angle) * dist - 30 + 'px');
+    c.style.animationDelay = (Math.random() * 0.15) + 's';
+    container.appendChild(c);
+    setTimeout(() => c.remove(), 1500);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// MILESTONES
+// ═══════════════════════════════════════════════
+
+let toastTimeout = null;
+function showToast(msg) {
+  const toast = el('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  if (toastTimeout) clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+function checkMilestones() {
+  MILESTONES.forEach(m => {
+    if (!state.milestonesHit[m.id] && m.test()) {
+      state.milestonesHit[m.id] = true;
+      showToast(m.msg);
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// WEATHER
+// ═══════════════════════════════════════════════
+
+let currentWeather = 'clear';
+let weatherInterval = null;
+
+function pickWeather() {
+  const month = new Date().getMonth(); // 0-11
+  const isWinter = month === 11 || month <= 1;
+  const r = Math.random();
+  if (isWinter) {
+    if (r < 0.30) currentWeather = 'snow';
+    else if (r < 0.50) currentWeather = 'rain';
+    else if (r < 0.70) currentWeather = 'cloudy';
+    else currentWeather = 'clear';
+  } else {
+    if (r < 0.25) currentWeather = 'rain';
+    else if (r < 0.50) currentWeather = 'cloudy';
+    else currentWeather = 'clear';
+  }
+  renderWeather();
+}
+
+function renderWeather() {
+  const layer = el('weather-layer');
+  layer.innerHTML = '';
+  // always show clouds for cloudy/rain/snow
+  if (currentWeather !== 'clear') {
+    for (let i = 0; i < 3; i++) {
+      const cloud = document.createElement('div');
+      cloud.className = 'cloud';
+      layer.appendChild(cloud);
+    }
+  }
+  // rain or snow particles
+  if (currentWeather === 'rain' || currentWeather === 'snow') {
+    if (weatherInterval) clearInterval(weatherInterval);
+    weatherInterval = setInterval(() => {
+      if (layer.querySelectorAll('.raindrop,.snowflake').length > 15) return;
+      const p = document.createElement('div');
+      if (currentWeather === 'rain') {
+        p.className = 'raindrop';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (0.6 + Math.random() * 0.6) + 's';
+        setTimeout(() => p.remove(), 1500);
+      } else {
+        p.className = 'snowflake';
+        p.textContent = '•';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (3 + Math.random() * 3) + 's';
+        setTimeout(() => p.remove(), 6000);
+      }
+      layer.appendChild(p);
+    }, currentWeather === 'rain' ? 150 : 400);
+  } else {
+    if (weatherInterval) { clearInterval(weatherInterval); weatherInterval = null; }
+  }
+}
+
+// ═══════════════════════════════════════════════
+// SCENE INIT
+// ═══════════════════════════════════════════════
+
+function initScenes() {
+  // Mill: generate spokes
+  const wheel = el('mill-wheel');
+  for (let i = 0; i < 8; i++) {
+    const spoke = document.createElement('div');
+    spoke.className = 'wheel-spoke';
+    spoke.style.transform = `rotate(${i * 45}deg)`;
+    wheel.appendChild(spoke);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// TICKER TAPE
+// ═══════════════════════════════════════════════
+
+// Shuffle deck — cycles through all messages before reshuffling, no back-to-back repeats
+let tickerDeck = [];
+let lastTickerMsg = '';
+function nextTickerMsg() {
+  if (tickerDeck.length === 0) {
+    tickerDeck = [...TICKER_MESSAGES];
+    // Fisher-Yates shuffle
+    for (let i = tickerDeck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [tickerDeck[i], tickerDeck[j]] = [tickerDeck[j], tickerDeck[i]];
+    }
+    // if first in new deck matches last shown, swap with a random later one
+    if (tickerDeck[0] === lastTickerMsg && tickerDeck.length > 1) {
+      const swap = 1 + Math.floor(Math.random() * (tickerDeck.length - 1));
+      [tickerDeck[0], tickerDeck[swap]] = [tickerDeck[swap], tickerDeck[0]];
+    }
+  }
+  lastTickerMsg = tickerDeck.pop();
+  return lastTickerMsg;
+}
+function cycleTicker() {
+  const ticker = el('ticker');
+  ticker.classList.add('fade');
+  setTimeout(() => {
+    ticker.textContent = nextTickerMsg();
+    ticker.classList.remove('fade');
+  }, 500);
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+
+initScenes();
+pickWeather();
+updateUI();
+setInterval(tick, 1000);
+setInterval(cycleTicker, 10000);
+setInterval(spawnShopCustomer, 1500);
+setInterval(wanderAnimals, 3000);
+setInterval(pickWeather, 60000);
+</script>
+</body>
+</html>
