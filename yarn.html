@@ -294,9 +294,21 @@
   }
 
   /* ── Mill Back: Spinning Wheel + Conveyor ── */
-  .mill-scene{width:100%;height:100%;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+  .mill-scene{width:100%;height:100%;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:0}
+  .mill-interior{position:absolute;inset:0;pointer-events:none;z-index:0}
+  .mill-wall{position:absolute;inset:0;background:linear-gradient(180deg,#e8d8c4 0%,#dcc8b0 60%,#d0bca0 100%)}
+  .mill-beam{position:absolute;height:6px;width:100%;background:linear-gradient(180deg,#b8864a,#9a7040);opacity:.25}
+  .mill-beam-1{top:20%}
+  .mill-beam-2{top:65%}
+  .mill-window{position:absolute;top:8%;right:10%;width:40px;height:32px;border-radius:2px;overflow:hidden;border:3px solid #9a7040;box-shadow:inset 0 0 8px rgba(0,0,0,.1)}
+  .mill-window-sky{position:absolute;inset:0;transition:background 2s ease}
+  .mill-window-frame{position:absolute;inset:0;border:none;background:linear-gradient(to right,transparent 48%,#9a7040 48%,#9a7040 52%,transparent 52%),linear-gradient(to bottom,transparent 48%,#9a7040 48%,#9a7040 52%,transparent 52%)}
+  .mill-floor{position:absolute;bottom:0;width:100%;height:8%;background:linear-gradient(180deg,#b8a080 0%,#a89070 100%);border-top:2px solid #9a8060}
+  .mill-dust{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+  .mill-dust-mote{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(220,200,170,.5);animation:dust-float linear infinite}
+  @keyframes dust-float{0%{transform:translateY(100%) translateX(0);opacity:0}10%{opacity:.5}90%{opacity:.3}100%{transform:translateY(-10%) translateX(20px);opacity:0}}
   .css-wheel{
-    position:relative;width:90px;height:90px;
+    position:relative;width:90px;height:90px;z-index:1;
     animation:spin 3s linear infinite;
   }
   .wheel-rim{
@@ -314,22 +326,28 @@
     background:#8b6914;transform-origin:top center;border-radius:1px;
   }
   .conveyor{
-    width:80%;height:24px;position:relative;
+    width:80%;height:24px;position:relative;z-index:1;
     background:rgba(0,0,0,.06);border-radius:12px;overflow:hidden;
   }
-  .conveyor-label{font-size:.65rem;color:var(--text-dim);display:flex;justify-content:space-between;width:80%;opacity:.7}
+  .conveyor-label{font-size:.65rem;color:var(--text-dim);display:flex;justify-content:space-between;width:80%;opacity:.7;position:relative;z-index:1}
   .conv-dot{
-    position:absolute;top:50%;width:10px;height:10px;border-radius:50%;
+    position:absolute;top:50%;width:12px;height:8px;
     transform:translateY(-50%);
-    animation:conv-move 2.5s linear infinite;
+    animation:conv-move 2.5s linear forwards;
   }
   @keyframes conv-move{
-    0%{left:-10px;background:#a08060;transform:translateY(-50%) scale(.8)}
-    40%{background:#b09070}
-    60%{background:#c4a0d0}
-    100%{left:calc(100% + 10px);background:#8a6fa0;transform:translateY(-50%) scale(1)}
+    0%{left:-10px;background:#a08060;border-radius:40% 60% 50% 40%;transform:translateY(-50%) scale(.9) rotate(-5deg);opacity:.8}
+    30%{background:#b09070;border-radius:45% 55% 50% 45%;transform:translateY(-50%) scale(.85) rotate(0deg)}
+    60%{background:#c4a0d0;border-radius:50%;width:10px;height:10px;transform:translateY(-50%) scale(.95) rotate(5deg)}
+    100%{left:calc(100% + 10px);background:#8a6fa0;border-radius:50%;width:10px;height:10px;transform:translateY(-50%) scale(1) rotate(0deg);opacity:1}
   }
-  .mill-rate-label{font-size:.75rem;color:var(--text-dim);font-style:italic;text-align:center}
+  .mill-mouse{position:absolute;bottom:10%;left:15%;z-index:2;opacity:0;transition:opacity .5s;filter:drop-shadow(0 1px 2px rgba(0,0,0,.12))}
+  .mill-mouse.visible{opacity:1}
+  .mill-mouse .mouse-body{animation:mouse-idle 2s ease-in-out infinite}
+  @keyframes mouse-idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+  .mill-mouse.working .mouse-body{animation:mouse-scurry .3s ease-in-out infinite}
+  @keyframes mouse-scurry{0%,100%{transform:translateX(0) rotate(0deg)}50%{transform:translateX(2px) rotate(-3deg)}}
+  .mill-rate-label{font-size:.75rem;color:var(--text);font-style:italic;text-align:center;position:relative;z-index:1;background:rgba(255,255,255,.45);padding:2px 10px;border-radius:6px}
 
   /* ── Shop Back: Yarn District City Map ── */
   .city-scene{width:100%;height:100%;position:relative;overflow:hidden}
@@ -415,14 +433,13 @@
   }
   .city-ambient{position:absolute;inset:0;pointer-events:none;overflow:hidden}
   .city-customer{
-    position:absolute;bottom:10%;font-size:.7rem;
-    animation:city-walk var(--walk-dur,5s) linear forwards;pointer-events:none;
+    position:absolute;font-size:.7rem;pointer-events:none;
+    transition:left 1.2s ease-in-out,top 1.2s ease-in-out,opacity .4s ease,transform .4s ease;
+    will-change:left,top,opacity,transform;
   }
-  @keyframes city-walk{
-    0%{left:-20px;opacity:0}
-    5%{opacity:1}
-    90%{opacity:1}
-    100%{left:calc(100% + 20px);opacity:0}
+  .city-customer.entering{
+    transform:scale(0.2)!important;opacity:0!important;
+    transition:left .5s ease-in,top .5s ease-in,opacity .5s ease-in,transform .5s ease-in;
   }
   .city-info{
     position:absolute;bottom:0;left:0;right:0;
@@ -434,8 +451,25 @@
   .city-info .fo-badge{font-size:.45rem;opacity:.6;font-weight:700}
 
   /* ── Studio Back: Knitting Needles + Fabric ── */
-  .studio-scene{width:100%;height:100%;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
-  .needles-wrap{position:relative;width:120px;height:80px}
+  .studio-scene{width:100%;height:100%;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:0}
+  .studio-room{position:absolute;inset:0;pointer-events:none;z-index:0}
+  .studio-wall{position:absolute;inset:0;background:linear-gradient(180deg,#e8ddd4 0%,#e0d4c8 60%,#d8ccbe 100%)}
+  .studio-window{position:absolute;top:8%;left:8%;width:36px;height:28px;border-radius:2px;overflow:hidden;border:3px solid #b0a090;box-shadow:inset 0 0 6px rgba(0,0,0,.08)}
+  .studio-window-sky{position:absolute;inset:0;transition:background 2s ease}
+  .studio-window-frame{position:absolute;inset:0;background:linear-gradient(to right,transparent 48%,#b0a090 48%,#b0a090 52%,transparent 52%),linear-gradient(to bottom,transparent 48%,#b0a090 48%,#b0a090 52%,transparent 52%)}
+  .studio-lamp{position:absolute;top:10%;left:22%;width:20px}
+  .studio-lamp-shade{width:20px;height:12px;background:linear-gradient(180deg,#f0e0c0,#e8d0a8);border-radius:2px 2px 10px 10px;border:1px solid #d0c0a0}
+  .studio-lamp-pole{width:2px;height:28px;background:#c0b0a0;margin:0 auto}
+  .studio-lamp-glow{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:40px;height:40px;background:radial-gradient(circle,rgba(255,240,200,.2) 0%,transparent 70%);pointer-events:none}
+  .studio-table{position:absolute;bottom:18%;right:8%;width:28px;height:16px;background:linear-gradient(180deg,#c0a880,#a89068);border-radius:2px 2px 0 0;border:1px solid #a08860}
+  .studio-mug{position:absolute;top:-14px;left:50%;transform:translateX(-50%)}
+  .studio-mug-body{width:10px;height:12px;background:linear-gradient(180deg,#f0f0f0,#e0e0e0);border-radius:1px 1px 2px 2px;border:1px solid #c0c0c0;position:relative}
+  .studio-mug-body::after{content:'';position:absolute;right:-4px;top:2px;width:5px;height:6px;border:1px solid #c0c0c0;border-left:none;border-radius:0 3px 3px 0}
+  .studio-mug-steam{position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:12px;height:10px;pointer-events:none}
+  .studio-mug-steam-puff{position:absolute;bottom:0;border-radius:50%;background:rgba(180,170,160,.2);animation:mug-steam 2.5s ease-out forwards}
+  @keyframes mug-steam{0%{opacity:.4;transform:translateY(0) scale(.3)}100%{opacity:0;transform:translateY(-10px) scale(.8)}}
+  .studio-floor{position:absolute;bottom:0;width:100%;height:6%;background:linear-gradient(180deg,#c8b8a0 0%,#b8a890 100%);border-top:1px solid #b0a080}
+  .needles-wrap{position:relative;width:120px;height:80px;z-index:1}
   .needle{
     position:absolute;width:3px;height:90px;
     background:linear-gradient(to bottom,#c0c0c0,#909090);border-radius:2px 2px 0 0;
@@ -445,21 +479,41 @@
     content:'';position:absolute;top:-6px;left:50%;transform:translateX(-50%);
     width:7px;height:7px;background:#d4d4d4;border-radius:50%;
   }
-  .needle-l{left:35%;transform:rotate(-12deg)}
-  .needle-r{right:35%;transform:rotate(12deg)}
+  .needle-l{left:35%;transform:rotate(-12deg);transform-origin:bottom center}
+  .needle-r{right:35%;transform:rotate(12deg);transform-origin:bottom center}
+  .knitting .needle-l{animation:needle-rock-l 0.6s ease-in-out infinite}
+  .knitting .needle-r{animation:needle-rock-r 0.6s ease-in-out infinite}
+  @keyframes needle-rock-l{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(-6deg)}}
+  @keyframes needle-rock-r{0%,100%{transform:rotate(12deg)}50%{transform:rotate(6deg)}}
   .fabric-strip{
     position:absolute;bottom:0;left:50%;transform:translateX(-50%);
     width:50px;border-radius:4px 4px 0 0;
-    background:linear-gradient(180deg,#c4b7d4 0%,#a890c0 50%,#8a6fa0 100%);
+    background:var(--fabric-bg, linear-gradient(180deg,#c4b7d4 0%,#a890c0 50%,#8a6fa0 100%));
     transition:height .5s ease;
     overflow:hidden;
   }
-  .fabric-strip .stitch-line{
-    width:100%;height:4px;
-    border-bottom:1px dashed rgba(255,255,255,.3);
+  .fabric-strip .stitch-row{
+    width:100%;height:5px;
+    border-bottom:1px solid rgba(255,255,255,.15);
+    animation:knit-row-in .3s ease-out;
+    background:var(--row-color, transparent);
   }
-  .studio-project-label{font-size:.78rem;color:var(--text-dim);font-style:italic;text-align:center}
-  .studio-fo-count{font-size:.72rem;color:var(--text-dim);opacity:.7}
+  @keyframes knit-row-in{0%{opacity:0;transform:scaleY(0)}100%{opacity:1;transform:scaleY(1)}}
+  .yarn-trail{width:120px;height:40px;overflow:visible;opacity:0;transition:opacity .5s;position:relative;z-index:1}
+  .yarn-trail.active{opacity:1;animation:yarn-trail-sway 2s ease-in-out infinite}
+  @keyframes yarn-trail-sway{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  .studio-cat{
+    opacity:0;transition:opacity .8s;pointer-events:none;
+    position:absolute;bottom:10%;right:12%;z-index:2;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.15));
+  }
+  .studio-cat.visible{opacity:1;pointer-events:auto}
+  .studio-cat .cat-body{animation:cat-breathe 3s ease-in-out infinite}
+  @keyframes cat-breathe{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-1px) scaleY(1.02)}}
+  .studio-cat.batting .cat-body{animation:cat-bat .4s ease-in-out 3}
+  @keyframes cat-bat{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-8deg) translateX(-3px)}}
+  .studio-project-label{font-size:.78rem;color:var(--text-dim);font-style:italic;text-align:center;position:relative;z-index:1}
+  .studio-fo-count{font-size:.72rem;color:var(--text-dim);opacity:.7;position:relative;z-index:1}
 
   /* confetti burst on completion */
   .confetti{
@@ -849,25 +903,48 @@
   }
 
   /* ── Mill: Piles + Dye Vat ── */
-  .mill-piles{display:flex;align-items:flex-end;justify-content:space-between;width:80%;gap:8px}
-  .mill-pile{display:flex;flex-direction:column;align-items:center;font-size:.85rem;gap:1px;min-width:30px}
+  .mill-piles{display:flex;align-items:flex-end;justify-content:space-between;width:80%;gap:8px;position:relative;z-index:1}
+  .mill-pile{display:flex;flex-direction:column;align-items:center;font-size:.85rem;gap:1px;min-width:30px;position:relative}
   .mill-pile-label{font-size:.6rem;color:var(--text-dim);opacity:.7}
-  .mill-pile-items{display:flex;flex-wrap:wrap;gap:1px;justify-content:center}
-  .dye-vat{font-size:1.4rem;animation:bubble 2s ease-in-out infinite;opacity:0;transition:opacity .5s}
-  .dye-vat.active{opacity:1}
+  .mill-pile-items{display:flex;flex-wrap:wrap;gap:1px;justify-content:center;position:relative;padding:2px 4px;min-height:18px}
+  .mill-pile-shelf .mill-pile-items{padding-bottom:4px;position:relative}
+  .mill-pile-shelf .mill-pile-items::after{content:'';position:absolute;bottom:0;left:-4px;right:-4px;height:3px;background:linear-gradient(180deg,#b8864a,#9a7040);border-radius:1px;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+  .dye-vat-wrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;opacity:0;transition:opacity .5s}
+  .dye-vat-wrap.active{opacity:1}
+  .dye-vat{font-size:1.4rem;animation:bubble 2s ease-in-out infinite}
   @keyframes bubble{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.05)}}
+  .dye-steam{position:absolute;top:-18px;left:50%;width:40px;height:20px;transform:translateX(-50%);pointer-events:none;overflow:visible}
+  .dye-steam-puff{position:absolute;bottom:0;border-radius:50%;background:rgba(180,160,140,.25);animation:dye-steam-rise 2s ease-out forwards}
+  @keyframes dye-steam-rise{0%{opacity:.5;transform:translateY(0) scale(.5)}100%{opacity:0;transform:translateY(-18px) scale(1.2)}}
+  .dye-bubbles{position:absolute;bottom:8px;left:50%;width:24px;height:8px;transform:translateX(-50%);pointer-events:none;overflow:visible}
+  .dye-bubble{position:absolute;border-radius:50%;background:rgba(180,140,180,.4);animation:dye-bubble-pop 1.5s ease-out forwards}
+  @keyframes dye-bubble-pop{0%{opacity:.6;transform:translateY(0) scale(.3)}60%{opacity:.4;transform:translateY(-6px) scale(.8)}100%{opacity:0;transform:translateY(-10px) scale(0)}}
 
   /* ── Studio: Yarn Ball + FO Gallery ── */
   .yarn-supply{
     font-size:1.8rem;transition:transform .5s ease;
     filter:drop-shadow(0 2px 4px rgba(0,0,0,.1));
+    position:relative;z-index:1;
   }
   .fo-gallery{
-    display:flex;gap:3px;justify-content:center;flex-wrap:wrap;
-    max-width:90%;font-size:.85rem;opacity:.65;
+    display:flex;gap:2px;justify-content:center;flex-wrap:wrap;
+    max-width:92%;font-size:.85rem;
+    position:relative;z-index:1;
+    padding:4px 6px 6px;
+    background:linear-gradient(180deg,rgba(180,160,130,.08) 0%,rgba(180,160,130,.15) 100%);
+    border-radius:4px;
+    border-bottom:2px solid rgba(160,140,110,.25);
+    min-height:0;
   }
-  .fo-gallery-item{display:flex;align-items:center;gap:1px}
-  .fo-gallery-count{font-size:.55rem;color:var(--text-dim)}
+  .fo-gallery:empty{display:none}
+  .fo-gallery-item{
+    display:flex;flex-direction:column;align-items:center;gap:0;
+    padding:2px 3px 1px;border-radius:3px;
+    background:rgba(255,255,255,.35);
+    transition:transform .2s;
+  }
+  .fo-gallery-item:hover{transform:scale(1.15)}
+  .fo-gallery-count{font-size:.5rem;color:var(--text-dim);line-height:1}
 
   /* ── World Map ── */
   .country-bar{
@@ -1040,17 +1117,46 @@
         </div>
         <div class="back-visual" id="back-mill">
           <div class="mill-scene" id="mill-scene">
+            <div class="mill-interior">
+              <div class="mill-wall"></div>
+              <div class="mill-beam mill-beam-1"></div>
+              <div class="mill-beam mill-beam-2"></div>
+              <div class="mill-window" id="mill-window">
+                <div class="mill-window-sky" id="mill-window-sky"></div>
+                <div class="mill-window-frame"></div>
+              </div>
+              <div class="mill-floor"></div>
+              <div class="mill-dust" id="mill-dust"></div>
+            </div>
+            <div class="mill-mouse" id="mill-mouse" title="Spindle the mill mouse">
+              <svg width="24" height="18" viewBox="0 0 48 36">
+                <g class="mouse-body">
+                  <ellipse cx="24" cy="24" rx="12" ry="8" fill="#c0b0a0" stroke="#9a8a7a" stroke-width="1.2"/>
+                  <circle cx="14" cy="18" r="6" fill="#c0b0a0" stroke="#9a8a7a" stroke-width="1.2"/>
+                  <ellipse cx="10" cy="14" rx="4" ry="5" fill="#d8c8b8" stroke="#9a8a7a" stroke-width="1"/>
+                  <ellipse cx="18" cy="14" rx="4" ry="5" fill="#d8c8b8" stroke="#9a8a7a" stroke-width="1"/>
+                  <circle cx="12" cy="17" r="1" fill="#3a3020"/>
+                  <circle cx="16" cy="17" r="1" fill="#3a3020"/>
+                  <ellipse cx="14" cy="19" rx="1.2" ry=".8" fill="#e0a0a0"/>
+                  <path d="M36,22 Q44,20 46,24" fill="none" stroke="#c0b0a0" stroke-width="1.5" stroke-linecap="round"/>
+                </g>
+              </svg>
+            </div>
             <div class="css-wheel" id="mill-wheel">
               <div class="wheel-rim"></div>
               <div class="wheel-hub"></div>
             </div>
             <div class="mill-piles">
               <div class="mill-pile"><div class="mill-pile-items" id="mill-fiber-pile"></div><div class="mill-pile-label">fiber</div></div>
-              <div class="mill-pile"><div class="mill-pile-items" id="mill-skein-pile"></div><div class="mill-pile-label">skeins</div></div>
+              <div class="mill-pile mill-pile-shelf"><div class="mill-pile-items" id="mill-skein-pile"></div><div class="mill-pile-label">skeins</div></div>
             </div>
             <div class="conveyor" id="mill-conveyor"></div>
             <div class="conveyor-label"><span><svg width="14" height="14" viewBox="0 0 64 64"><path d="M32,58 Q30,40 32,20" fill="none" stroke="#6a8a55" stroke-width="2" stroke-linecap="round"/><path d="M32,42 Q20,34 18,24 Q28,28 32,36" fill="#e4ecda" stroke="#6a8a55" stroke-width="1.5"/><path d="M32,34 Q44,26 46,16 Q36,20 32,28" fill="#e4ecda" stroke="#6a8a55" stroke-width="1.5"/><path d="M32,26 Q22,18 22,8 Q30,14 32,20" fill="#e4ecda" stroke="#6a8a55" stroke-width="1.5"/></svg> fiber</span><span><svg width="14" height="14" viewBox="0 0 64 64"><circle cx="30" cy="34" r="20" fill="#d4a5a5" stroke="#9e6060" stroke-width="2"/><path d="M12,28 Q30,16 48,28" fill="none" stroke="#9e6060" stroke-width="1.5" opacity=".5"/><path d="M12,40 Q30,50 48,40" fill="none" stroke="#9e6060" stroke-width="1.5" opacity=".5"/></svg> skeins</span></div>
-            <div class="dye-vat" id="mill-dye-vat"><svg width="28" height="28" viewBox="0 0 64 64"><path d="M12,28 L12,48 Q12,54 18,54 L46,54 Q52,54 52,48 L52,28" fill="#d4a5a5" stroke="#9e6060" stroke-width="2"/><ellipse cx="32" cy="28" rx="20" ry="5" fill="#d4a5a5" stroke="#9e6060" stroke-width="2"/><path d="M12,34 Q6,34 6,40 Q6,46 12,46" fill="none" stroke="#9e6060" stroke-width="2" stroke-linecap="round"/><path d="M52,34 Q58,34 58,40 Q58,46 52,46" fill="none" stroke="#9e6060" stroke-width="2" stroke-linecap="round"/><path d="M22,28 Q26,24 30,28 Q34,32 38,28" fill="none" stroke="#9e6060" stroke-width="2" opacity=".5"/></svg></div>
+            <div class="dye-vat-wrap" id="mill-dye-wrap">
+              <div class="dye-steam" id="mill-dye-steam"></div>
+              <div class="dye-vat" id="mill-dye-vat"><svg width="28" height="28" viewBox="0 0 64 64"><path d="M12,28 L12,48 Q12,54 18,54 L46,54 Q52,54 52,48 L52,28" fill="#d4a5a5" stroke="#9e6060" stroke-width="2"/><ellipse cx="32" cy="28" rx="20" ry="5" fill="#d4a5a5" stroke="#9e6060" stroke-width="2"/><path d="M12,34 Q6,34 6,40 Q6,46 12,46" fill="none" stroke="#9e6060" stroke-width="2" stroke-linecap="round"/><path d="M52,34 Q58,34 58,40 Q58,46 52,46" fill="none" stroke="#9e6060" stroke-width="2" stroke-linecap="round"/><path d="M22,28 Q26,24 30,28 Q34,32 38,28" fill="none" stroke="#9e6060" stroke-width="2" opacity=".5"/></svg></div>
+              <div class="dye-bubbles" id="mill-dye-bubbles"></div>
+            </div>
             <div class="mill-rate-label" id="mill-rate-label">No equipment yet</div>
           </div>
         </div>
@@ -1110,11 +1216,47 @@
         </div>
         <div class="back-visual" id="back-studio">
           <div class="studio-scene" id="studio-scene">
+            <div class="studio-room">
+              <div class="studio-wall"></div>
+              <div class="studio-window" id="studio-window">
+                <div class="studio-window-sky" id="studio-window-sky"></div>
+                <div class="studio-window-frame"></div>
+              </div>
+              <div class="studio-lamp">
+                <div class="studio-lamp-shade"></div>
+                <div class="studio-lamp-pole"></div>
+                <div class="studio-lamp-glow"></div>
+              </div>
+              <div class="studio-table">
+                <div class="studio-mug">
+                  <div class="studio-mug-body"></div>
+                  <div class="studio-mug-steam" id="studio-mug-steam"></div>
+                </div>
+              </div>
+              <div class="studio-floor"></div>
+            </div>
             <div class="yarn-supply" id="studio-yarn-ball"><svg width="28" height="28" viewBox="0 0 64 64"><g class="svg-wobble"><circle cx="30" cy="34" r="20" fill="#d4a5a5" stroke="#9e6060" stroke-width="2"/><path d="M12,28 Q30,16 48,28" fill="none" stroke="#9e6060" stroke-width="1.5" opacity=".5"/><path d="M12,40 Q30,50 48,40" fill="none" stroke="#9e6060" stroke-width="1.5" opacity=".5"/><path d="M18,16 Q28,34 18,52" fill="none" stroke="#9e6060" stroke-width="1.2" opacity=".35"/><path d="M42,16 Q32,34 42,52" fill="none" stroke="#9e6060" stroke-width="1.2" opacity=".35"/></g></svg></div>
+            <svg class="yarn-trail" id="studio-yarn-trail" viewBox="0 0 120 40" preserveAspectRatio="none"><path d="M10,35 Q30,5 60,20 T110,8" fill="none" stroke="#d4a5a5" stroke-width="1.5" stroke-linecap="round" opacity=".6"/></svg>
             <div class="needles-wrap">
               <div class="needle needle-l"></div>
               <div class="needle needle-r"></div>
               <div class="fabric-strip" id="studio-fabric" style="height:0px"></div>
+            </div>
+            <div class="studio-cat" id="studio-cat" title="Purl the studio cat">
+              <svg width="32" height="24" viewBox="0 0 64 48">
+                <g class="cat-body">
+                  <ellipse cx="32" cy="36" rx="18" ry="10" fill="#8a7a6a" stroke="#6a5a4a" stroke-width="1.5"/>
+                  <circle cx="20" cy="26" r="9" fill="#8a7a6a" stroke="#6a5a4a" stroke-width="1.5"/>
+                  <polygon points="13,20 11,8 19,18" fill="#8a7a6a" stroke="#6a5a4a" stroke-width="1"/>
+                  <polygon points="13,20 15,10 19,18" fill="#a08a7a"/>
+                  <polygon points="27,20 25,8 31,18" fill="#8a7a6a" stroke="#6a5a4a" stroke-width="1"/>
+                  <polygon points="27,20 29,10 31,18" fill="#a08a7a"/>
+                  <circle cx="17" cy="25" r="1.5" fill="#3a3a2a"/>
+                  <circle cx="24" cy="25" r="1.5" fill="#3a3a2a"/>
+                  <ellipse cx="20.5" cy="27.5" rx="1.5" ry="1" fill="#d4a0a0"/>
+                  <path d="M48,30 Q56,28 54,36" fill="none" stroke="#8a7a6a" stroke-width="2.5" stroke-linecap="round"/>
+                </g>
+              </svg>
             </div>
             <div class="studio-project-label" id="studio-back-label">Waiting for a project...</div>
             <div class="studio-fo-count" id="studio-fo-count"></div>
@@ -1898,12 +2040,14 @@ const COUNTRIES = [
   {
     id: 'home', name: 'Home Farm', flag: '🏡', cost: 0, desc: 'Where it all began',
     mapX: 20, mapY: 35, pinColor: '#7b9e6b',
+    landscape: null,
     animals: null, millProcessing: null, millDye: null,
     shopUpgrades: null, studioProjects: null, studioUpgrade: null,
   },
   {
     id: 'scotland', name: 'Scotland', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', cost: 1000000, desc: 'Highland wool & heritage tweeds',
     mapX: 19, mapY: 24, pinColor: '#5a7a9a',
+    landscape: { hills: ['#8a9f8a','#7a8e75','#6b7d65'], skyTint: '#c8d4c4' },
     animals: [
       { id: 'shetland',  name: 'Shetland Sheep',    emoji: '🐑', baseCost: 8000,   fiberPerSec: 80,  desc: '+80 fiber/s — Fine & Fair Isle ready' },
       { id: 'blackface', name: 'Scottish Blackface', emoji: '🐏', baseCost: 15000,  fiberPerSec: 200, desc: '+200 fiber/s — Rugged highland wool' },
@@ -1929,6 +2073,7 @@ const COUNTRIES = [
   {
     id: 'peru', name: 'Peru', flag: '🇵🇪', cost: 2500000, desc: 'Luxurious South American fibers',
     mapX: 14, mapY: 62, pinColor: '#c4734a',
+    landscape: { hills: ['#c4a882','#b89570','#a8855e'], skyTint: '#e0d4c0' },
     animals: [
       { id: 'huacaya', name: 'Huacaya Alpaca', emoji: '🦙', baseCost: 20000,  fiberPerSec: 150, desc: '+150 fiber/s — Fluffy cloud fiber' },
       { id: 'vicuna',  name: 'Vicuna',         emoji: '🦌', baseCost: 100000, fiberPerSec: 500, desc: '+500 fiber/s — The rarest fiber on Earth' },
@@ -1954,6 +2099,7 @@ const COUNTRIES = [
   {
     id: 'iceland', name: 'Iceland', flag: '🇮🇸', cost: 5000000, desc: 'Viking wool & Lopi traditions',
     mapX: 30, mapY: 20, pinColor: '#7aaac4',
+    landscape: { hills: ['#9ab0b8','#88a0aa','#758e98'], skyTint: '#c8d8e0' },
     animals: [
       { id: 'icelandic',   name: 'Icelandic Sheep', emoji: '🐑', baseCost: 40000,  fiberPerSec: 300, desc: '+300 fiber/s — Dual-coated: tog & thel' },
       { id: 'leadersheep', name: 'Leader Sheep',     emoji: '🐏', baseCost: 200000, fiberPerSec: 800, desc: '+800 fiber/s — Ancient and intelligent' },
@@ -1977,6 +2123,7 @@ const COUNTRIES = [
   {
     id: 'japan', name: 'Japan', flag: '🇯🇵', cost: 10000000, desc: 'Silk & precision blending',
     mapX: 70, mapY: 32, pinColor: '#c45a6a',
+    landscape: { hills: ['#b5c4a0','#a0b58a','#8ca578'], skyTint: '#dce4d0' },
     animals: [
       { id: 'silkmoth', name: 'Silk Moth Colony',      emoji: '🦋', baseCost: 80000,  fiberPerSec: 400,  desc: '+400 fiber/s — Bombyx mori silk' },
       { id: 'akitainu', name: 'Akita Dog (Chiengora)', emoji: '🐕', baseCost: 300000, fiberPerSec: 1000, desc: '+1000 fiber/s — Luxury blend' },
@@ -2002,6 +2149,7 @@ const COUNTRIES = [
   {
     id: 'australia', name: 'Australia', flag: '🇦🇺', cost: 20000000, desc: 'Merino premium & industrial scale',
     mapX: 80, mapY: 66, pinColor: '#b89040',
+    landscape: { hills: ['#c9a060','#b88d4a','#a67a38'], skyTint: '#e4d8b8' },
     animals: [
       { id: 'supermerino', name: 'Superfine Merino', emoji: '🐑', baseCost: 150000, fiberPerSec: 600,  desc: '+600 fiber/s — <15 micron luxury' },
       { id: 'wombat',      name: 'Fiber Wombat',     emoji: '🦡', baseCost: 500000, fiberPerSec: 2000, desc: '+2000 fiber/s — Adorable bulk producer' },
@@ -2750,17 +2898,32 @@ function wanderAnimals() {
 }
 
 function updatePastureBack() {
-  // Sky colour based on real time
+  // Per-country landscape
+  const country = getActiveCountry();
+  const ls = country.landscape;
+  const tint = ls?.skyTint || '#d6e2c8';
+  const nightTint = ls ? ls.hills[0] : '#6b7a60';
+
+  // Sky colour based on real time + country tint
   const hour = new Date().getHours();
   let skyColor;
-  if (hour >= 6 && hour < 8) skyColor = 'linear-gradient(180deg,#fdd8a5 0%,#fceabb 50%,#d6e2c8 100%)'; // dawn
-  else if (hour >= 8 && hour < 17) skyColor = 'linear-gradient(180deg,#a8d0e6 0%,#d6e8f0 40%,#e4ecda 100%)'; // day
-  else if (hour >= 17 && hour < 20) skyColor = 'linear-gradient(180deg,#e8a87c 0%,#ddb892 40%,#d6e2c8 100%)'; // sunset
-  else skyColor = 'linear-gradient(180deg,#2c3e6b 0%,#4a5a80 40%,#6b7a60 100%)'; // night
+  if (hour >= 6 && hour < 8) skyColor = `linear-gradient(180deg,#fdd8a5 0%,#fceabb 50%,${tint} 100%)`; // dawn
+  else if (hour >= 8 && hour < 17) skyColor = `linear-gradient(180deg,#a8d0e6 0%,#d6e8f0 40%,${tint} 100%)`; // day
+  else if (hour >= 17 && hour < 20) skyColor = `linear-gradient(180deg,#e8a87c 0%,#ddb892 40%,${tint} 100%)`; // sunset
+  else skyColor = `linear-gradient(180deg,#2c3e6b 0%,#4a5a80 40%,${nightTint} 100%)`; // night
   el('pasture-sky').style.background = skyColor;
 
+  // Apply hill colors
+  const hills = el('pasture-scene').querySelectorAll('.hill');
+  if (ls) {
+    if (hills[0]) hills[0].style.background = ls.hills[0];
+    if (hills[1]) hills[1].style.background = ls.hills[1];
+    if (hills[2]) hills[2].style.background = ls.hills[2];
+  } else {
+    hills.forEach(h => h.style.background = '');
+  }
+
   // Build desired animal list (current country only)
-  const country = getActiveCountry();
   const visibleAnimals = state.currentCountry === 'home' ? PASTURE_UPGRADES : (country.animals || []);
   const desired = [];
   let total = 0;
@@ -2831,16 +2994,51 @@ let conveyorInterval = null;
 let lastProcessRate = -1;
 let lastMillFiber = -1;
 let lastMillSkeins = -1;
+let millDustInterval = null;
 function updateMillBack() {
   const processRate = getAllMillProcessing().reduce((s, u) => s + getOwned(u.id) * u.processPerSec, 0);
   el('mill-rate-label').textContent = processRate > 0
     ? `Spinning ${fmt(processRate)} fiber/s`
     : 'No equipment yet';
 
+  // Window sky — sync with pasture day/night
+  const hour = new Date().getHours();
+  let winSky;
+  if (hour >= 6 && hour < 8) winSky = 'linear-gradient(180deg,#fdd8a5,#fceabb)';
+  else if (hour >= 8 && hour < 17) winSky = 'linear-gradient(180deg,#a8d0e6,#d6e8f0)';
+  else if (hour >= 17 && hour < 20) winSky = 'linear-gradient(180deg,#e8a87c,#ddb892)';
+  else winSky = 'linear-gradient(180deg,#2c3e6b,#4a5a80)';
+  el('mill-window-sky').style.background = winSky;
+
+  // Dust motes — spawn when mill is active
+  if (processRate > 0 && !millDustInterval) {
+    millDustInterval = setInterval(() => {
+      const dust = el('mill-dust');
+      if (dust.children.length > 8) return;
+      const mote = document.createElement('div');
+      mote.className = 'mill-dust-mote';
+      mote.style.left = (10 + Math.random() * 80) + '%';
+      mote.style.bottom = (Math.random() * 60) + '%';
+      mote.style.animationDuration = (4 + Math.random() * 4) + 's';
+      mote.style.width = mote.style.height = (2 + Math.random() * 2) + 'px';
+      dust.appendChild(mote);
+      setTimeout(() => mote.remove(), 8000);
+    }, 800);
+  } else if (processRate === 0 && millDustInterval) {
+    clearInterval(millDustInterval);
+    millDustInterval = null;
+  }
+
   // Wheel visibility
   const wheel = el('mill-wheel');
   wheel.style.opacity = processRate > 0 ? '1' : '.25';
   wheel.style.animationDuration = processRate > 10 ? '1.5s' : '3s';
+
+  // Mill mouse — appears when equipment is owned
+  const mouse = el('mill-mouse');
+  const hasEquip = processRate > 0 || getAllMillProcessing().some(u => getOwned(u.id) > 0);
+  mouse.classList.toggle('visible', hasEquip);
+  mouse.classList.toggle('working', processRate > 0);
 
   // Fiber & skein piles
   const fiberCount = Math.min(5, Math.ceil(state.fiber / 50));
@@ -2861,8 +3059,32 @@ function updateMillBack() {
   // Dye vat
   const hasDye = getOwned('kettle') > 0 || getOwned('speckle') > 0;
   const vat = el('mill-dye-vat');
+  const vatWrap = el('mill-dye-wrap');
   vat.innerHTML = getOwned('speckle') > 0 ? (icon('speckle', 28) || '🎨') : (icon('kettle', 28) || '🫕');
-  vat.classList.toggle('active', hasDye);
+  vatWrap.classList.toggle('active', hasDye);
+  // Steam & bubble spawning
+  if (hasDye && !vatWrap._steamInterval) {
+    vatWrap._steamInterval = setInterval(() => {
+      const steam = el('mill-dye-steam');
+      const puff = document.createElement('div');
+      puff.className = 'dye-steam-puff';
+      puff.style.left = (8 + Math.random() * 24) + 'px';
+      puff.style.width = puff.style.height = (4 + Math.random() * 5) + 'px';
+      steam.appendChild(puff);
+      setTimeout(() => puff.remove(), 2000);
+      // Bubble
+      const bubbles = el('mill-dye-bubbles');
+      const b = document.createElement('div');
+      b.className = 'dye-bubble';
+      b.style.left = (2 + Math.random() * 18) + 'px';
+      b.style.width = b.style.height = (2 + Math.random() * 4) + 'px';
+      bubbles.appendChild(b);
+      setTimeout(() => b.remove(), 1500);
+    }, 600);
+  } else if (!hasDye && vatWrap._steamInterval) {
+    clearInterval(vatWrap._steamInterval);
+    vatWrap._steamInterval = null;
+  }
 
   // Manage conveyor dots — only update if rate changed
   if (processRate !== lastProcessRate) {
@@ -2889,6 +3111,7 @@ const YARN_COLORS = ['#d4a5a5','#c4b7d4','#b5c4a8','#f0d6a8','#a8c4d4','#d4c4a8'
 const CUSTOMER_EMOJIS = ['🧑‍🦰','👩‍🦱','🧓','👩','👨‍🦳','🧑‍🦲','👩‍🦰','👨'];
 let cityBuildingKey = '';
 let cityFoKey = '';
+const cityCustomers = [];
 
 function buildCityBuilding(shop) {
   const windowCount = shop.size === 'large' ? 4 : shop.size === 'medium' ? 2 : 1;
@@ -2968,19 +3191,103 @@ function updateCityMap() {
   el('city-info').innerHTML = infoHTML;
 }
 
+function randomCityWaypoint() {
+  return { x: 8 + Math.random() * 84, y: 10 + Math.random() * 80 };
+}
+
 function spawnCityCustomer() {
   const sellRate = getAllShopUpgrades().reduce((s, u) => s + getOwned(u.id) * u.skeinsPerSec, 0);
   if (sellRate <= 0) return;
+  if (cityCustomers.length >= 5) return;
   const ambient = el('city-ambient');
-  if (ambient.children.length > 5) return;
   const c = document.createElement('span');
   c.className = 'city-customer';
   c.textContent = CUSTOMER_EMOJIS[Math.floor(Math.random() * CUSTOMER_EMOJIS.length)];
-  const dur = 4 + Math.random() * 3;
-  c.style.setProperty('--walk-dur', dur + 's');
-  c.style.bottom = (8 + Math.random() * 30) + '%';
+  // Spawn from a random edge
+  const edge = Math.floor(Math.random() * 4);
+  let sx, sy;
+  if (edge === 0)      { sx = 10 + Math.random() * 80; sy = -3; }
+  else if (edge === 1) { sx = 103; sy = 15 + Math.random() * 70; }
+  else if (edge === 2) { sx = 10 + Math.random() * 80; sy = 103; }
+  else                 { sx = -3;  sy = 15 + Math.random() * 70; }
+  c.style.left = sx + '%';
+  c.style.top = sy + '%';
+  c.style.opacity = '0';
   ambient.appendChild(c);
-  setTimeout(() => c.remove(), (dur + 1) * 1000);
+  requestAnimationFrame(() => { c.style.opacity = '1'; });
+  const wp = randomCityWaypoint();
+  cityCustomers.push({
+    el: c, x: sx, y: sy, targetX: wp.x, targetY: wp.y,
+    speed: 1.5 + Math.random() * 1.5, entering: false,
+    lifetime: 40 + Math.floor(Math.random() * 20),
+  });
+}
+
+function removeCityCustomer(cust) {
+  cust.el.remove();
+  const idx = cityCustomers.indexOf(cust);
+  if (idx !== -1) cityCustomers.splice(idx, 1);
+}
+
+function walkOffEdge(cust) {
+  cust.entering = true;
+  const edges = [
+    { x: cust.x, y: -5 }, { x: 105, y: cust.y },
+    { x: cust.x, y: 105 }, { x: -5, y: cust.y },
+  ];
+  let best = edges[0], bestD = Infinity;
+  for (const e of edges) {
+    const d = Math.hypot(e.x - cust.x, e.y - cust.y);
+    if (d < bestD) { bestD = d; best = e; }
+  }
+  cust.el.style.left = best.x + '%';
+  cust.el.style.top = best.y + '%';
+  cust.el.style.opacity = '0';
+  setTimeout(() => removeCityCustomer(cust), 1500);
+}
+
+function tickCityCustomers() {
+  const activeShops = CITY_SHOPS.filter(s =>
+    s.openCondition() && s.upgradeIds.some(id => getOwned(id) > 0)
+  );
+  for (let i = cityCustomers.length - 1; i >= 0; i--) {
+    const cust = cityCustomers[i];
+    if (cust.entering) continue;
+    cust.lifetime--;
+    const dx = cust.targetX - cust.x;
+    const dy = cust.targetY - cust.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 3) {
+      const wp = randomCityWaypoint();
+      cust.targetX = wp.x;
+      cust.targetY = wp.y;
+      if (Math.random() < 0.3) continue; // pause this tick
+    } else {
+      const mx = (dx / dist) * cust.speed;
+      const my = (dy / dist) * cust.speed;
+      const wobble = (Math.random() - 0.5) * 0.8;
+      cust.x += mx + wobble * (dy / dist);
+      cust.y += my + wobble * (-dx / dist);
+    }
+    cust.el.style.transform = dx > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+    cust.el.style.left = cust.x + '%';
+    cust.el.style.top = cust.y + '%';
+    // Check proximity to active shops
+    let entered = false;
+    for (const shop of activeShops) {
+      if (Math.hypot(cust.x - shop.mapX, cust.y - shop.mapY) < 5) {
+        cust.entering = true;
+        cust.el.style.left = shop.mapX + '%';
+        cust.el.style.top = shop.mapY + '%';
+        cust.el.classList.add('entering');
+        const ref = cust;
+        setTimeout(() => removeCityCustomer(ref), 600);
+        entered = true;
+        break;
+      }
+    }
+    if (!entered && cust.lifetime <= 0) walkOffEdge(cust);
+  }
 }
 
 // ── Shop Detail Modal ──
@@ -3078,22 +3385,76 @@ function closeShopDetail() {
 }
 
 // ── Studio: fabric grows with project progress, confetti on completion ──
+const FABRIC_PATTERNS = {
+  swatch:    { bg:'linear-gradient(180deg,#e8e0d0 0%,#d8d0c0 100%)', rows:['#d8d0c0','#c8c0b0'] },
+  socks:     { bg:'linear-gradient(180deg,#c4d8e8 0%,#90b0c8 100%)', rows:['#a0c0d4','#80a8c0','#c4d8e8'] },
+  beanie:    { bg:'linear-gradient(180deg,#e8c4c4 0%,#d4a0a0 100%)', rows:['#d4a0a0','#e8c4c4','#c89090'] },
+  shawl:     { bg:'linear-gradient(180deg,#d4e0c4 0%,#b0c898 100%)', rows:['#c0d4a8','#d4e0c4','#a8c090'] },
+  sweater:   { bg:'linear-gradient(180deg,#c4b7d4 0%,#a890c0 100%)', rows:['#a890c0','#d4c4e0','#c4b7d4','#8a6fa0'] },
+  blanket:   { bg:'linear-gradient(180deg,#f0d6a8 0%,#e8c088 100%)', rows:['#e8c088','#d4a878','#f0d6a8','#c89868','#f0e0c0'] },
+  tweed_cap: { bg:'linear-gradient(180deg,#a8b098 0%,#889078 100%)', rows:['#889078','#98a888','#788868'] },
+  fair_isle: { bg:'linear-gradient(180deg,#d4c4b0 0%,#b8a890 100%)', rows:['#b8a890','#d4c4b0','#c0402020','#d4c4b0'] },
+  kilt:      { bg:'linear-gradient(180deg,#2855a0 0%,#1a4080 100%)', rows:['#1a4080','#2855a0','#40a060','#2855a0'] },
+  chullo:    { bg:'linear-gradient(180deg,#e05050 0%,#c04040 100%)', rows:['#c04040','#f0d040','#e05050','#f0f0f0'] },
+  poncho:    { bg:'linear-gradient(180deg,#d4b896 0%,#c0a078 100%)', rows:['#c0a078','#d4b896','#e0c8a8'] },
+  vicscarf:  { bg:'linear-gradient(180deg,#f0e8d8 0%,#e0d0b8 100%)', rows:['#e0d0b8','#f0e8d8'] },
+  lopapeysa: { bg:'linear-gradient(180deg,#606060 0%,#404040 100%)', rows:['#404040','#f0f0f0','#606060','#f0f0f0'] },
+  vikinghood:{ bg:'linear-gradient(180deg,#8b6914 0%,#6a5010 100%)', rows:['#6a5010','#8b6914','#a08020'] },
+  iceblanket:{ bg:'linear-gradient(180deg,#90b8d8 0%,#6898c0 100%)', rows:['#6898c0','#90b8d8','#b0d8f0','#78a8d0'] },
+  furoshiki: { bg:'linear-gradient(180deg,#c04060 0%,#a03050 100%)', rows:['#a03050','#d0a050','#c04060'] },
+  kimono:    { bg:'linear-gradient(180deg,#e8d0e0 0%,#d0b0c8 100%)', rows:['#d0b0c8','#e8d0e0','#c098b0'] },
+  obi:       { bg:'linear-gradient(180deg,#302020 0%,#1a1010 100%)', rows:['#1a1010','#c0a020','#302020'] },
+  surfscarf: { bg:'linear-gradient(180deg,#40b0c0 0%,#2890a0 100%)', rows:['#2890a0','#f0f0e0','#40b0c0'] },
+  outback:   { bg:'linear-gradient(180deg,#c09060 0%,#a07848 100%)', rows:['#a07848','#c09060','#d8a878'] },
+  dreaming:  { bg:'linear-gradient(180deg,#6040a0 0%,#402880 100%)', rows:['#402880','#f0c040','#6040a0','#e06040','#4080c0'] },
+};
 let lastStudioFoKey = '';
+let studioSteamInterval = null;
 function updateStudioBack() {
   const fabric = el('studio-fabric');
   const label = el('studio-back-label');
   const foCount = el('studio-fo-count');
   const yarnBall = el('studio-yarn-ball');
 
+  // Studio room — window sky sync
+  const sHour = new Date().getHours();
+  let sSky;
+  if (sHour >= 6 && sHour < 8) sSky = 'linear-gradient(180deg,#fdd8a5,#fceabb)';
+  else if (sHour >= 8 && sHour < 17) sSky = 'linear-gradient(180deg,#a8d0e6,#d6e8f0)';
+  else if (sHour >= 17 && sHour < 20) sSky = 'linear-gradient(180deg,#e8a87c,#ddb892)';
+  else sSky = 'linear-gradient(180deg,#2c3e6b,#4a5a80)';
+  el('studio-window-sky').style.background = sSky;
+
+  // Mug steam
+  if (!studioSteamInterval) {
+    studioSteamInterval = setInterval(() => {
+      const steam = el('studio-mug-steam');
+      if (steam.children.length > 3) return;
+      const puff = document.createElement('div');
+      puff.className = 'studio-mug-steam-puff';
+      puff.style.left = (2 + Math.random() * 6) + 'px';
+      puff.style.width = puff.style.height = (3 + Math.random() * 3) + 'px';
+      steam.appendChild(puff);
+      setTimeout(() => puff.remove(), 2500);
+    }, 700);
+  }
+
+  const needlesWrap = el('studio-scene').querySelector('.needles-wrap');
+  const yarnTrail = el('studio-yarn-trail');
   if (state.activeProject) {
+    needlesWrap.classList.add('knitting');
+    yarnTrail.classList.add('active');
     const pct = state.activeProject.elapsed / state.activeProject.duration;
     const maxH = 65;
     fabric.style.height = Math.floor(pct * maxH) + 'px';
-    const neededLines = Math.floor(pct * 10);
-    while (fabric.children.length < neededLines) {
-      const line = document.createElement('div');
-      line.className = 'stitch-line';
-      fabric.appendChild(line);
+    const pat = FABRIC_PATTERNS[state.activeProject.id];
+    if (pat) fabric.style.setProperty('--fabric-bg', pat.bg);
+    const neededRows = Math.floor(pct * 12);
+    while (fabric.children.length < neededRows) {
+      const row = document.createElement('div');
+      row.className = 'stitch-row';
+      if (pat) row.style.setProperty('--row-color', pat.rows[fabric.children.length % pat.rows.length]);
+      fabric.appendChild(row);
     }
     label.textContent = `Knitting: ${state.activeProject.name}...`;
     // Yarn ball shrinks as project progresses
@@ -3101,6 +3462,8 @@ function updateStudioBack() {
     yarnBall.style.transform = `scale(${scale.toFixed(2)})`;
     yarnBall.style.opacity = '1';
   } else {
+    needlesWrap.classList.remove('knitting');
+    yarnTrail.classList.remove('active');
     fabric.style.height = '0px';
     fabric.innerHTML = '';
     label.textContent = 'Waiting for a project...';
@@ -3109,6 +3472,14 @@ function updateStudioBack() {
   }
 
   foCount.textContent = state.fos > 0 ? `${state.fos} finished object${state.fos !== 1 ? 's' : ''} crafted` : '';
+
+  // Studio cat — appears after first FO
+  const cat = el('studio-cat');
+  cat.classList.toggle('visible', state.fos > 0);
+  if (state.fos > 0 && state.activeProject && Math.random() < 0.02) {
+    cat.classList.add('batting');
+    setTimeout(() => cat.classList.remove('batting'), 1200);
+  }
 
   // FO gallery
   const foKey = JSON.stringify(state.foTypes);
@@ -4024,7 +4395,8 @@ if (saveTimestamp) {
 updateUI();
 setInterval(tick, 1000);
 setInterval(cycleTicker, 10000);
-setInterval(spawnCityCustomer, 2000);
+setInterval(spawnCityCustomer, 2500);
+setInterval(tickCityCustomers, 1200);
 setInterval(wanderAnimals, 3000);
 setInterval(pickWeather, 60000);
 setInterval(saveGame, 30000);
