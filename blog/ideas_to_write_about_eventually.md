@@ -14,4 +14,4 @@
 * Chess set where if you move your queen you get an electric shock, if you move your rook you get a smaller electric shock etc, and if you move your pawns you don't get an electric shock.
 * Chess set where all the pieces are made of pure tungsten. Excellent for blitz.
 * Alcohol chess set where every piece is a glass and if you take that piece you drink whatever is in that glass. The great equaliser.
-* 
+* You've heard of desks, you've heard of standing desks, you've never heard of squatting desks. Why?

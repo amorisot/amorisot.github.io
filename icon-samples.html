@@ -1,0 +1,2067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fleece to Fashion — Icon Style Samples</title>
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --header: #ede7dc;
+    --border: #d9d0c3;
+    --text: #4a3f35;
+    --text-dim: #8a7e72;
+    --accent: #7b9e6b;
+    --pasture: #e4ecda;
+    --pasture-dark: #6a8a55;
+    --mill: #fce8d0;
+    --mill-dark: #b8864a;
+    --shop: #d4a5a5;
+    --shop-dark: #9e6060;
+    --studio: #c4b7d4;
+    --studio-dark: #7a6690;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem;
+    line-height: 1.5;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 0.3rem;
+    color: var(--text);
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--text-dim);
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+  }
+
+  .styles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .style-card {
+    background: white;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    overflow: hidden;
+  }
+
+  .style-header {
+    padding: 1rem 1.2rem;
+    border-bottom: 2px solid var(--border);
+    background: var(--header);
+  }
+
+  .style-header h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .style-header p {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  .icons-showcase {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .icon-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .icon-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    min-width: 70px;
+    text-align: right;
+  }
+
+  .icon-sizes {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .icon-sizes svg {
+    display: block;
+  }
+
+  .size-label {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    text-align: center;
+    margin-top: 2px;
+  }
+
+  .icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Style 2: Yarn-stroke filter */
+  .yarn-filter-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+
+  /* Style 3: Animations */
+  @keyframes wool-bounce {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(1.08) scaleX(0.95); }
+  }
+
+  @keyframes gentle-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes yarn-wobble {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
+
+  @keyframes snip {
+    0%, 70%, 100% { transform: rotate(0deg); }
+    80% { transform: rotate(-8deg); }
+    90% { transform: rotate(5deg); }
+  }
+
+  @keyframes ear-twitch {
+    0%, 85%, 100% { transform: rotate(0deg); }
+    90% { transform: rotate(-12deg); }
+    95% { transform: rotate(5deg); }
+  }
+
+  @keyframes chew {
+    0%, 80%, 100% { transform: scaleY(1); }
+    85% { transform: scaleY(0.9); }
+    90% { transform: scaleY(1.05); }
+  }
+
+  @keyframes flutter {
+    0%, 100% { transform: scaleX(1) rotate(0deg); }
+    25% { transform: scaleX(0.7) rotate(5deg); }
+    50% { transform: scaleX(1) rotate(0deg); }
+    75% { transform: scaleX(0.7) rotate(-5deg); }
+  }
+
+  @keyframes tail-wag {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(15deg); }
+    75% { transform: rotate(-15deg); }
+  }
+
+  @keyframes gentle-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+
+  @keyframes coin-shine {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 0.6; }
+  }
+
+  @keyframes steam-rise {
+    0% { transform: translateY(0) scale(1); opacity: 0.6; }
+    100% { transform: translateY(-12px) scale(1.3); opacity: 0; }
+  }
+
+  @keyframes needle-knit {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-8deg) translateY(-2px); }
+    75% { transform: rotate(8deg) translateY(-2px); }
+  }
+
+  .anim-ear { animation: ear-twitch 3s ease-in-out infinite; }
+  .anim-chew { animation: chew 2.5s ease-in-out infinite; }
+  .anim-flutter { animation: flutter 0.8s ease-in-out infinite; }
+  .anim-wag { animation: tail-wag 0.6s ease-in-out infinite; }
+  .anim-bob { animation: gentle-bob 2s ease-in-out infinite; }
+  .anim-shine { animation: coin-shine 2s ease-in-out infinite; }
+  .anim-steam { animation: steam-rise 2s ease-in-out infinite; }
+  .anim-knit { animation: needle-knit 1s ease-in-out infinite; }
+
+  /* Gallery section */
+  .gallery {
+    max-width: 1400px;
+    margin: 2.5rem auto 0;
+  }
+
+  .gallery h2 {
+    text-align: center;
+    font-size: 1.4rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .gallery .subtitle {
+    margin-bottom: 1.5rem;
+  }
+
+  .gallery-section {
+    margin-bottom: 2rem;
+  }
+
+  .gallery-section h3 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+  }
+
+  .gallery-item {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.8rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .gallery-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .gallery-item .emoji-before {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+  }
+
+  .gallery-item .item-name {
+    font-size: 0.7rem;
+    color: var(--text);
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .anim-wool { animation: wool-bounce 2s ease-in-out infinite; transform-origin: center bottom; }
+  .anim-spin { animation: gentle-spin 4s linear infinite; transform-origin: center center; }
+  .anim-wobble { animation: yarn-wobble 1.5s ease-in-out infinite; transform-origin: center center; }
+  .anim-snip { animation: snip 3s ease-in-out infinite; transform-origin: center center; }
+
+  /* Style 4: Hybrid scene */
+  .hybrid-scene {
+    position: relative;
+    background: linear-gradient(135deg, var(--pasture) 0%, var(--mill) 50%, var(--shop) 100%);
+    border-radius: 8px;
+    padding: 1.5rem;
+    min-height: 180px;
+    overflow: hidden;
+  }
+
+  .hybrid-icons {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    align-items: flex-end;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hybrid-icon-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .hybrid-icon-wrap span {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+  }
+
+  @keyframes particle-float {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    50% { transform: translate(var(--dx), var(--dy)) scale(1.2); opacity: 0.7; }
+    100% { transform: translate(var(--dx2), var(--dy2)) scale(0.8); opacity: 0; }
+  }
+
+  .particle {
+    position: absolute;
+    font-size: 14px;
+    animation: particle-float var(--dur) ease-in-out infinite;
+    animation-delay: var(--delay);
+    pointer-events: none;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+
+<!-- Hidden SVG filter definitions for yarn-stroke style -->
+<svg class="yarn-filter-defs" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="yarn-stroke" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="4" result="turbulence" seed="2"/>
+      <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="yarn-stroke-lg" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="4" result="turbulence" seed="3"/>
+      <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<h1>Fleece to Fashion — Icon Styles</h1>
+<p class="subtitle">Four approaches for replacing emojis with custom visuals. Same icons, different vibes.</p>
+
+<div class="styles-grid">
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- STYLE 1: Knitting Chart Pixel Art     -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="style-card">
+    <div class="style-header">
+      <h2>1. Knitting Chart Pixel Art</h2>
+      <p>Icons as mini colorwork charts — like reading a knitting pattern</p>
+    </div>
+    <div class="icons-showcase">
+
+      <!-- Sheep (Pasture green) -->
+      <div class="icon-row">
+        <div class="icon-label">Sheep</div>
+        <div class="icon-sizes">
+          <div class="icon-item">
+            <svg width="64" height="64" viewBox="0 0 16 16" shape-rendering="crispEdges">
+              <rect width="16" height="16" fill="var(--pasture)"/>
+              <!-- body wool -->
+              <rect x="4" y="5" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="6" y="4" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="8" y="4" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="10" y="5" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="3" y="7" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="5" y="6" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="7" y="6" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="9" y="6" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="11" y="7" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="4" y="8" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="6" y="8" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="8" y="8" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="10" y="8" width="2" height="2" fill="var(--pasture-dark)"/>
+              <!-- head -->
+              <rect x="12" y="5" width="2" height="2" fill="var(--text)"/>
+              <rect x="12" y="7" width="2" height="2" fill="var(--text)"/>
+              <rect x="13" y="6" width="1" height="1" fill="white"/>
+              <!-- legs -->
+              <rect x="5" y="10" width="1" height="3" fill="var(--text)"/>
+              <rect x="7" y="10" width="1" height="3" fill="var(--text)"/>
+              <rect x="9" y="10" width="1" height="3" fill="var(--text)"/>
+              <rect x="11" y="10" width="1" height="3" fill="var(--text)"/>
+            </svg>
+            <div class="size-label">64px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="32" height="32" viewBox="0 0 16 16" shape-rendering="crispEdges">
+              <rect width="16" height="16" fill="var(--pasture)"/>
+              <rect x="4" y="5" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="6" y="4" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="8" y="4" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="10" y="5" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="3" y="7" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="5" y="6" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="7" y="6" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="9" y="6" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="11" y="7" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="4" y="8" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="6" y="8" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="8" y="8" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="10" y="8" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="12" y="5" width="2" height="2" fill="var(--text)"/>
+              <rect x="12" y="7" width="2" height="2" fill="var(--text)"/>
+              <rect x="13" y="6" width="1" height="1" fill="white"/>
+              <rect x="5" y="10" width="1" height="3" fill="var(--text)"/>
+              <rect x="7" y="10" width="1" height="3" fill="var(--text)"/>
+              <rect x="9" y="10" width="1" height="3" fill="var(--text)"/>
+              <rect x="11" y="10" width="1" height="3" fill="var(--text)"/>
+            </svg>
+            <div class="size-label">32px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="20" height="20" viewBox="0 0 16 16" shape-rendering="crispEdges">
+              <rect width="16" height="16" fill="var(--pasture)"/>
+              <rect x="4" y="5" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="6" y="4" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="8" y="4" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="10" y="5" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="3" y="7" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="5" y="6" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="7" y="6" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="9" y="6" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="11" y="7" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="4" y="8" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="6" y="8" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="8" y="8" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="10" y="8" width="2" height="2" fill="var(--pasture-dark)"/>
+              <rect x="12" y="5" width="2" height="2" fill="var(--text)"/>
+              <rect x="12" y="7" width="2" height="2" fill="var(--text)"/>
+              <rect x="13" y="6" width="1" height="1" fill="white"/>
+              <rect x="5" y="10" width="1" height="3" fill="var(--text)"/>
+              <rect x="7" y="10" width="1" height="3" fill="var(--text)"/>
+              <rect x="9" y="10" width="1" height="3" fill="var(--text)"/>
+              <rect x="11" y="10" width="1" height="3" fill="var(--text)"/>
+            </svg>
+            <div class="size-label">20px</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Yarn Skein (Shop rose) -->
+      <div class="icon-row">
+        <div class="icon-label">Yarn</div>
+        <div class="icon-sizes">
+          <div class="icon-item">
+            <svg width="64" height="64" viewBox="0 0 16 16" shape-rendering="crispEdges">
+              <rect width="16" height="16" fill="#f2e0e0"/>
+              <!-- Yarn ball outline -->
+              <rect x="5" y="2" width="6" height="1" fill="var(--shop-dark)"/>
+              <rect x="3" y="3" width="2" height="1" fill="var(--shop-dark)"/>
+              <rect x="11" y="3" width="2" height="1" fill="var(--shop-dark)"/>
+              <rect x="2" y="4" width="1" height="1" fill="var(--shop-dark)"/>
+              <rect x="13" y="4" width="1" height="1" fill="var(--shop-dark)"/>
+              <rect x="2" y="5" width="1" height="6" fill="var(--shop-dark)"/>
+              <rect x="13" y="5" width="1" height="6" fill="var(--shop-dark)"/>
+              <rect x="3" y="11" width="2" height="1" fill="var(--shop-dark)"/>
+              <rect x="11" y="11" width="2" height="1" fill="var(--shop-dark)"/>
+              <rect x="5" y="12" width="6" height="1" fill="var(--shop-dark)"/>
+              <!-- Fill -->
+              <rect x="3" y="4" width="10" height="7" fill="var(--shop)"/>
+              <rect x="5" y="3" width="6" height="1" fill="var(--shop)"/>
+              <rect x="5" y="11" width="6" height="1" fill="var(--shop)"/>
+              <!-- Wrap lines -->
+              <rect x="5" y="4" width="1" height="7" fill="var(--shop-dark)" opacity="0.4"/>
+              <rect x="8" y="3" width="1" height="9" fill="var(--shop-dark)" opacity="0.4"/>
+              <rect x="11" y="4" width="1" height="7" fill="var(--shop-dark)" opacity="0.4"/>
+              <!-- Horizontal wraps -->
+              <rect x="3" y="5" width="10" height="1" fill="var(--shop-dark)" opacity="0.3"/>
+              <rect x="3" y="8" width="10" height="1" fill="var(--shop-dark)" opacity="0.3"/>
+              <!-- Strand tail -->
+              <rect x="11" y="2" width="1" height="1" fill="var(--shop-dark)"/>
+              <rect x="12" y="1" width="1" height="1" fill="var(--shop-dark)"/>
+              <rect x="13" y="1" width="1" height="1" fill="var(--shop-dark)"/>
+            </svg>
+            <div class="size-label">64px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="32" height="32" viewBox="0 0 16 16" shape-rendering="crispEdges">
+              <rect width="16" height="16" fill="#f2e0e0"/>
+              <rect x="5" y="2" width="6" height="1" fill="var(--shop-dark)"/>
+              <rect x="3" y="3" width="2" height="1" fill="var(--shop-dark)"/>
+              <rect x="11" y="3" width="2" height="1" fill="var(--shop-dark)"/>
+              <rect x="2" y="4" width="1" height="1" fill="var(--shop-dark)"/>
+              <rect x="13" y="4" width="1" height="1" fill="var(--shop-dark)"/>
+              <rect x="2" y="5" width="1" height="6" fill="var(--shop-dark)"/>
+              <rect x="13" y="5" width="1" height="6" fill="var(--shop-dark)"/>
+              <rect x="3" y="11" width="2" height="1" fill="var(--shop-dark)"/>
+              <rect x="11" y="11" width="2" height="1" fill="var(--shop-dark)"/>
+              <rect x="5" y="12" width="6" height="1" fill="var(--shop-dark)"/>
+              <rect x="3" y="4" width="10" height="7" fill="var(--shop)"/>
+              <rect x="5" y="3" width="6" height="1" fill="var(--shop)"/>
+              <rect x="5" y="11" width="6" height="1" fill="var(--shop)"/>
+              <rect x="5" y="4" width="1" height="7" fill="var(--shop-dark)" opacity="0.4"/>
+              <rect x="8" y="3" width="1" height="9" fill="var(--shop-dark)" opacity="0.4"/>
+              <rect x="11" y="4" width="1" height="7" fill="var(--shop-dark)" opacity="0.4"/>
+              <rect x="3" y="5" width="10" height="1" fill="var(--shop-dark)" opacity="0.3"/>
+              <rect x="3" y="8" width="10" height="1" fill="var(--shop-dark)" opacity="0.3"/>
+              <rect x="11" y="2" width="1" height="1" fill="var(--shop-dark)"/>
+              <rect x="12" y="1" width="1" height="1" fill="var(--shop-dark)"/>
+              <rect x="13" y="1" width="1" height="1" fill="var(--shop-dark)"/>
+            </svg>
+            <div class="size-label">32px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="20" height="20" viewBox="0 0 16 16" shape-rendering="crispEdges">
+              <rect width="16" height="16" fill="#f2e0e0"/>
+              <rect x="5" y="2" width="6" height="1" fill="var(--shop-dark)"/>
+              <rect x="3" y="3" width="2" height="1" fill="var(--shop-dark)"/>
+              <rect x="11" y="3" width="2" height="1" fill="var(--shop-dark)"/>
+              <rect x="2" y="4" width="1" height="1" fill="var(--shop-dark)"/>
+              <rect x="13" y="4" width="1" height="1" fill="var(--shop-dark)"/>
+              <rect x="2" y="5" width="1" height="6" fill="var(--shop-dark)"/>
+              <rect x="13" y="5" width="1" height="6" fill="var(--shop-dark)"/>
+              <rect x="3" y="11" width="2" height="1" fill="var(--shop-dark)"/>
+              <rect x="11" y="11" width="2" height="1" fill="var(--shop-dark)"/>
+              <rect x="5" y="12" width="6" height="1" fill="var(--shop-dark)"/>
+              <rect x="3" y="4" width="10" height="7" fill="var(--shop)"/>
+              <rect x="5" y="3" width="6" height="1" fill="var(--shop)"/>
+              <rect x="5" y="11" width="6" height="1" fill="var(--shop)"/>
+              <rect x="5" y="4" width="1" height="7" fill="var(--shop-dark)" opacity="0.4"/>
+              <rect x="8" y="3" width="1" height="9" fill="var(--shop-dark)" opacity="0.4"/>
+              <rect x="11" y="4" width="1" height="7" fill="var(--shop-dark)" opacity="0.4"/>
+              <rect x="3" y="5" width="10" height="1" fill="var(--shop-dark)" opacity="0.3"/>
+              <rect x="3" y="8" width="10" height="1" fill="var(--shop-dark)" opacity="0.3"/>
+              <rect x="11" y="2" width="1" height="1" fill="var(--shop-dark)"/>
+              <rect x="12" y="1" width="1" height="1" fill="var(--shop-dark)"/>
+              <rect x="13" y="1" width="1" height="1" fill="var(--shop-dark)"/>
+            </svg>
+            <div class="size-label">20px</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spinning Wheel (Mill tan) -->
+      <div class="icon-row">
+        <div class="icon-label">Wheel</div>
+        <div class="icon-sizes">
+          <div class="icon-item">
+            <svg width="64" height="64" viewBox="0 0 16 16" shape-rendering="crispEdges">
+              <rect width="16" height="16" fill="var(--mill)"/>
+              <!-- Wheel rim -->
+              <rect x="4" y="1" width="6" height="1" fill="var(--mill-dark)"/>
+              <rect x="2" y="2" width="2" height="1" fill="var(--mill-dark)"/>
+              <rect x="10" y="2" width="2" height="1" fill="var(--mill-dark)"/>
+              <rect x="1" y="3" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="12" y="3" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="1" y="5" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="12" y="5" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="1" y="7" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="12" y="7" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="2" y="9" width="2" height="1" fill="var(--mill-dark)"/>
+              <rect x="10" y="9" width="2" height="1" fill="var(--mill-dark)"/>
+              <rect x="4" y="10" width="6" height="1" fill="var(--mill-dark)"/>
+              <!-- Spokes -->
+              <rect x="6" y="2" width="2" height="2" fill="var(--mill-dark)" opacity="0.5"/>
+              <rect x="6" y="8" width="2" height="2" fill="var(--mill-dark)" opacity="0.5"/>
+              <rect x="2" y="5" width="2" height="2" fill="var(--mill-dark)" opacity="0.5"/>
+              <rect x="10" y="5" width="2" height="2" fill="var(--mill-dark)" opacity="0.5"/>
+              <!-- Hub -->
+              <rect x="6" y="5" width="2" height="2" fill="var(--mill-dark)"/>
+              <!-- Stand -->
+              <rect x="3" y="11" width="1" height="3" fill="var(--mill-dark)"/>
+              <rect x="10" y="11" width="1" height="3" fill="var(--mill-dark)"/>
+              <rect x="2" y="14" width="3" height="1" fill="var(--mill-dark)"/>
+              <rect x="9" y="14" width="3" height="1" fill="var(--mill-dark)"/>
+              <!-- Flyer -->
+              <rect x="13" y="4" width="2" height="1" fill="var(--mill-dark)"/>
+              <rect x="14" y="5" width="1" height="3" fill="var(--mill-dark)"/>
+              <rect x="13" y="8" width="2" height="1" fill="var(--mill-dark)"/>
+            </svg>
+            <div class="size-label">64px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="32" height="32" viewBox="0 0 16 16" shape-rendering="crispEdges">
+              <rect width="16" height="16" fill="var(--mill)"/>
+              <rect x="4" y="1" width="6" height="1" fill="var(--mill-dark)"/>
+              <rect x="2" y="2" width="2" height="1" fill="var(--mill-dark)"/>
+              <rect x="10" y="2" width="2" height="1" fill="var(--mill-dark)"/>
+              <rect x="1" y="3" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="12" y="3" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="1" y="5" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="12" y="5" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="1" y="7" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="12" y="7" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="2" y="9" width="2" height="1" fill="var(--mill-dark)"/>
+              <rect x="10" y="9" width="2" height="1" fill="var(--mill-dark)"/>
+              <rect x="4" y="10" width="6" height="1" fill="var(--mill-dark)"/>
+              <rect x="6" y="2" width="2" height="2" fill="var(--mill-dark)" opacity="0.5"/>
+              <rect x="6" y="8" width="2" height="2" fill="var(--mill-dark)" opacity="0.5"/>
+              <rect x="2" y="5" width="2" height="2" fill="var(--mill-dark)" opacity="0.5"/>
+              <rect x="10" y="5" width="2" height="2" fill="var(--mill-dark)" opacity="0.5"/>
+              <rect x="6" y="5" width="2" height="2" fill="var(--mill-dark)"/>
+              <rect x="3" y="11" width="1" height="3" fill="var(--mill-dark)"/>
+              <rect x="10" y="11" width="1" height="3" fill="var(--mill-dark)"/>
+              <rect x="2" y="14" width="3" height="1" fill="var(--mill-dark)"/>
+              <rect x="9" y="14" width="3" height="1" fill="var(--mill-dark)"/>
+              <rect x="13" y="4" width="2" height="1" fill="var(--mill-dark)"/>
+              <rect x="14" y="5" width="1" height="3" fill="var(--mill-dark)"/>
+              <rect x="13" y="8" width="2" height="1" fill="var(--mill-dark)"/>
+            </svg>
+            <div class="size-label">32px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="20" height="20" viewBox="0 0 16 16" shape-rendering="crispEdges">
+              <rect width="16" height="16" fill="var(--mill)"/>
+              <rect x="4" y="1" width="6" height="1" fill="var(--mill-dark)"/>
+              <rect x="2" y="2" width="2" height="1" fill="var(--mill-dark)"/>
+              <rect x="10" y="2" width="2" height="1" fill="var(--mill-dark)"/>
+              <rect x="1" y="3" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="12" y="3" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="1" y="5" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="12" y="5" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="1" y="7" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="12" y="7" width="1" height="2" fill="var(--mill-dark)"/>
+              <rect x="2" y="9" width="2" height="1" fill="var(--mill-dark)"/>
+              <rect x="10" y="9" width="2" height="1" fill="var(--mill-dark)"/>
+              <rect x="4" y="10" width="6" height="1" fill="var(--mill-dark)"/>
+              <rect x="6" y="5" width="2" height="2" fill="var(--mill-dark)"/>
+              <rect x="3" y="11" width="1" height="3" fill="var(--mill-dark)"/>
+              <rect x="10" y="11" width="1" height="3" fill="var(--mill-dark)"/>
+              <rect x="2" y="14" width="3" height="1" fill="var(--mill-dark)"/>
+              <rect x="9" y="14" width="3" height="1" fill="var(--mill-dark)"/>
+            </svg>
+            <div class="size-label">20px</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scissors (Studio purple) -->
+      <div class="icon-row">
+        <div class="icon-label">Scissors</div>
+        <div class="icon-sizes">
+          <div class="icon-item">
+            <svg width="64" height="64" viewBox="0 0 16 16" shape-rendering="crispEdges">
+              <rect width="16" height="16" fill="var(--studio)"/>
+              <!-- Top blade -->
+              <rect x="1" y="3" width="2" height="2" fill="var(--studio-dark)"/>
+              <rect x="1" y="2" width="1" height="1" fill="var(--studio-dark)"/>
+              <rect x="3" y="4" width="1" height="1" fill="var(--studio-dark)"/>
+              <rect x="3" y="5" width="8" height="1" fill="var(--studio-dark)"/>
+              <rect x="4" y="4" width="7" height="1" fill="var(--studio-dark)" opacity="0.6"/>
+              <!-- Bottom blade -->
+              <rect x="1" y="10" width="2" height="2" fill="var(--studio-dark)"/>
+              <rect x="1" y="12" width="1" height="1" fill="var(--studio-dark)"/>
+              <rect x="3" y="10" width="1" height="1" fill="var(--studio-dark)"/>
+              <rect x="3" y="9" width="8" height="1" fill="var(--studio-dark)"/>
+              <rect x="4" y="10" width="7" height="1" fill="var(--studio-dark)" opacity="0.6"/>
+              <!-- Pivot -->
+              <rect x="10" y="6" width="2" height="3" fill="var(--studio-dark)"/>
+              <rect x="11" y="7" width="1" height="1" fill="white"/>
+              <!-- Handle tips -->
+              <rect x="12" y="5" width="3" height="1" fill="var(--studio-dark)"/>
+              <rect x="12" y="9" width="3" height="1" fill="var(--studio-dark)"/>
+              <rect x="14" y="6" width="1" height="1" fill="var(--studio-dark)"/>
+              <rect x="14" y="8" width="1" height="1" fill="var(--studio-dark)"/>
+              <!-- Finger rings -->
+              <rect x="0" y="3" width="1" height="1" fill="var(--studio-dark)" opacity="0.5"/>
+              <rect x="0" y="11" width="1" height="1" fill="var(--studio-dark)" opacity="0.5"/>
+            </svg>
+            <div class="size-label">64px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="32" height="32" viewBox="0 0 16 16" shape-rendering="crispEdges">
+              <rect width="16" height="16" fill="var(--studio)"/>
+              <rect x="1" y="3" width="2" height="2" fill="var(--studio-dark)"/>
+              <rect x="1" y="2" width="1" height="1" fill="var(--studio-dark)"/>
+              <rect x="3" y="4" width="1" height="1" fill="var(--studio-dark)"/>
+              <rect x="3" y="5" width="8" height="1" fill="var(--studio-dark)"/>
+              <rect x="4" y="4" width="7" height="1" fill="var(--studio-dark)" opacity="0.6"/>
+              <rect x="1" y="10" width="2" height="2" fill="var(--studio-dark)"/>
+              <rect x="1" y="12" width="1" height="1" fill="var(--studio-dark)"/>
+              <rect x="3" y="10" width="1" height="1" fill="var(--studio-dark)"/>
+              <rect x="3" y="9" width="8" height="1" fill="var(--studio-dark)"/>
+              <rect x="4" y="10" width="7" height="1" fill="var(--studio-dark)" opacity="0.6"/>
+              <rect x="10" y="6" width="2" height="3" fill="var(--studio-dark)"/>
+              <rect x="11" y="7" width="1" height="1" fill="white"/>
+              <rect x="12" y="5" width="3" height="1" fill="var(--studio-dark)"/>
+              <rect x="12" y="9" width="3" height="1" fill="var(--studio-dark)"/>
+              <rect x="14" y="6" width="1" height="1" fill="var(--studio-dark)"/>
+              <rect x="14" y="8" width="1" height="1" fill="var(--studio-dark)"/>
+            </svg>
+            <div class="size-label">32px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="20" height="20" viewBox="0 0 16 16" shape-rendering="crispEdges">
+              <rect width="16" height="16" fill="var(--studio)"/>
+              <rect x="1" y="3" width="2" height="2" fill="var(--studio-dark)"/>
+              <rect x="3" y="5" width="8" height="1" fill="var(--studio-dark)"/>
+              <rect x="1" y="10" width="2" height="2" fill="var(--studio-dark)"/>
+              <rect x="3" y="9" width="8" height="1" fill="var(--studio-dark)"/>
+              <rect x="10" y="6" width="2" height="3" fill="var(--studio-dark)"/>
+              <rect x="11" y="7" width="1" height="1" fill="white"/>
+              <rect x="12" y="5" width="3" height="1" fill="var(--studio-dark)"/>
+              <rect x="12" y="9" width="3" height="1" fill="var(--studio-dark)"/>
+            </svg>
+            <div class="size-label">20px</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- STYLE 2: Yarn-Stroke Hand-Drawn SVGs  -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="style-card">
+    <div class="style-header">
+      <h2>2. Yarn-Stroke Hand-Drawn</h2>
+      <p>Organic, wobbly lines that look drawn with a strand of yarn</p>
+    </div>
+    <div class="icons-showcase">
+
+      <!-- Sheep -->
+      <div class="icon-row">
+        <div class="icon-label">Sheep</div>
+        <div class="icon-sizes">
+          <div class="icon-item">
+            <svg width="64" height="64" viewBox="0 0 64 64" filter="url(#yarn-stroke-lg)">
+              <!-- Body (fluffy cloud shape) -->
+              <ellipse cx="30" cy="32" rx="18" ry="14" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="2.5" stroke-linecap="round"/>
+              <!-- Fluffy bumps -->
+              <circle cx="20" cy="24" r="7" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="2"/>
+              <circle cx="32" cy="22" r="8" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="2"/>
+              <circle cx="40" cy="26" r="6" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="2"/>
+              <circle cx="18" cy="32" r="6" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="2"/>
+              <!-- Head -->
+              <ellipse cx="48" cy="30" rx="7" ry="8" fill="var(--text)" stroke="var(--text)" stroke-width="1.5"/>
+              <circle cx="51" cy="28" r="1.5" fill="white"/>
+              <!-- Legs -->
+              <line x1="22" y1="42" x2="22" y2="56" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="30" y1="44" x2="30" y2="56" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="36" y1="44" x2="36" y2="56" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="42" y1="42" x2="42" y2="56" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+              <!-- Ear -->
+              <ellipse cx="52" cy="22" rx="3" ry="5" fill="var(--text)" transform="rotate(15, 52, 22)"/>
+            </svg>
+            <div class="size-label">64px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="32" height="32" viewBox="0 0 64 64" filter="url(#yarn-stroke)">
+              <ellipse cx="30" cy="32" rx="18" ry="14" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="3.5" stroke-linecap="round"/>
+              <circle cx="20" cy="24" r="7" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="3"/>
+              <circle cx="32" cy="22" r="8" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="3"/>
+              <circle cx="40" cy="26" r="6" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="3"/>
+              <ellipse cx="48" cy="30" rx="7" ry="8" fill="var(--text)"/>
+              <circle cx="51" cy="28" r="2" fill="white"/>
+              <line x1="22" y1="42" x2="22" y2="56" stroke="var(--text)" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="30" y1="44" x2="30" y2="56" stroke="var(--text)" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="36" y1="44" x2="36" y2="56" stroke="var(--text)" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="42" y1="42" x2="42" y2="56" stroke="var(--text)" stroke-width="3.5" stroke-linecap="round"/>
+            </svg>
+            <div class="size-label">32px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="20" height="20" viewBox="0 0 64 64" filter="url(#yarn-stroke)">
+              <ellipse cx="30" cy="32" rx="18" ry="14" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="22" cy="24" r="8" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="4"/>
+              <circle cx="34" cy="22" r="8" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="4"/>
+              <ellipse cx="48" cy="30" rx="7" ry="8" fill="var(--text)"/>
+              <circle cx="51" cy="28" r="2.5" fill="white"/>
+              <line x1="24" y1="42" x2="24" y2="56" stroke="var(--text)" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="42" x2="38" y2="56" stroke="var(--text)" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+            <div class="size-label">20px</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Yarn Ball -->
+      <div class="icon-row">
+        <div class="icon-label">Yarn</div>
+        <div class="icon-sizes">
+          <div class="icon-item">
+            <svg width="64" height="64" viewBox="0 0 64 64" filter="url(#yarn-stroke-lg)">
+              <circle cx="30" cy="34" r="22" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="2.5"/>
+              <!-- Wrap curves -->
+              <path d="M12,28 Q30,14 48,28" fill="none" stroke="var(--shop-dark)" stroke-width="2" opacity="0.5"/>
+              <path d="M12,38 Q30,52 48,38" fill="none" stroke="var(--shop-dark)" stroke-width="2" opacity="0.5"/>
+              <path d="M18,16 Q30,34 18,52" fill="none" stroke="var(--shop-dark)" stroke-width="1.5" opacity="0.4"/>
+              <path d="M42,16 Q30,34 42,52" fill="none" stroke="var(--shop-dark)" stroke-width="1.5" opacity="0.4"/>
+              <!-- Strand tail -->
+              <path d="M48,22 Q54,16 58,8" fill="none" stroke="var(--shop-dark)" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+            <div class="size-label">64px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="32" height="32" viewBox="0 0 64 64" filter="url(#yarn-stroke)">
+              <circle cx="30" cy="34" r="22" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="3.5"/>
+              <path d="M12,28 Q30,14 48,28" fill="none" stroke="var(--shop-dark)" stroke-width="2.5" opacity="0.5"/>
+              <path d="M12,38 Q30,52 48,38" fill="none" stroke="var(--shop-dark)" stroke-width="2.5" opacity="0.5"/>
+              <path d="M48,22 Q54,16 58,8" fill="none" stroke="var(--shop-dark)" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <div class="size-label">32px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="20" height="20" viewBox="0 0 64 64" filter="url(#yarn-stroke)">
+              <circle cx="30" cy="34" r="22" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="4.5"/>
+              <path d="M48,22 Q54,16 58,8" fill="none" stroke="var(--shop-dark)" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+            <div class="size-label">20px</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spinning Wheel -->
+      <div class="icon-row">
+        <div class="icon-label">Wheel</div>
+        <div class="icon-sizes">
+          <div class="icon-item">
+            <svg width="64" height="64" viewBox="0 0 64 64" filter="url(#yarn-stroke-lg)">
+              <!-- Main wheel -->
+              <circle cx="28" cy="28" r="22" fill="none" stroke="var(--mill-dark)" stroke-width="3"/>
+              <!-- Hub -->
+              <circle cx="28" cy="28" r="4" fill="var(--mill-dark)"/>
+              <!-- Spokes -->
+              <line x1="28" y1="6" x2="28" y2="50" stroke="var(--mill-dark)" stroke-width="1.5"/>
+              <line x1="6" y1="28" x2="50" y2="28" stroke="var(--mill-dark)" stroke-width="1.5"/>
+              <line x1="12" y1="12" x2="44" y2="44" stroke="var(--mill-dark)" stroke-width="1.5"/>
+              <line x1="44" y1="12" x2="12" y2="44" stroke="var(--mill-dark)" stroke-width="1.5"/>
+              <!-- Stand legs -->
+              <line x1="12" y1="48" x2="12" y2="60" stroke="var(--mill-dark)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="44" y1="48" x2="44" y2="60" stroke="var(--mill-dark)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="8" y1="60" x2="48" y2="60" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+              <!-- Flyer -->
+              <rect x="50" y="20" width="8" height="16" rx="2" fill="none" stroke="var(--mill-dark)" stroke-width="2"/>
+              <line x1="50" y1="28" x2="54" y2="28" stroke="var(--mill-dark)" stroke-width="1.5"/>
+            </svg>
+            <div class="size-label">64px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="32" height="32" viewBox="0 0 64 64" filter="url(#yarn-stroke)">
+              <circle cx="28" cy="28" r="22" fill="none" stroke="var(--mill-dark)" stroke-width="4"/>
+              <circle cx="28" cy="28" r="5" fill="var(--mill-dark)"/>
+              <line x1="28" y1="6" x2="28" y2="50" stroke="var(--mill-dark)" stroke-width="2.5"/>
+              <line x1="6" y1="28" x2="50" y2="28" stroke="var(--mill-dark)" stroke-width="2.5"/>
+              <line x1="12" y1="48" x2="12" y2="60" stroke="var(--mill-dark)" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="44" y1="48" x2="44" y2="60" stroke="var(--mill-dark)" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="8" y1="60" x2="48" y2="60" stroke="var(--mill-dark)" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <div class="size-label">32px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="20" height="20" viewBox="0 0 64 64" filter="url(#yarn-stroke)">
+              <circle cx="28" cy="28" r="22" fill="none" stroke="var(--mill-dark)" stroke-width="5"/>
+              <circle cx="28" cy="28" r="6" fill="var(--mill-dark)"/>
+              <line x1="28" y1="6" x2="28" y2="50" stroke="var(--mill-dark)" stroke-width="3"/>
+              <line x1="6" y1="28" x2="50" y2="28" stroke="var(--mill-dark)" stroke-width="3"/>
+            </svg>
+            <div class="size-label">20px</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scissors -->
+      <div class="icon-row">
+        <div class="icon-label">Scissors</div>
+        <div class="icon-sizes">
+          <div class="icon-item">
+            <svg width="64" height="64" viewBox="0 0 64 64" filter="url(#yarn-stroke-lg)">
+              <!-- Top ring -->
+              <circle cx="12" cy="16" r="8" fill="none" stroke="var(--studio-dark)" stroke-width="2.5"/>
+              <!-- Bottom ring -->
+              <circle cx="12" cy="48" r="8" fill="none" stroke="var(--studio-dark)" stroke-width="2.5"/>
+              <!-- Top blade -->
+              <line x1="18" y1="20" x2="52" y2="30" stroke="var(--studio-dark)" stroke-width="3" stroke-linecap="round"/>
+              <!-- Bottom blade -->
+              <line x1="18" y1="44" x2="52" y2="34" stroke="var(--studio-dark)" stroke-width="3" stroke-linecap="round"/>
+              <!-- Pivot -->
+              <circle cx="42" cy="32" r="3" fill="var(--studio-dark)"/>
+            </svg>
+            <div class="size-label">64px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="32" height="32" viewBox="0 0 64 64" filter="url(#yarn-stroke)">
+              <circle cx="12" cy="16" r="8" fill="none" stroke="var(--studio-dark)" stroke-width="3.5"/>
+              <circle cx="12" cy="48" r="8" fill="none" stroke="var(--studio-dark)" stroke-width="3.5"/>
+              <line x1="18" y1="20" x2="52" y2="30" stroke="var(--studio-dark)" stroke-width="4" stroke-linecap="round"/>
+              <line x1="18" y1="44" x2="52" y2="34" stroke="var(--studio-dark)" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="42" cy="32" r="4" fill="var(--studio-dark)"/>
+            </svg>
+            <div class="size-label">32px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="20" height="20" viewBox="0 0 64 64" filter="url(#yarn-stroke)">
+              <circle cx="12" cy="16" r="9" fill="none" stroke="var(--studio-dark)" stroke-width="5"/>
+              <circle cx="12" cy="48" r="9" fill="none" stroke="var(--studio-dark)" stroke-width="5"/>
+              <line x1="18" y1="20" x2="52" y2="30" stroke="var(--studio-dark)" stroke-width="5" stroke-linecap="round"/>
+              <line x1="18" y1="44" x2="52" y2="34" stroke="var(--studio-dark)" stroke-width="5" stroke-linecap="round"/>
+              <circle cx="42" cy="32" r="5" fill="var(--studio-dark)"/>
+            </svg>
+            <div class="size-label">20px</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- STYLE 3: Animated SVG Sprites         -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="style-card">
+    <div class="style-header">
+      <h2>3. Animated SVG Sprites</h2>
+      <p>Clean vectors with personality — bouncing wool, spinning wheels, snipping scissors</p>
+    </div>
+    <div class="icons-showcase">
+
+      <!-- Animated Sheep -->
+      <div class="icon-row">
+        <div class="icon-label">Sheep</div>
+        <div class="icon-sizes">
+          <div class="icon-item">
+            <svg width="64" height="64" viewBox="0 0 64 64">
+              <g class="anim-wool">
+                <!-- Body -->
+                <ellipse cx="28" cy="30" rx="18" ry="13" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="2"/>
+                <!-- Wool bumps -->
+                <circle cx="18" cy="22" r="7" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+                <circle cx="28" cy="20" r="7" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+                <circle cx="38" cy="22" r="6" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+                <circle cx="14" cy="30" r="5" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+                <circle cx="42" cy="28" r="5" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+              </g>
+              <!-- Head (doesn't bounce) -->
+              <ellipse cx="50" cy="28" rx="6" ry="7" fill="var(--text)"/>
+              <circle cx="52" cy="26" r="1.5" fill="white"/>
+              <circle cx="52" cy="26" r="0.8" fill="var(--text)"/>
+              <!-- Ears -->
+              <ellipse cx="53" cy="21" rx="2.5" ry="4" fill="var(--text)" transform="rotate(20,53,21)"/>
+              <!-- Legs -->
+              <line x1="20" y1="41" x2="20" y2="54" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="28" y1="42" x2="28" y2="54" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="34" y1="42" x2="34" y2="54" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="40" y1="41" x2="40" y2="54" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+              <!-- Hooves -->
+              <rect x="18" y="53" width="4" height="2" rx="1" fill="var(--text)"/>
+              <rect x="26" y="53" width="4" height="2" rx="1" fill="var(--text)"/>
+              <rect x="32" y="53" width="4" height="2" rx="1" fill="var(--text)"/>
+              <rect x="38" y="53" width="4" height="2" rx="1" fill="var(--text)"/>
+            </svg>
+            <div class="size-label">64px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="32" height="32" viewBox="0 0 64 64">
+              <g class="anim-wool">
+                <ellipse cx="28" cy="30" rx="18" ry="13" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="3"/>
+                <circle cx="18" cy="22" r="7" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="2.5"/>
+                <circle cx="28" cy="20" r="7" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="2.5"/>
+                <circle cx="38" cy="22" r="6" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="2.5"/>
+              </g>
+              <ellipse cx="50" cy="28" rx="6" ry="7" fill="var(--text)"/>
+              <circle cx="52" cy="26" r="2" fill="white"/>
+              <line x1="22" y1="42" x2="22" y2="54" stroke="var(--text)" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="36" y1="42" x2="36" y2="54" stroke="var(--text)" stroke-width="3.5" stroke-linecap="round"/>
+            </svg>
+            <div class="size-label">32px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="20" height="20" viewBox="0 0 64 64">
+              <g class="anim-wool">
+                <ellipse cx="28" cy="30" rx="18" ry="14" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="4"/>
+                <circle cx="22" cy="22" r="8" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="3"/>
+                <circle cx="34" cy="22" r="8" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="3"/>
+              </g>
+              <ellipse cx="50" cy="28" rx="7" ry="8" fill="var(--text)"/>
+              <circle cx="52" cy="26" r="2.5" fill="white"/>
+            </svg>
+            <div class="size-label">20px</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Animated Yarn Ball -->
+      <div class="icon-row">
+        <div class="icon-label">Yarn</div>
+        <div class="icon-sizes">
+          <div class="icon-item">
+            <svg width="64" height="64" viewBox="0 0 64 64">
+              <g class="anim-wobble">
+                <circle cx="30" cy="34" r="22" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="2"/>
+                <!-- Decorative wraps -->
+                <path d="M10,26 Q30,12 50,26" fill="none" stroke="var(--shop-dark)" stroke-width="1.5" opacity="0.5"/>
+                <path d="M10,40 Q30,54 50,40" fill="none" stroke="var(--shop-dark)" stroke-width="1.5" opacity="0.5"/>
+                <path d="M16,14 Q28,34 16,54" fill="none" stroke="var(--shop-dark)" stroke-width="1.2" opacity="0.35"/>
+                <path d="M44,14 Q32,34 44,54" fill="none" stroke="var(--shop-dark)" stroke-width="1.2" opacity="0.35"/>
+                <ellipse cx="30" cy="34" rx="8" ry="6" fill="none" stroke="var(--shop-dark)" stroke-width="1" opacity="0.3"/>
+              </g>
+              <!-- Strand (doesn't wobble) -->
+              <path d="M48,20 C52,14 56,10 60,6" fill="none" stroke="var(--shop-dark)" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <div class="size-label">64px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="32" height="32" viewBox="0 0 64 64">
+              <g class="anim-wobble">
+                <circle cx="30" cy="34" r="22" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="3"/>
+                <path d="M10,26 Q30,12 50,26" fill="none" stroke="var(--shop-dark)" stroke-width="2" opacity="0.5"/>
+                <path d="M10,40 Q30,54 50,40" fill="none" stroke="var(--shop-dark)" stroke-width="2" opacity="0.5"/>
+              </g>
+              <path d="M48,20 C52,14 56,10 60,6" fill="none" stroke="var(--shop-dark)" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+            <div class="size-label">32px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="20" height="20" viewBox="0 0 64 64">
+              <g class="anim-wobble">
+                <circle cx="30" cy="34" r="22" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="4"/>
+              </g>
+              <path d="M48,20 C52,14 56,10 60,6" fill="none" stroke="var(--shop-dark)" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <div class="size-label">20px</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Animated Spinning Wheel -->
+      <div class="icon-row">
+        <div class="icon-label">Wheel</div>
+        <div class="icon-sizes">
+          <div class="icon-item">
+            <svg width="64" height="64" viewBox="0 0 64 64">
+              <!-- Stand (static) -->
+              <line x1="12" y1="50" x2="12" y2="60" stroke="var(--mill-dark)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="44" y1="50" x2="44" y2="60" stroke="var(--mill-dark)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="6" y1="60" x2="50" y2="60" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+              <!-- Spinning wheel group -->
+              <g class="anim-spin" style="transform-origin: 28px 28px">
+                <circle cx="28" cy="28" r="22" fill="none" stroke="var(--mill-dark)" stroke-width="2.5"/>
+                <circle cx="28" cy="28" r="4" fill="var(--mill-dark)"/>
+                <line x1="28" y1="6" x2="28" y2="50" stroke="var(--mill-dark)" stroke-width="1.5"/>
+                <line x1="6" y1="28" x2="50" y2="28" stroke="var(--mill-dark)" stroke-width="1.5"/>
+                <line x1="12" y1="12" x2="44" y2="44" stroke="var(--mill-dark)" stroke-width="1.5"/>
+                <line x1="44" y1="12" x2="12" y2="44" stroke="var(--mill-dark)" stroke-width="1.5"/>
+              </g>
+              <!-- Flyer (static) -->
+              <rect x="52" y="20" width="6" height="16" rx="2" fill="none" stroke="var(--mill-dark)" stroke-width="2"/>
+            </svg>
+            <div class="size-label">64px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="32" height="32" viewBox="0 0 64 64">
+              <line x1="12" y1="50" x2="12" y2="60" stroke="var(--mill-dark)" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="44" y1="50" x2="44" y2="60" stroke="var(--mill-dark)" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="6" y1="60" x2="50" y2="60" stroke="var(--mill-dark)" stroke-width="3" stroke-linecap="round"/>
+              <g class="anim-spin" style="transform-origin: 28px 28px">
+                <circle cx="28" cy="28" r="22" fill="none" stroke="var(--mill-dark)" stroke-width="3.5"/>
+                <circle cx="28" cy="28" r="5" fill="var(--mill-dark)"/>
+                <line x1="28" y1="6" x2="28" y2="50" stroke="var(--mill-dark)" stroke-width="2.5"/>
+                <line x1="6" y1="28" x2="50" y2="28" stroke="var(--mill-dark)" stroke-width="2.5"/>
+              </g>
+            </svg>
+            <div class="size-label">32px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="20" height="20" viewBox="0 0 64 64">
+              <g class="anim-spin" style="transform-origin: 28px 28px">
+                <circle cx="28" cy="28" r="22" fill="none" stroke="var(--mill-dark)" stroke-width="5"/>
+                <circle cx="28" cy="28" r="6" fill="var(--mill-dark)"/>
+                <line x1="28" y1="6" x2="28" y2="50" stroke="var(--mill-dark)" stroke-width="3"/>
+                <line x1="6" y1="28" x2="50" y2="28" stroke="var(--mill-dark)" stroke-width="3"/>
+              </g>
+            </svg>
+            <div class="size-label">20px</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Animated Scissors -->
+      <div class="icon-row">
+        <div class="icon-label">Scissors</div>
+        <div class="icon-sizes">
+          <div class="icon-item">
+            <svg width="64" height="64" viewBox="0 0 64 64">
+              <g class="anim-snip">
+                <!-- Top blade + ring -->
+                <circle cx="12" cy="16" r="8" fill="none" stroke="var(--studio-dark)" stroke-width="2.5"/>
+                <line x1="18" y1="20" x2="52" y2="30" stroke="var(--studio-dark)" stroke-width="2.5" stroke-linecap="round"/>
+              </g>
+              <g class="anim-snip" style="animation-direction: reverse">
+                <!-- Bottom blade + ring -->
+                <circle cx="12" cy="48" r="8" fill="none" stroke="var(--studio-dark)" stroke-width="2.5"/>
+                <line x1="18" y1="44" x2="52" y2="34" stroke="var(--studio-dark)" stroke-width="2.5" stroke-linecap="round"/>
+              </g>
+              <!-- Pivot (static) -->
+              <circle cx="42" cy="32" r="3" fill="var(--studio-dark)"/>
+              <circle cx="42" cy="32" r="1.5" fill="white"/>
+            </svg>
+            <div class="size-label">64px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="32" height="32" viewBox="0 0 64 64">
+              <g class="anim-snip">
+                <circle cx="12" cy="16" r="8" fill="none" stroke="var(--studio-dark)" stroke-width="3.5"/>
+                <line x1="18" y1="20" x2="52" y2="30" stroke="var(--studio-dark)" stroke-width="3.5" stroke-linecap="round"/>
+              </g>
+              <g class="anim-snip" style="animation-direction: reverse">
+                <circle cx="12" cy="48" r="8" fill="none" stroke="var(--studio-dark)" stroke-width="3.5"/>
+                <line x1="18" y1="44" x2="52" y2="34" stroke="var(--studio-dark)" stroke-width="3.5" stroke-linecap="round"/>
+              </g>
+              <circle cx="42" cy="32" r="4" fill="var(--studio-dark)"/>
+              <circle cx="42" cy="32" r="2" fill="white"/>
+            </svg>
+            <div class="size-label">32px</div>
+          </div>
+          <div class="icon-item">
+            <svg width="20" height="20" viewBox="0 0 64 64">
+              <g class="anim-snip">
+                <circle cx="12" cy="16" r="9" fill="none" stroke="var(--studio-dark)" stroke-width="5"/>
+                <line x1="18" y1="20" x2="52" y2="30" stroke="var(--studio-dark)" stroke-width="5" stroke-linecap="round"/>
+              </g>
+              <g class="anim-snip" style="animation-direction: reverse">
+                <circle cx="12" cy="48" r="9" fill="none" stroke="var(--studio-dark)" stroke-width="5"/>
+                <line x1="18" y1="44" x2="52" y2="34" stroke="var(--studio-dark)" stroke-width="5" stroke-linecap="round"/>
+              </g>
+              <circle cx="42" cy="32" r="5" fill="var(--studio-dark)"/>
+            </svg>
+            <div class="size-label">20px</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- STYLE 4: Hybrid Scene                 -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="style-card">
+    <div class="style-header">
+      <h2>4. Hybrid: Custom SVG + Emoji Particles</h2>
+      <p>Custom icons for functional elements, emoji sparkles for ambient decoration</p>
+    </div>
+    <div class="icons-showcase" style="padding: 1rem;">
+
+      <div class="hybrid-scene">
+        <!-- Floating emoji particles -->
+        <span class="particle" style="left:10%; top:15%; --dx:15px; --dy:-20px; --dx2:30px; --dy2:-40px; --dur:3s; --delay:0s">~</span>
+        <span class="particle" style="left:25%; top:10%; --dx:-10px; --dy:-15px; --dx2:-25px; --dy2:-30px; --dur:4s; --delay:0.5s">🌿</span>
+        <span class="particle" style="left:55%; top:8%; --dx:20px; --dy:-25px; --dx2:10px; --dy2:-50px; --dur:3.5s; --delay:1s">✨</span>
+        <span class="particle" style="left:70%; top:20%; --dx:-15px; --dy:-10px; --dx2:-30px; --dy2:-25px; --dur:4.5s; --delay:0.3s">💫</span>
+        <span class="particle" style="left:85%; top:12%; --dx:10px; --dy:-30px; --dx2:5px; --dy2:-55px; --dur:3.2s; --delay:1.5s">🌸</span>
+        <span class="particle" style="left:40%; top:5%; --dx:-5px; --dy:-20px; --dx2:-15px; --dy2:-45px; --dur:3.8s; --delay:2s">⭐</span>
+        <span class="particle" style="left:15%; top:60%; --dx:10px; --dy:15px; --dx2:20px; --dy2:30px; --dur:4.2s; --delay:0.8s">🌾</span>
+        <span class="particle" style="left:80%; top:55%; --dx:-8px; --dy:12px; --dx2:-16px; --dy2:25px; --dur:3.6s; --delay:1.2s">💎</span>
+
+        <div class="hybrid-icons">
+          <!-- SVG sheep with emoji particles -->
+          <div class="hybrid-icon-wrap">
+            <svg width="56" height="56" viewBox="0 0 64 64">
+              <g class="anim-wool">
+                <ellipse cx="28" cy="30" rx="18" ry="13" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="2"/>
+                <circle cx="18" cy="22" r="7" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+                <circle cx="28" cy="20" r="7" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+                <circle cx="38" cy="22" r="6" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+                <circle cx="14" cy="30" r="5" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+              </g>
+              <ellipse cx="50" cy="28" rx="6" ry="7" fill="var(--text)"/>
+              <circle cx="52" cy="26" r="1.5" fill="white"/>
+              <line x1="22" y1="42" x2="22" y2="54" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="30" y1="42" x2="30" y2="54" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="36" y1="42" x2="36" y2="54" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="40" y1="42" x2="40" y2="54" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+            <span>SVG animal</span>
+          </div>
+
+          <!-- SVG yarn ball -->
+          <div class="hybrid-icon-wrap">
+            <svg width="56" height="56" viewBox="0 0 64 64">
+              <g class="anim-wobble">
+                <circle cx="30" cy="34" r="22" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="2"/>
+                <path d="M10,26 Q30,12 50,26" fill="none" stroke="var(--shop-dark)" stroke-width="1.5" opacity="0.5"/>
+                <path d="M10,40 Q30,54 50,40" fill="none" stroke="var(--shop-dark)" stroke-width="1.5" opacity="0.5"/>
+                <path d="M16,14 Q28,34 16,54" fill="none" stroke="var(--shop-dark)" stroke-width="1.2" opacity="0.35"/>
+                <path d="M44,14 Q32,34 44,54" fill="none" stroke="var(--shop-dark)" stroke-width="1.2" opacity="0.35"/>
+              </g>
+              <path d="M48,20 C52,14 56,10 60,6" fill="none" stroke="var(--shop-dark)" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>SVG yarn</span>
+          </div>
+
+          <!-- SVG spinning wheel -->
+          <div class="hybrid-icon-wrap">
+            <svg width="56" height="56" viewBox="0 0 64 64">
+              <g class="anim-spin" style="transform-origin: 28px 28px">
+                <circle cx="28" cy="28" r="22" fill="none" stroke="var(--mill-dark)" stroke-width="2.5"/>
+                <circle cx="28" cy="28" r="4" fill="var(--mill-dark)"/>
+                <line x1="28" y1="6" x2="28" y2="50" stroke="var(--mill-dark)" stroke-width="1.5"/>
+                <line x1="6" y1="28" x2="50" y2="28" stroke="var(--mill-dark)" stroke-width="1.5"/>
+                <line x1="12" y1="12" x2="44" y2="44" stroke="var(--mill-dark)" stroke-width="1.5"/>
+                <line x1="44" y1="12" x2="12" y2="44" stroke="var(--mill-dark)" stroke-width="1.5"/>
+              </g>
+              <line x1="12" y1="50" x2="12" y2="60" stroke="var(--mill-dark)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="44" y1="50" x2="44" y2="60" stroke="var(--mill-dark)" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="6" y1="60" x2="50" y2="60" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>SVG wheel</span>
+          </div>
+
+          <!-- SVG scissors -->
+          <div class="hybrid-icon-wrap">
+            <svg width="56" height="56" viewBox="0 0 64 64">
+              <g class="anim-snip">
+                <circle cx="12" cy="16" r="8" fill="none" stroke="var(--studio-dark)" stroke-width="2.5"/>
+                <line x1="18" y1="20" x2="52" y2="30" stroke="var(--studio-dark)" stroke-width="2.5" stroke-linecap="round"/>
+              </g>
+              <g class="anim-snip" style="animation-direction: reverse">
+                <circle cx="12" cy="48" r="8" fill="none" stroke="var(--studio-dark)" stroke-width="2.5"/>
+                <line x1="18" y1="44" x2="52" y2="34" stroke="var(--studio-dark)" stroke-width="2.5" stroke-linecap="round"/>
+              </g>
+              <circle cx="42" cy="32" r="3" fill="var(--studio-dark)"/>
+              <circle cx="42" cy="32" r="1.5" fill="white"/>
+            </svg>
+            <span>SVG scissors</span>
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.8rem; text-align: center;">
+        Custom SVG icons handle gameplay elements &bull; Emoji particles provide ambient sparkle &bull; Best of both worlds
+      </p>
+
+      <!-- Side-by-side comparison -->
+      <div style="display: flex; gap: 2rem; justify-content: center; margin-top: 1rem; padding: 1rem; background: var(--header); border-radius: 8px;">
+        <div style="text-align: center;">
+          <div style="font-size: 0.7rem; color: var(--text-dim); margin-bottom: 4px;">Before (emoji)</div>
+          <div style="font-size: 2rem; line-height: 1;">🐑 🧶 🎡 ✂️</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 0.7rem; color: var(--text-dim); margin-bottom: 4px;">After (hybrid)</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <svg width="32" height="32" viewBox="0 0 64 64">
+              <g class="anim-wool"><ellipse cx="28" cy="30" rx="18" ry="13" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="3"/><circle cx="20" cy="22" r="7" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="2.5"/><circle cx="32" cy="20" r="7" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="2.5"/></g><ellipse cx="50" cy="28" rx="6" ry="7" fill="var(--text)"/><circle cx="52" cy="26" r="2" fill="white"/>
+            </svg>
+            <svg width="32" height="32" viewBox="0 0 64 64">
+              <g class="anim-wobble"><circle cx="30" cy="34" r="22" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="3"/><path d="M10,26 Q30,12 50,26" fill="none" stroke="var(--shop-dark)" stroke-width="2" opacity="0.5"/><path d="M10,40 Q30,54 50,40" fill="none" stroke="var(--shop-dark)" stroke-width="2" opacity="0.5"/></g><path d="M48,20 C52,14 56,10 60,6" fill="none" stroke="var(--shop-dark)" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+            <svg width="32" height="32" viewBox="0 0 64 64">
+              <g class="anim-spin" style="transform-origin:28px 28px"><circle cx="28" cy="28" r="22" fill="none" stroke="var(--mill-dark)" stroke-width="3.5"/><circle cx="28" cy="28" r="5" fill="var(--mill-dark)"/><line x1="28" y1="6" x2="28" y2="50" stroke="var(--mill-dark)" stroke-width="2.5"/><line x1="6" y1="28" x2="50" y2="28" stroke="var(--mill-dark)" stroke-width="2.5"/></g>
+            </svg>
+            <svg width="32" height="32" viewBox="0 0 64 64">
+              <g class="anim-snip"><circle cx="12" cy="16" r="8" fill="none" stroke="var(--studio-dark)" stroke-width="3.5"/><line x1="18" y1="20" x2="52" y2="30" stroke="var(--studio-dark)" stroke-width="3.5" stroke-linecap="round"/></g><g class="anim-snip" style="animation-direction:reverse"><circle cx="12" cy="48" r="8" fill="none" stroke="var(--studio-dark)" stroke-width="3.5"/><line x1="18" y1="44" x2="52" y2="34" stroke="var(--studio-dark)" stroke-width="3.5" stroke-linecap="round"/></g><circle cx="42" cy="32" r="4" fill="var(--studio-dark)"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- FULL ICON GALLERY                                      -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="gallery">
+  <h2>Full Icon Gallery</h2>
+  <p class="subtitle">Every key game emoji reimagined as animated SVGs, grouped by game area</p>
+
+  <!-- ── RESOURCES (Header Bar) ── -->
+  <div class="gallery-section">
+    <h3>Resources</h3>
+    <div class="gallery-grid">
+
+      <!-- Coin / Cash -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 💰</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <g class="anim-bob">
+            <!-- Coin body -->
+            <ellipse cx="32" cy="36" rx="20" ry="22" fill="#e8c84a" stroke="#b8962a" stroke-width="2.5"/>
+            <ellipse cx="32" cy="34" rx="20" ry="22" fill="#f0d860" stroke="#c8a830" stroke-width="2"/>
+            <!-- Inner ring -->
+            <ellipse cx="32" cy="34" rx="14" ry="16" fill="none" stroke="#c8a830" stroke-width="1.5" opacity="0.5"/>
+            <!-- $ sign -->
+            <text x="32" y="40" text-anchor="middle" font-family="serif" font-weight="bold" font-size="22" fill="#b8962a">$</text>
+            <!-- Shine -->
+            <ellipse cx="24" cy="26" rx="3" ry="5" fill="white" opacity="0.3" transform="rotate(-20,24,26)" class="anim-shine"/>
+          </g>
+        </svg>
+        <div class="item-name">Cash</div>
+      </div>
+
+      <!-- Fiber / Leaf -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🌿</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <g class="anim-wobble">
+            <!-- Stem -->
+            <path d="M32,58 Q30,40 32,20" fill="none" stroke="var(--pasture-dark)" stroke-width="2" stroke-linecap="round"/>
+            <!-- Leaves -->
+            <path d="M32,42 Q20,34 18,24 Q28,28 32,36" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+            <path d="M32,34 Q44,26 46,16 Q36,20 32,28" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+            <path d="M32,26 Q22,18 22,8 Q30,14 32,20" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+            <!-- Fiber wisps -->
+            <path d="M18,24 Q14,20 10,22" fill="none" stroke="var(--pasture-dark)" stroke-width="1" opacity="0.4" stroke-linecap="round"/>
+            <path d="M46,16 Q50,12 52,14" fill="none" stroke="var(--pasture-dark)" stroke-width="1" opacity="0.4" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <div class="item-name">Fiber</div>
+      </div>
+
+      <!-- Skein (smaller yarn ball) -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🧶</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <g class="anim-wobble">
+            <circle cx="30" cy="34" r="20" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="2"/>
+            <path d="M12,28 Q30,16 48,28" fill="none" stroke="var(--shop-dark)" stroke-width="1.5" opacity="0.5"/>
+            <path d="M12,40 Q30,50 48,40" fill="none" stroke="var(--shop-dark)" stroke-width="1.5" opacity="0.5"/>
+            <path d="M18,16 Q28,34 18,52" fill="none" stroke="var(--shop-dark)" stroke-width="1.2" opacity="0.35"/>
+            <path d="M42,16 Q32,34 42,52" fill="none" stroke="var(--shop-dark)" stroke-width="1.2" opacity="0.35"/>
+          </g>
+          <!-- Knitting needles sticking out -->
+          <line x1="40" y1="18" x2="56" y2="4" stroke="var(--studio-dark)" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="57" cy="3" r="2" fill="var(--studio-dark)"/>
+          <line x1="44" y1="22" x2="60" y2="8" stroke="var(--studio-dark)" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="61" cy="7" r="2" fill="var(--studio-dark)"/>
+        </svg>
+        <div class="item-name">Skeins / FOs</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── PASTURE ANIMALS ── -->
+  <div class="gallery-section">
+    <h3>Pasture Animals</h3>
+    <div class="gallery-grid">
+
+      <!-- Sheep (already exists, compact version) -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🐑</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <g class="anim-wool">
+            <ellipse cx="28" cy="30" rx="16" ry="12" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="2"/>
+            <circle cx="18" cy="23" r="6" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+            <circle cx="28" cy="21" r="6" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+            <circle cx="37" cy="24" r="5" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+          </g>
+          <ellipse cx="47" cy="28" rx="5" ry="6" fill="var(--text)"/>
+          <circle cx="49" cy="26" r="1.5" fill="white"/>
+          <line x1="20" y1="40" x2="20" y2="52" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="28" y1="41" x2="28" y2="52" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="34" y1="41" x2="34" y2="52" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="40" y1="40" x2="40" y2="52" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <div class="item-name">Sheep</div>
+      </div>
+
+      <!-- Alpaca -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🦙</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Body -->
+          <g class="anim-wool">
+            <ellipse cx="32" cy="38" rx="14" ry="10" fill="#f5e6d0" stroke="var(--mill-dark)" stroke-width="1.5"/>
+            <!-- Fluffy body bumps -->
+            <circle cx="24" cy="34" r="5" fill="#f5e6d0" stroke="var(--mill-dark)" stroke-width="1.2"/>
+            <circle cx="32" cy="32" r="5" fill="#f5e6d0" stroke="var(--mill-dark)" stroke-width="1.2"/>
+            <circle cx="40" cy="34" r="5" fill="#f5e6d0" stroke="var(--mill-dark)" stroke-width="1.2"/>
+          </g>
+          <!-- Long neck -->
+          <path d="M42,36 Q44,24 42,12" fill="none" stroke="var(--mill-dark)" stroke-width="5" stroke-linecap="round"/>
+          <path d="M42,36 Q44,24 42,12" fill="none" stroke="#f5e6d0" stroke-width="3" stroke-linecap="round"/>
+          <!-- Head -->
+          <ellipse cx="42" cy="10" rx="5" ry="6" fill="#f5e6d0" stroke="var(--mill-dark)" stroke-width="1.5"/>
+          <!-- Eye -->
+          <circle cx="44" cy="9" r="1.2" fill="var(--text)"/>
+          <circle cx="44.4" cy="8.7" r="0.5" fill="white"/>
+          <!-- Ears -->
+          <line x1="39" y1="6" x2="37" y2="1" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="44" y1="5" x2="46" y2="1" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+          <!-- Fluffy head poof -->
+          <circle cx="41" cy="5" r="3" fill="#f5e6d0" stroke="var(--mill-dark)" stroke-width="1"/>
+          <!-- Legs -->
+          <line x1="24" y1="46" x2="24" y2="58" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="32" y1="47" x2="32" y2="58" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="38" y1="47" x2="38" y2="58" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="42" y1="46" x2="42" y2="58" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="item-name">Alpaca</div>
+      </div>
+
+      <!-- Rabbit -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🐇</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Body -->
+          <g class="anim-wool">
+            <ellipse cx="30" cy="38" rx="16" ry="12" fill="#f5e8f0" stroke="#c48aaa" stroke-width="1.5"/>
+            <!-- Fluffy tufts -->
+            <circle cx="22" cy="34" r="5" fill="#f5e8f0" stroke="#c48aaa" stroke-width="1.2"/>
+            <circle cx="30" cy="32" r="5" fill="#f5e8f0" stroke="#c48aaa" stroke-width="1.2"/>
+            <circle cx="38" cy="34" r="5" fill="#f5e8f0" stroke="#c48aaa" stroke-width="1.2"/>
+          </g>
+          <!-- Head -->
+          <circle cx="46" cy="30" r="8" fill="#f5e8f0" stroke="#c48aaa" stroke-width="1.5"/>
+          <!-- Eye -->
+          <circle cx="49" cy="29" r="2" fill="#c44a7a"/>
+          <circle cx="49.5" cy="28.5" r="0.8" fill="white"/>
+          <!-- Nose -->
+          <ellipse cx="53" cy="31" rx="1.5" ry="1" fill="#e08aaa"/>
+          <!-- Ears (tall!) -->
+          <g class="anim-ear" style="transform-origin: 44px 22px">
+            <ellipse cx="42" cy="14" rx="3" ry="10" fill="#f5e8f0" stroke="#c48aaa" stroke-width="1.5"/>
+            <ellipse cx="42" cy="14" rx="1.5" ry="7" fill="#e8c0d4"/>
+          </g>
+          <g class="anim-ear" style="transform-origin: 49px 22px; animation-delay: 0.3s">
+            <ellipse cx="49" cy="14" rx="3" ry="10" fill="#f5e8f0" stroke="#c48aaa" stroke-width="1.5"/>
+            <ellipse cx="49" cy="14" rx="1.5" ry="7" fill="#e8c0d4"/>
+          </g>
+          <!-- Tail puff -->
+          <circle cx="14" cy="38" r="4" fill="#f5e8f0" stroke="#c48aaa" stroke-width="1.2"/>
+          <!-- Legs -->
+          <line x1="22" y1="48" x2="22" y2="56" stroke="#c48aaa" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="38" y1="48" x2="38" y2="56" stroke="#c48aaa" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Back feet (bigger) -->
+          <ellipse cx="22" cy="57" rx="3" ry="2" fill="#f5e8f0" stroke="#c48aaa" stroke-width="1.2"/>
+          <ellipse cx="38" cy="57" rx="3" ry="2" fill="#f5e8f0" stroke="#c48aaa" stroke-width="1.2"/>
+        </svg>
+        <div class="item-name">Rabbit</div>
+      </div>
+
+      <!-- Goat -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🐐</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Body -->
+          <g class="anim-chew" style="transform-origin: center bottom">
+            <ellipse cx="30" cy="34" rx="16" ry="11" fill="#e8dce8" stroke="var(--studio-dark)" stroke-width="1.5"/>
+          </g>
+          <!-- Neck -->
+          <path d="M42,32 Q46,24 44,16" fill="none" stroke="var(--studio-dark)" stroke-width="4" stroke-linecap="round"/>
+          <path d="M42,32 Q46,24 44,16" fill="none" stroke="#e8dce8" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Head -->
+          <ellipse cx="44" cy="14" rx="6" ry="7" fill="#e8dce8" stroke="var(--studio-dark)" stroke-width="1.5"/>
+          <!-- Horns! -->
+          <path d="M40,10 Q36,2 38,0" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M47,9 Q52,2 50,0" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"/>
+          <!-- Eye -->
+          <circle cx="47" cy="13" r="1.5" fill="var(--text)"/>
+          <!-- Horizontal pupil (goat!) -->
+          <ellipse cx="47" cy="13" rx="1.8" ry="0.6" fill="var(--text)"/>
+          <ellipse cx="47.3" cy="13" rx="0.5" ry="0.5" fill="#e8dce8" opacity="0.6"/>
+          <!-- Beard -->
+          <path d="M46,18 Q48,24 46,28" fill="none" stroke="var(--studio-dark)" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M44,19 Q46,25 44,29" fill="none" stroke="var(--studio-dark)" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
+          <!-- Legs -->
+          <line x1="20" y1="43" x2="20" y2="56" stroke="var(--studio-dark)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="28" y1="44" x2="28" y2="56" stroke="var(--studio-dark)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="34" y1="44" x2="34" y2="56" stroke="var(--studio-dark)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="40" y1="43" x2="40" y2="56" stroke="var(--studio-dark)" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <div class="item-name">Goat</div>
+      </div>
+
+      <!-- Ram -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🐏</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <g class="anim-wool">
+            <ellipse cx="28" cy="32" rx="16" ry="12" fill="#e0dce0" stroke="#7a7080" stroke-width="1.5"/>
+            <circle cx="18" cy="26" r="5" fill="#e0dce0" stroke="#7a7080" stroke-width="1.2"/>
+            <circle cx="28" cy="24" r="6" fill="#e0dce0" stroke="#7a7080" stroke-width="1.2"/>
+            <circle cx="36" cy="26" r="5" fill="#e0dce0" stroke="#7a7080" stroke-width="1.2"/>
+          </g>
+          <!-- Head -->
+          <ellipse cx="46" cy="28" rx="6" ry="7" fill="var(--text)"/>
+          <circle cx="49" cy="26" r="1.5" fill="white"/>
+          <!-- Curly horns -->
+          <path d="M42,22 Q36,14 40,8 Q46,6 48,12" fill="none" stroke="#8a7e72" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M50,22 Q56,14 52,8 Q46,6 44,12" fill="none" stroke="#8a7e72" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Legs -->
+          <line x1="18" y1="42" x2="18" y2="54" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="26" y1="43" x2="26" y2="54" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="34" y1="43" x2="34" y2="54" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="40" y1="42" x2="40" y2="54" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <div class="item-name">Ram</div>
+      </div>
+
+      <!-- Silk Moth -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🦋</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Body -->
+          <ellipse cx="32" cy="34" rx="3" ry="10" fill="#f0e8d8" stroke="var(--mill-dark)" stroke-width="1.5"/>
+          <!-- Wings (animated) -->
+          <g class="anim-flutter" style="transform-origin: 32px 30px">
+            <!-- Left wing -->
+            <path d="M29,28 Q14,18 12,28 Q14,38 29,36" fill="#f8f0e0" stroke="var(--mill-dark)" stroke-width="1.5"/>
+            <path d="M29,34 Q18,38 16,44 Q22,42 29,38" fill="#f8f0e0" stroke="var(--mill-dark)" stroke-width="1.2"/>
+            <!-- Wing pattern -->
+            <circle cx="20" cy="28" r="3" fill="none" stroke="var(--mill-dark)" stroke-width="0.8" opacity="0.4"/>
+          </g>
+          <g class="anim-flutter" style="transform-origin: 32px 30px; animation-direction: reverse">
+            <!-- Right wing -->
+            <path d="M35,28 Q50,18 52,28 Q50,38 35,36" fill="#f8f0e0" stroke="var(--mill-dark)" stroke-width="1.5"/>
+            <path d="M35,34 Q46,38 48,44 Q42,42 35,38" fill="#f8f0e0" stroke="var(--mill-dark)" stroke-width="1.2"/>
+            <!-- Wing pattern -->
+            <circle cx="44" cy="28" r="3" fill="none" stroke="var(--mill-dark)" stroke-width="0.8" opacity="0.4"/>
+          </g>
+          <!-- Head -->
+          <circle cx="32" cy="22" r="4" fill="#f0e8d8" stroke="var(--mill-dark)" stroke-width="1.5"/>
+          <!-- Eyes -->
+          <circle cx="30" cy="21" r="1" fill="var(--text)"/>
+          <circle cx="34" cy="21" r="1" fill="var(--text)"/>
+          <!-- Antennae -->
+          <path d="M30,19 Q26,10 22,8" fill="none" stroke="var(--mill-dark)" stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M34,19 Q38,10 42,8" fill="none" stroke="var(--mill-dark)" stroke-width="1.2" stroke-linecap="round"/>
+          <circle cx="22" cy="8" r="1.5" fill="var(--mill-dark)"/>
+          <circle cx="42" cy="8" r="1.5" fill="var(--mill-dark)"/>
+        </svg>
+        <div class="item-name">Silk Moth</div>
+      </div>
+
+      <!-- Dog (Akita) -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🐕</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Body -->
+          <ellipse cx="30" cy="34" rx="16" ry="10" fill="#e8c8a0" stroke="#a08050" stroke-width="1.5"/>
+          <!-- Head -->
+          <ellipse cx="48" cy="24" rx="8" ry="9" fill="#e8c8a0" stroke="#a08050" stroke-width="1.5"/>
+          <!-- Snout -->
+          <ellipse cx="54" cy="27" rx="4" ry="3" fill="#f0d8b8" stroke="#a08050" stroke-width="1.2"/>
+          <circle cx="55" cy="26" r="1.5" fill="var(--text)"/>
+          <!-- Eye -->
+          <circle cx="50" cy="22" r="2" fill="var(--text)"/>
+          <circle cx="50.5" cy="21.5" r="0.8" fill="white"/>
+          <!-- Ears (pointy - Akita!) -->
+          <polygon points="42,18 38,6 44,14" fill="#e8c8a0" stroke="#a08050" stroke-width="1.5" stroke-linejoin="round"/>
+          <polygon points="50,16 52,4 54,14" fill="#e8c8a0" stroke="#a08050" stroke-width="1.5" stroke-linejoin="round"/>
+          <!-- Tail (curly, animated) -->
+          <g class="anim-wag" style="transform-origin: 14px 30px">
+            <path d="M14,32 Q8,22 12,16 Q16,14 16,20" fill="#e8c8a0" stroke="#a08050" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </g>
+          <!-- Legs -->
+          <line x1="20" y1="42" x2="20" y2="54" stroke="#a08050" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="28" y1="43" x2="28" y2="54" stroke="#a08050" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="36" y1="43" x2="36" y2="54" stroke="#a08050" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="42" y1="42" x2="42" y2="54" stroke="#a08050" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <div class="item-name">Akita</div>
+      </div>
+
+      <!-- Wombat -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🦡</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Round body -->
+          <g class="anim-wool">
+            <ellipse cx="32" cy="36" rx="18" ry="14" fill="#8a7e60" stroke="#5a5040" stroke-width="1.5"/>
+          </g>
+          <!-- Head (merged with body) -->
+          <ellipse cx="48" cy="30" rx="10" ry="9" fill="#8a7e60" stroke="#5a5040" stroke-width="1.5"/>
+          <!-- Face patch -->
+          <ellipse cx="52" cy="32" rx="5" ry="4" fill="#a09070"/>
+          <!-- Nose -->
+          <ellipse cx="56" cy="30" rx="2.5" ry="2" fill="#5a5040"/>
+          <!-- Eye -->
+          <circle cx="52" cy="27" r="2" fill="var(--text)"/>
+          <circle cx="52.5" cy="26.5" r="0.8" fill="white"/>
+          <!-- Small round ears -->
+          <circle cx="44" cy="22" r="3" fill="#8a7e60" stroke="#5a5040" stroke-width="1.2"/>
+          <circle cx="50" cy="21" r="3" fill="#8a7e60" stroke="#5a5040" stroke-width="1.2"/>
+          <!-- Stubby legs -->
+          <ellipse cx="20" cy="50" rx="4" ry="3" fill="#8a7e60" stroke="#5a5040" stroke-width="1.2"/>
+          <ellipse cx="30" cy="50" rx="4" ry="3" fill="#8a7e60" stroke="#5a5040" stroke-width="1.2"/>
+          <ellipse cx="38" cy="50" rx="4" ry="3" fill="#8a7e60" stroke="#5a5040" stroke-width="1.2"/>
+          <ellipse cx="46" cy="48" rx="4" ry="3" fill="#8a7e60" stroke="#5a5040" stroke-width="1.2"/>
+        </svg>
+        <div class="item-name">Wombat</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── MILL EQUIPMENT ── -->
+  <div class="gallery-section">
+    <h3>Mill Equipment</h3>
+    <div class="gallery-grid">
+
+      <!-- Drop Spindle -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🪵</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <g class="anim-spin" style="transform-origin: 32px 32px; animation-duration: 3s">
+            <!-- Whorl (disc) -->
+            <ellipse cx="32" cy="32" rx="14" ry="4" fill="var(--mill)" stroke="var(--mill-dark)" stroke-width="2"/>
+            <!-- Whorl decoration -->
+            <ellipse cx="32" cy="32" rx="8" ry="2.5" fill="none" stroke="var(--mill-dark)" stroke-width="1" opacity="0.4"/>
+          </g>
+          <!-- Shaft -->
+          <line x1="32" y1="6" x2="32" y2="58" stroke="var(--mill-dark)" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Hook at top -->
+          <path d="M32,6 Q36,4 34,8" fill="none" stroke="var(--mill-dark)" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Yarn wrapping -->
+          <path d="M32,20 Q38,22 34,26 Q28,28 32,30" fill="none" stroke="var(--shop-dark)" stroke-width="1.5" opacity="0.6"/>
+        </svg>
+        <div class="item-name">Drop Spindle</div>
+      </div>
+
+      <!-- Spinning Wheel (compact) -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🎡</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <line x1="14" y1="50" x2="14" y2="58" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="42" y1="50" x2="42" y2="58" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="8" y1="58" x2="48" y2="58" stroke="var(--mill-dark)" stroke-width="1.5" stroke-linecap="round"/>
+          <g class="anim-spin" style="transform-origin: 28px 28px">
+            <circle cx="28" cy="28" r="20" fill="none" stroke="var(--mill-dark)" stroke-width="2.5"/>
+            <circle cx="28" cy="28" r="3.5" fill="var(--mill-dark)"/>
+            <line x1="28" y1="8" x2="28" y2="48" stroke="var(--mill-dark)" stroke-width="1.5"/>
+            <line x1="8" y1="28" x2="48" y2="28" stroke="var(--mill-dark)" stroke-width="1.5"/>
+            <line x1="14" y1="14" x2="42" y2="42" stroke="var(--mill-dark)" stroke-width="1.2"/>
+            <line x1="42" y1="14" x2="14" y2="42" stroke="var(--mill-dark)" stroke-width="1.2"/>
+          </g>
+          <rect x="50" y="22" width="6" height="12" rx="2" fill="none" stroke="var(--mill-dark)" stroke-width="1.5"/>
+        </svg>
+        <div class="item-name">Spinning Wheel</div>
+      </div>
+
+      <!-- Electric Carder -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: ⚡</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Machine body -->
+          <rect x="10" y="20" width="44" height="28" rx="4" fill="var(--mill)" stroke="var(--mill-dark)" stroke-width="2"/>
+          <!-- Drum rollers -->
+          <g class="anim-spin" style="transform-origin: 24px 34px; animation-duration: 1.5s">
+            <circle cx="24" cy="34" r="8" fill="none" stroke="var(--mill-dark)" stroke-width="2"/>
+            <!-- Teeth -->
+            <line x1="24" y1="26" x2="24" y2="28" stroke="var(--mill-dark)" stroke-width="1.5"/>
+            <line x1="24" y1="40" x2="24" y2="42" stroke="var(--mill-dark)" stroke-width="1.5"/>
+            <line x1="16" y1="34" x2="18" y2="34" stroke="var(--mill-dark)" stroke-width="1.5"/>
+            <line x1="30" y1="34" x2="32" y2="34" stroke="var(--mill-dark)" stroke-width="1.5"/>
+          </g>
+          <g class="anim-spin" style="transform-origin: 42px 34px; animation-duration: 1s; animation-direction: reverse">
+            <circle cx="42" cy="34" r="6" fill="none" stroke="var(--mill-dark)" stroke-width="2"/>
+            <line x1="42" y1="28" x2="42" y2="30" stroke="var(--mill-dark)" stroke-width="1.5"/>
+            <line x1="42" y1="38" x2="42" y2="40" stroke="var(--mill-dark)" stroke-width="1.5"/>
+            <line x1="36" y1="34" x2="38" y2="34" stroke="var(--mill-dark)" stroke-width="1.5"/>
+            <line x1="46" y1="34" x2="48" y2="34" stroke="var(--mill-dark)" stroke-width="1.5"/>
+          </g>
+          <!-- Lightning bolt -->
+          <path d="M30,8 L26,18 L32,16 L28,24" fill="none" stroke="#e8a830" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Feed tray -->
+          <line x1="4" y1="30" x2="10" y2="34" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+          <!-- Output -->
+          <line x1="54" y1="34" x2="60" y2="30" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="item-name">Electric Carder</div>
+      </div>
+
+      <!-- Kettle Dyeing -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🫕</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Pot -->
+          <path d="M12,28 L12,48 Q12,54 18,54 L46,54 Q52,54 52,48 L52,28" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="2"/>
+          <!-- Rim -->
+          <ellipse cx="32" cy="28" rx="20" ry="5" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="2"/>
+          <!-- Liquid -->
+          <ellipse cx="32" cy="30" rx="16" ry="3" fill="var(--shop-dark)" opacity="0.3"/>
+          <!-- Handles -->
+          <path d="M12,34 Q6,34 6,40 Q6,46 12,46" fill="none" stroke="var(--shop-dark)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M52,34 Q58,34 58,40 Q58,46 52,46" fill="none" stroke="var(--shop-dark)" stroke-width="2" stroke-linecap="round"/>
+          <!-- Steam -->
+          <path d="M24,24 Q22,18 24,12" fill="none" stroke="var(--shop-dark)" stroke-width="1.2" opacity="0.4" stroke-linecap="round" class="anim-steam" style="--delay:0s"/>
+          <path d="M32,22 Q30,16 32,10" fill="none" stroke="var(--shop-dark)" stroke-width="1.2" opacity="0.4" stroke-linecap="round" class="anim-steam" style="animation-delay:0.6s"/>
+          <path d="M40,24 Q38,18 40,12" fill="none" stroke="var(--shop-dark)" stroke-width="1.2" opacity="0.4" stroke-linecap="round" class="anim-steam" style="animation-delay:1.2s"/>
+          <!-- Yarn in pot (peeking out) -->
+          <path d="M22,28 Q26,24 30,28 Q34,32 38,28" fill="none" stroke="var(--shop-dark)" stroke-width="2" opacity="0.5"/>
+        </svg>
+        <div class="item-name">Kettle Dye</div>
+      </div>
+
+      <!-- Paint Palette / Indie Dye -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🎨</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Palette shape -->
+          <path d="M10,32 Q10,12 32,12 Q54,12 54,32 Q54,52 32,52 Q10,52 10,32 Z" fill="#f5e8d8" stroke="var(--mill-dark)" stroke-width="2"/>
+          <!-- Thumb hole -->
+          <circle cx="40" cy="40" r="6" fill="var(--bg)" stroke="var(--mill-dark)" stroke-width="1.5"/>
+          <!-- Paint blobs -->
+          <circle cx="20" cy="22" r="5" fill="var(--shop)"/>
+          <circle cx="34" cy="18" r="4" fill="var(--pasture-dark)"/>
+          <circle cx="46" cy="24" r="4" fill="var(--studio)"/>
+          <circle cx="18" cy="36" r="4" fill="var(--mill-dark)"/>
+          <circle cx="30" cy="42" r="3.5" fill="#7badd4"/>
+          <!-- Brush -->
+          <line x1="48" y1="8" x2="56" y2="2" stroke="var(--text)" stroke-width="2" stroke-linecap="round"/>
+          <rect x="54" y="0" width="8" height="4" rx="1" fill="var(--mill-dark)" transform="rotate(-40, 58, 2)"/>
+        </svg>
+        <div class="item-name">Indie Dye</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SHOP ── -->
+  <div class="gallery-section">
+    <h3>Yarn Shop</h3>
+    <div class="gallery-grid">
+
+      <!-- Swift & Ball Winder -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🧵</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Swift base -->
+          <line x1="32" y1="58" x2="32" y2="30" stroke="var(--mill-dark)" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Swift arms (spinning) -->
+          <g class="anim-spin" style="transform-origin: 32px 24px; animation-duration: 3s">
+            <line x1="14" y1="24" x2="50" y2="24" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="22" y1="14" x2="42" y2="34" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="22" y1="34" x2="42" y2="14" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+            <!-- Yarn on swift -->
+            <circle cx="32" cy="24" r="18" fill="none" stroke="var(--shop)" stroke-width="3" opacity="0.4"/>
+          </g>
+          <!-- Base -->
+          <ellipse cx="32" cy="58" rx="10" ry="3" fill="none" stroke="var(--mill-dark)" stroke-width="1.5"/>
+        </svg>
+        <div class="item-name">Swift</div>
+      </div>
+
+      <!-- Knit Night / Moon -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🌙</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Moon crescent -->
+          <path d="M40,8 Q16,8 16,32 Q16,56 40,56 Q26,50 26,32 Q26,14 40,8 Z" fill="#f0d860" stroke="#c8a830" stroke-width="2"/>
+          <!-- Stars -->
+          <g class="anim-shine">
+            <circle cx="48" cy="14" r="1.5" fill="#f0d860"/>
+            <line x1="48" y1="10" x2="48" y2="18" stroke="#f0d860" stroke-width="0.8"/>
+            <line x1="44" y1="14" x2="52" y2="14" stroke="#f0d860" stroke-width="0.8"/>
+          </g>
+          <g class="anim-shine" style="animation-delay: 1s">
+            <circle cx="54" cy="28" r="1" fill="#f0d860"/>
+            <line x1="54" y1="25" x2="54" y2="31" stroke="#f0d860" stroke-width="0.6"/>
+            <line x1="51" y1="28" x2="57" y2="28" stroke="#f0d860" stroke-width="0.6"/>
+          </g>
+          <g class="anim-shine" style="animation-delay: 0.5s">
+            <circle cx="50" cy="44" r="1.2" fill="#f0d860"/>
+          </g>
+          <!-- Tiny knitting needles crossed -->
+          <line x1="42" y1="50" x2="54" y2="38" stroke="var(--studio-dark)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="46" y1="52" x2="58" y2="40" stroke="var(--studio-dark)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div class="item-name">Knit Night</div>
+      </div>
+
+      <!-- Basket / Fiber Merchant -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🧺</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Basket body -->
+          <path d="M10,28 L6,50 Q6,56 14,56 L50,56 Q58,56 58,50 L54,28" fill="var(--mill)" stroke="var(--mill-dark)" stroke-width="2"/>
+          <!-- Weave pattern -->
+          <line x1="20" y1="28" x2="16" y2="56" stroke="var(--mill-dark)" stroke-width="1" opacity="0.3"/>
+          <line x1="32" y1="28" x2="32" y2="56" stroke="var(--mill-dark)" stroke-width="1" opacity="0.3"/>
+          <line x1="44" y1="28" x2="48" y2="56" stroke="var(--mill-dark)" stroke-width="1" opacity="0.3"/>
+          <line x1="6" y1="38" x2="58" y2="38" stroke="var(--mill-dark)" stroke-width="1" opacity="0.3"/>
+          <line x1="6" y1="48" x2="58" y2="48" stroke="var(--mill-dark)" stroke-width="1" opacity="0.3"/>
+          <!-- Handle -->
+          <path d="M14,28 Q32,6 50,28" fill="none" stroke="var(--mill-dark)" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Rim -->
+          <line x1="10" y1="28" x2="54" y2="28" stroke="var(--mill-dark)" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Yarn peeking out -->
+          <circle cx="24" cy="24" r="6" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="1.2"/>
+          <circle cx="38" cy="22" r="5" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="1.2"/>
+          <circle cx="32" cy="18" r="4" fill="var(--studio)" stroke="var(--studio-dark)" stroke-width="1.2"/>
+        </svg>
+        <div class="item-name">Basket</div>
+      </div>
+
+      <!-- Trophy / SABLE -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🏆</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Cup -->
+          <path d="M18,12 L16,34 Q16,42 24,42 L40,42 Q48,42 48,34 L46,12 Z" fill="#f0d860" stroke="#c8a830" stroke-width="2"/>
+          <!-- Handles -->
+          <path d="M18,16 Q8,16 8,26 Q8,34 16,34" fill="none" stroke="#c8a830" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M46,16 Q56,16 56,26 Q56,34 48,34" fill="none" stroke="#c8a830" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Shine -->
+          <line x1="24" y1="18" x2="24" y2="28" stroke="white" stroke-width="1.5" opacity="0.4" stroke-linecap="round"/>
+          <!-- Stem -->
+          <rect x="28" y="42" width="8" height="8" fill="#c8a830"/>
+          <!-- Base -->
+          <rect x="20" y="50" width="24" height="4" rx="2" fill="#c8a830" stroke="#a88020" stroke-width="1"/>
+          <!-- Star on cup -->
+          <text x="32" y="32" text-anchor="middle" font-size="14" fill="#c8a830" opacity="0.5">★</text>
+        </svg>
+        <div class="item-name">Trophy</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── STUDIO PROJECTS ── -->
+  <div class="gallery-section">
+    <h3>Studio Projects</h3>
+    <div class="gallery-grid">
+
+      <!-- Gauge Swatch / Safety Pin -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🧷</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Pin body -->
+          <path d="M16,18 L16,46 Q16,52 22,52 L24,52 Q28,52 28,46 L28,26" fill="none" stroke="var(--studio-dark)" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Pin point -->
+          <line x1="16" y1="18" x2="44" y2="18" stroke="var(--studio-dark)" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Clasp loop -->
+          <path d="M28,26 Q28,20 34,20 L44,20 Q48,20 48,16 L44,18" fill="none" stroke="var(--studio-dark)" stroke-width="2" stroke-linecap="round"/>
+          <!-- Tiny swatch hanging -->
+          <rect x="32" y="28" width="20" height="24" rx="2" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+          <!-- Knit grid on swatch -->
+          <line x1="36" y1="28" x2="36" y2="52" stroke="var(--pasture-dark)" stroke-width="0.8" opacity="0.3"/>
+          <line x1="40" y1="28" x2="40" y2="52" stroke="var(--pasture-dark)" stroke-width="0.8" opacity="0.3"/>
+          <line x1="44" y1="28" x2="44" y2="52" stroke="var(--pasture-dark)" stroke-width="0.8" opacity="0.3"/>
+          <line x1="48" y1="28" x2="48" y2="52" stroke="var(--pasture-dark)" stroke-width="0.8" opacity="0.3"/>
+          <line x1="32" y1="34" x2="52" y2="34" stroke="var(--pasture-dark)" stroke-width="0.8" opacity="0.3"/>
+          <line x1="32" y1="40" x2="52" y2="40" stroke="var(--pasture-dark)" stroke-width="0.8" opacity="0.3"/>
+          <line x1="32" y1="46" x2="52" y2="46" stroke="var(--pasture-dark)" stroke-width="0.8" opacity="0.3"/>
+        </svg>
+        <div class="item-name">Gauge Swatch</div>
+      </div>
+
+      <!-- Socks -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🧦</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Left sock -->
+          <path d="M14,6 L14,38 Q14,48 24,48 L30,48 Q36,48 36,40 L36,38 L24,38 L24,6 Z" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="2" stroke-linejoin="round"/>
+          <!-- Ribbing -->
+          <line x1="14" y1="10" x2="24" y2="10" stroke="var(--shop-dark)" stroke-width="1" opacity="0.3"/>
+          <line x1="14" y1="14" x2="24" y2="14" stroke="var(--shop-dark)" stroke-width="1" opacity="0.3"/>
+          <!-- Heel -->
+          <path d="M14,30 Q10,34 14,38" fill="none" stroke="var(--shop-dark)" stroke-width="1" opacity="0.4"/>
+          <!-- Right sock (offset) -->
+          <path d="M30,6 L30,38 Q30,48 40,48 L46,48 Q52,48 52,40 L52,38 L40,38 L40,6 Z" fill="var(--studio)" stroke="var(--studio-dark)" stroke-width="2" stroke-linejoin="round"/>
+          <!-- Ribbing -->
+          <line x1="30" y1="10" x2="40" y2="10" stroke="var(--studio-dark)" stroke-width="1" opacity="0.3"/>
+          <line x1="30" y1="14" x2="40" y2="14" stroke="var(--studio-dark)" stroke-width="1" opacity="0.3"/>
+          <!-- Toe -->
+          <path d="M40,48 Q52,52 52,40" fill="none" stroke="var(--studio-dark)" stroke-width="1" opacity="0.4"/>
+        </svg>
+        <div class="item-name">Socks</div>
+      </div>
+
+      <!-- Shawl / Feather -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🪶</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <g class="anim-wobble" style="animation-duration: 3s">
+            <!-- Quill shaft -->
+            <path d="M52,4 Q32,32 12,58" fill="none" stroke="var(--mill-dark)" stroke-width="2" stroke-linecap="round"/>
+            <!-- Feather vanes -->
+            <path d="M52,4 Q40,10 38,20 Q44,14 52,4" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="1"/>
+            <path d="M44,14 Q30,20 28,32 Q36,24 44,14" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="1"/>
+            <path d="M36,26 Q22,32 20,42 Q28,34 36,26" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="1"/>
+            <path d="M28,38 Q16,42 14,52 Q22,44 28,38" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="1"/>
+            <!-- Right side -->
+            <path d="M52,4 Q54,14 48,22 Q52,12 52,4" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="1"/>
+            <path d="M44,16 Q48,26 40,34 Q46,24 44,16" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="1"/>
+            <path d="M36,28 Q40,38 32,44 Q38,36 36,28" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="1"/>
+          </g>
+        </svg>
+        <div class="item-name">Shawl</div>
+      </div>
+
+      <!-- Sweater -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🧥</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Body -->
+          <path d="M18,24 L18,54 L46,54 L46,24 Q40,20 32,18 Q24,20 18,24 Z" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="2"/>
+          <!-- Collar / Yoke -->
+          <path d="M24,16 Q32,12 40,16 Q46,20 46,24 Q40,20 32,18 Q24,20 18,24 Q18,20 24,16 Z" fill="var(--studio)" stroke="var(--studio-dark)" stroke-width="1.5"/>
+          <!-- Fair isle band -->
+          <rect x="18" y="30" width="28" height="6" fill="var(--studio)" opacity="0.4"/>
+          <path d="M18,33 L22,30 L26,33 L30,30 L34,33 L38,30 L42,33 L46,30" fill="none" stroke="var(--shop-dark)" stroke-width="1.2" opacity="0.5"/>
+          <!-- Left sleeve -->
+          <path d="M18,24 L4,34 L8,38 L18,30" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="2"/>
+          <!-- Right sleeve -->
+          <path d="M46,24 L60,34 L56,38 L46,30" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="2"/>
+          <!-- Neck opening -->
+          <path d="M28,16 Q32,14 36,16" fill="none" stroke="var(--shop-dark)" stroke-width="1.5"/>
+        </svg>
+        <div class="item-name">Sweater</div>
+      </div>
+
+      <!-- Blanket / Temperature -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🌡️</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Blanket (folded) -->
+          <rect x="8" y="14" width="48" height="40" rx="3" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+          <!-- Temperature stripes -->
+          <rect x="8" y="14" width="48" height="5" rx="3" fill="#7badd4"/>
+          <rect x="8" y="19" width="48" height="5" fill="#7b9e6b"/>
+          <rect x="8" y="24" width="48" height="5" fill="#b8c86b"/>
+          <rect x="8" y="29" width="48" height="5" fill="#e8d060"/>
+          <rect x="8" y="34" width="48" height="5" fill="#e8a040"/>
+          <rect x="8" y="39" width="48" height="5" fill="#d47070"/>
+          <rect x="8" y="44" width="48" height="5" fill="var(--shop)"/>
+          <rect x="8" y="49" width="48" height="5" rx="3" fill="var(--studio)"/>
+          <!-- Border overlay -->
+          <rect x="8" y="14" width="48" height="40" rx="3" fill="none" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <!-- Draped corner -->
+          <path d="M56,44 Q58,50 54,54 L56,54 Z" fill="var(--studio)" stroke="var(--text-dim)" stroke-width="1"/>
+        </svg>
+        <div class="item-name">Temp Blanket</div>
+      </div>
+
+      <!-- Knitting Machine / Robot -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🤖</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Head -->
+          <rect x="16" y="8" width="32" height="24" rx="4" fill="var(--header)" stroke="var(--text-dim)" stroke-width="2"/>
+          <!-- Eyes -->
+          <rect x="22" y="14" width="8" height="6" rx="1" fill="var(--pasture-dark)"/>
+          <rect x="34" y="14" width="8" height="6" rx="1" fill="var(--pasture-dark)"/>
+          <!-- Animated eye dots -->
+          <circle cx="26" cy="17" r="2" fill="white" class="anim-shine" style="animation-delay: 0.5s"/>
+          <circle cx="38" cy="17" r="2" fill="white" class="anim-shine" style="animation-delay: 0.5s"/>
+          <!-- Mouth (zigzag = knit pattern) -->
+          <path d="M24,26 L27,24 L30,26 L33,24 L36,26 L39,24" fill="none" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <!-- Body -->
+          <rect x="20" y="32" width="24" height="20" rx="3" fill="var(--header)" stroke="var(--text-dim)" stroke-width="2"/>
+          <!-- Antenna -->
+          <line x1="32" y1="8" x2="32" y2="2" stroke="var(--text-dim)" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="32" cy="2" r="2" fill="var(--shop)"/>
+          <!-- Arms holding needles -->
+          <g class="anim-knit" style="transform-origin: 10px 38px">
+            <line x1="20" y1="38" x2="4" y2="34" stroke="var(--text-dim)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="4" y1="34" x2="0" y2="28" stroke="var(--studio-dark)" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <g class="anim-knit" style="transform-origin: 54px 38px; animation-direction: reverse">
+            <line x1="44" y1="38" x2="60" y2="34" stroke="var(--text-dim)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="60" y1="34" x2="64" y2="28" stroke="var(--studio-dark)" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <!-- Heart on chest -->
+          <text x="32" y="47" text-anchor="middle" font-size="10" fill="var(--shop)">♥</text>
+        </svg>
+        <div class="item-name">Knit Machine</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SECTION HEADERS ── -->
+  <div class="gallery-section">
+    <h3>Section Headers</h3>
+    <div class="gallery-grid">
+
+      <!-- Mill / Factory -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🏭</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Building -->
+          <rect x="8" y="24" width="48" height="32" rx="2" fill="var(--mill)" stroke="var(--mill-dark)" stroke-width="2"/>
+          <!-- Roof -->
+          <path d="M6,24 L32,10 L58,24 Z" fill="var(--mill)" stroke="var(--mill-dark)" stroke-width="2"/>
+          <!-- Chimney -->
+          <rect x="44" y="6" width="8" height="18" fill="var(--mill-dark)" stroke="var(--mill-dark)" stroke-width="1"/>
+          <!-- Smoke -->
+          <circle cx="48" cy="4" r="3" fill="var(--text-dim)" opacity="0.3" class="anim-steam"/>
+          <circle cx="52" cy="2" r="2" fill="var(--text-dim)" opacity="0.2" class="anim-steam" style="animation-delay: 0.8s"/>
+          <!-- Door -->
+          <rect x="26" y="40" width="12" height="16" rx="6" fill="var(--mill-dark)" opacity="0.3"/>
+          <!-- Windows -->
+          <rect x="14" y="32" width="8" height="8" rx="1" fill="var(--bg)" stroke="var(--mill-dark)" stroke-width="1"/>
+          <rect x="42" y="32" width="8" height="8" rx="1" fill="var(--bg)" stroke="var(--mill-dark)" stroke-width="1"/>
+          <!-- Wheel watermark -->
+          <circle cx="18" cy="36" r="2" fill="none" stroke="var(--mill-dark)" stroke-width="0.8" opacity="0.3"/>
+        </svg>
+        <div class="item-name">Mill</div>
+      </div>
+
+      <!-- Shop -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🏪</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Building -->
+          <rect x="8" y="20" width="48" height="36" fill="var(--shop)" stroke="var(--shop-dark)" stroke-width="2"/>
+          <!-- Awning -->
+          <path d="M4,20 L60,20 L56,28 Q48,24 40,28 Q32,24 24,28 Q16,24 8,28 Z" fill="var(--shop-dark)" stroke="var(--shop-dark)" stroke-width="1.5"/>
+          <!-- Window with yarn display -->
+          <rect x="14" y="32" width="16" height="14" rx="1" fill="var(--bg)" stroke="var(--shop-dark)" stroke-width="1.5"/>
+          <!-- Yarn balls in window -->
+          <circle cx="20" cy="40" r="3" fill="var(--pasture)"/>
+          <circle cx="26" cy="40" r="3" fill="var(--studio)"/>
+          <circle cx="23" cy="36" r="3" fill="var(--mill)"/>
+          <!-- Door -->
+          <rect x="36" y="32" width="14" height="24" rx="2" fill="var(--bg)" stroke="var(--shop-dark)" stroke-width="1.5"/>
+          <circle cx="46" cy="44" r="1.5" fill="var(--shop-dark)"/>
+          <!-- Sign -->
+          <rect x="20" y="10" width="24" height="10" rx="2" fill="var(--bg)" stroke="var(--shop-dark)" stroke-width="1.5"/>
+          <text x="32" y="18" text-anchor="middle" font-size="6" font-family="serif" fill="var(--shop-dark)">YARN</text>
+        </svg>
+        <div class="item-name">Shop</div>
+      </div>
+
+      <!-- Studio / Scissors (already done, compact) -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: ✂️</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <g class="anim-snip">
+            <circle cx="12" cy="16" r="7" fill="none" stroke="var(--studio-dark)" stroke-width="2"/>
+            <line x1="17" y1="20" x2="50" y2="30" stroke="var(--studio-dark)" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <g class="anim-snip" style="animation-direction: reverse">
+            <circle cx="12" cy="48" r="7" fill="none" stroke="var(--studio-dark)" stroke-width="2"/>
+            <line x1="17" y1="44" x2="50" y2="34" stroke="var(--studio-dark)" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <circle cx="40" cy="32" r="3" fill="var(--studio-dark)"/>
+          <circle cx="40" cy="32" r="1.5" fill="white"/>
+          <!-- Tiny yarn strand being cut -->
+          <path d="M50,30 Q56,28 60,32 Q56,36 50,34" fill="none" stroke="var(--shop-dark)" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>
+        </svg>
+        <div class="item-name">Studio</div>
+      </div>
+
+      <!-- Pasture -->
+      <div class="gallery-item">
+        <div class="emoji-before">was: 🐑</div>
+        <svg width="48" height="48" viewBox="0 0 64 64">
+          <!-- Rolling hills -->
+          <path d="M0,44 Q16,32 32,40 Q48,48 64,38 L64,64 L0,64 Z" fill="var(--pasture)" stroke="var(--pasture-dark)" stroke-width="1.5"/>
+          <path d="M0,50 Q20,42 40,48 Q56,54 64,46 L64,64 L0,64 Z" fill="var(--pasture-dark)" opacity="0.2"/>
+          <!-- Fence -->
+          <line x1="6" y1="38" x2="6" y2="50" stroke="var(--mill-dark)" stroke-width="1.5"/>
+          <line x1="16" y1="34" x2="16" y2="46" stroke="var(--mill-dark)" stroke-width="1.5"/>
+          <line x1="6" y1="42" x2="16" y2="38" stroke="var(--mill-dark)" stroke-width="1"/>
+          <line x1="6" y1="46" x2="16" y2="42" stroke="var(--mill-dark)" stroke-width="1"/>
+          <!-- Tiny sheep on hill -->
+          <g class="anim-wool">
+            <ellipse cx="40" cy="38" rx="6" ry="4" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="1"/>
+            <circle cx="36" cy="36" r="2.5" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="0.8"/>
+            <circle cx="40" cy="35" r="2.5" fill="#f5f0e8" stroke="var(--pasture-dark)" stroke-width="0.8"/>
+          </g>
+          <ellipse cx="45" cy="37" rx="2" ry="2.5" fill="var(--text)"/>
+          <circle cx="46" cy="36" r="0.7" fill="white"/>
+          <!-- Sun -->
+          <circle cx="52" cy="12" r="6" fill="#f0d860" opacity="0.6"/>
+          <circle cx="52" cy="12" r="4" fill="#f0d860"/>
+        </svg>
+        <div class="item-name">Pasture</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
