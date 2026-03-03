@@ -64,7 +64,7 @@ Unlike cattle and hogs, chickens are inconveniently covered in (surprise!) feath
 
 Fresh out of the contaminated scalding tank, after a few seconds at the plucking station, the carcass is mechanically eviscerated. The residual fecal slop still clinging to the skin contaminates the gutting machine, which in turn inoculates the body cavity, splashing fluids and infecting the whole bird from the inside. The carcass is then washed again, usually in another (dirty) communal tank, but by now it is virtually impossible to remove all of the liquified, dilute fecal material from every nook, cranny, scrap, cut and fold of flesh. Some of the bacteria have a reproductive cycle of just a few minutes, so even after a thorough washing, just a few residual bacteria can re-contaminate the carcass in a very short time. (One surviving bacterium, reproducing every ~6 min = 1 million in 2 hr, 1 trillion in 4 hrs.)
 
-The presence of of E. Coli, salmonella and camphylobacter in virtually ALL consumer chicken, including organic and farmer's markets, means it is best to keep raw chicken isolated (well-wrapped) and well refrigerated (bottom shelf). Prepare it as soon as possible, and cook it thoroughly. If you can't use it right away, immerse it fully in a strong brine or acidic marinade (zipper bags are good) to slow pathogen growth. Makes it moist and tasty, too!
+The presence of E. Coli, salmonella and campylobacter in virtually ALL consumer chicken, including organic and farmer's markets, means it is best to keep raw chicken isolated (well-wrapped) and well refrigerated (bottom shelf). Prepare it as soon as possible, and cook it thoroughly. If you can't use it right away, immerse it fully in a strong brine or acidic marinade (zipper bags are good) to slow pathogen growth. Makes it moist and tasty, too!
 """.strip(),
   },
 
@@ -108,7 +108,7 @@ An incomplete (and largely facetious) list:
 - Going to a conference to network = -10 micro-pmfs
 - Having heated debates with your cofounders = 25 micro-pmfs
 
-I'll update these, probably with more earnesty, as my co-proprietorship of my small business evolves.
+I'll update these, probably with more earnestness, as my co-proprietorship of my small business evolves.
 """.strip(),
   },
   "on cohere's valuation": {
@@ -137,7 +137,7 @@ There are of course many feelings I've been feeling since starting the company, 
 
 But there's a particular feeling that I wasn't anticipating, that I end up spending lots of time with. It's hard to describe, but in broad strokes, I am trying to wrap my mind around a firm vision of the thing we are aspiring to build, both in the short term, the medium term, and the very long term, and in so doing I feel my mind stretching.
 
-This is perhaps an unusual analogy, but it's how I imagine a model feels when it is trying to <a href="https://arxiv.org/pdf/2201.02177">grok</a> a dataset. It struggles and struggles and the loss is sometimes going down, but and sometimes stubbornly plateau-ing, and sometimes going up again. And the general trend is one of progress, fast at first, and then slower and slower as it tries to compress and model every last bit of information in the data.
+This is perhaps an unusual analogy, but it's how I imagine a model feels when it is trying to <a href="https://arxiv.org/pdf/2201.02177">grok</a> a dataset. It struggles and struggles and the loss is sometimes going down, but sometimes stubbornly plateau-ing, and sometimes going up again. And the general trend is one of progress, fast at first, and then slower and slower as it tries to compress and model every last bit of information in the data.
 
 I think it is my brain's attempt at trying to compress the vision for the company into maximally clear, truthful, simple statements and action plans (like a famous one <a href="https://www.tesla.com/en_ca/secret-master-plan">here</a>), and at the same time all the uncertainties in the vision and counterarguments to the assumptions rear their heads and in turn mold the thought process.
 
@@ -159,11 +159,29 @@ To start, here is the set of professions that wear crocs in the line of duty:
 What an august set of professions to be included amongst.
 
 Other arguments in favour of crocs are self-evident: they are comfortable, waterproof, breathable, playful, and stylish.
-They are perhaps the most customiseable footwear, both in look (jibbitz), and in function (relax-mode or sport-mode).
+They are perhaps the most customisable footwear, both in look (jibbitz), and in function (relax-mode or sport-mode).
 
 At Silmo, every employee is gifted a pair of onboarding crocs of their choosing, and if they help close a customer, they get a commemorative jibbit.
     """.strip()
-  }
+  },
+  "Attention vs Secrecy": {
+    "published": "2026-03-03",
+    "content": """
+In the world of coding agents that produce code at superhuman quality and speed, the relative value of human attention and process secrecy increases.
+
+If your process is secret, then it is harder for coding agents to blindly copy it, especially if it is backend heavy.
+
+And of course, human attention remains finite, with ever-better software competing for it.
+
+When building software, especially software that is meant to be doing a long-running work task, we are confronted with a choice: 
+Should we explain or help the user understand what is going on in the backend, encouraging the user to pay attention to us and the work we are doing?
+Or should we instead stay mute and alert the user once the work is done, at the cost of the user paying context switching elsewhere and not paying us as much attention?
+
+This is something that we are actively grappling with, and have for now settled on a compromise whereby we reveal some, but not too much, of the backend processing.
+
+The correct answer is likely to change over time as agents improve --perhaps soon all they will need is a few input-output pairs to replicate a process-- but for now this is what we've settled on.
+    """.strip()
+  },
 
 }
 
