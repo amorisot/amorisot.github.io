@@ -159,7 +159,7 @@ To start, here is the set of professions that wear crocs in the line of duty:
 What an august set of professions to be included amongst.
 
 Other arguments in favour of crocs are self-evident: they are comfortable, waterproof, breathable, playful, and stylish.
-They are perhaps the customiseable footwear, both in look (jibbitz), and in function (relax-mode or sport-mode).
+They are perhaps the most customiseable footwear, both in look (jibbitz), and in function (relax-mode or sport-mode).
 
 At Silmo, every employee is gifted a pair of onboarding crocs of their choosing, and if they help close a customer, they get a commemorative jibbit.
     """.strip()
