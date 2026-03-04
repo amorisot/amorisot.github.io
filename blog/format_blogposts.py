@@ -182,7 +182,24 @@ This is something that we are actively grappling with, and have for now settled 
 The correct answer is likely to change over time as agents improve --perhaps soon all they will need is a few input-output pairs to replicate a process-- but for now this is what we've settled on.
     """.strip()
   },
+  "The Joy of Discarding": {
+    "published": "2026-03-04",
+    "content": """
+Here are a couple of different situations that lead to the same feeling:
 
+You're late for an appointment, you hop onto a bikeshare, pedal like mad, gingerly speed through a couple of red lights, arrive at your destination, and slam the bike into the bikeshare rack, docking it with gleeful violence.
+
+There are several edge cases in a piece of software that will be demoed soon, that might make the demo fail. You spin up several Claude Code sessions, prompt like mad, have it write the hackiest code that sets up the contrived setup. Many files have been edited. The code runs. The demo still works despite the edge cases. You discard all the modified code.
+
+The act of slamming the bikeshare into the dock feels the same as the act of deleting the code. It's a feeling of pure satisfaction. Not because the act of discarding is inherently pleasing, but because the act of creation was fluid and its output no longer feels precious, and not gripped by the feeling of sunk cost.
+    """.strip()
+  },
+#   "New Post": {
+#     "published": "2026-03-03",
+#     "content": """
+# Content
+#     """.strip()
+#   },
 }
 
 def get_git_dates(filepath: str) -> tuple[str | None, str | None]:
