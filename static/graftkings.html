@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GraftKings — Botanical Garden Betting</title>
+  <style>
+    :root {
+      --bg-dark:       #cfc9b9;
+      --bg-panel:      #c4bead;
+      --bg-card:       #d8d2c2;
+      --bg-hover:      #bbb5a5;
+      --accent-green:  #4a7a2c;
+      --accent-lime:   #3d6622;
+      --accent-maroon: #7a2832;
+      --accent-rose:   #943540;
+      --accent-beige:  #6a5e4a;
+      --accent-cream:  #1e1a14;
+      --text-primary:  #2a2420;
+      --text-muted:    #7a7060;
+      --border:        #b0a898;
+      --odds-bg:       #bab4a4;
+      --odds-hover:    #a8bc90;
+      --live-red:      #b83025;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* ── TOP NAV ── */
+    .topnav {
+      background: #b8b2a2;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      height: 52px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      gap: 24px;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--accent-green);
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .logo span { color: var(--accent-maroon); }
+
+    .topnav-links {
+      display: flex;
+      gap: 4px;
+      list-style: none;
+      flex: 1;
+    }
+    .topnav-links a {
+      color: var(--text-primary);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 13px;
+      transition: background 0.15s;
+    }
+    .topnav-links a:hover { background: var(--bg-hover); }
+    .topnav-links a.active { color: var(--accent-lime); }
+
+    .topnav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+    }
+    .btn-outline {
+      border: 1px solid var(--accent-green);
+      color: var(--accent-lime);
+      background: transparent;
+      padding: 7px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      transition: background 0.15s;
+    }
+    .btn-outline:hover { background: var(--bg-hover); }
+    .btn-primary {
+      background: var(--accent-green);
+      color: #111;
+      border: none;
+      padding: 7px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover { background: var(--accent-lime); }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: flex;
+      flex: 1;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 240px;
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border);
+      flex-shrink: 0;
+      padding: 12px 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-search {
+      margin: 0 12px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .sidebar-search span { flex: 1; }
+
+    .sidebar-section-label {
+      padding: 8px 16px 4px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+    .sidebar-section-label:first-of-type { border-top: none; margin-top: 0; }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      cursor: pointer;
+      transition: background 0.12s;
+      border-left: 3px solid transparent;
+    }
+    .sidebar-item:hover { background: var(--bg-hover); }
+    .sidebar-item.active {
+      border-left-color: var(--accent-lime);
+      background: var(--bg-card);
+      color: var(--accent-lime);
+    }
+    .sidebar-item .icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-item .label { flex: 1; font-size: 13px; font-weight: 500; }
+    .sidebar-item .sub { font-size: 11px; color: var(--text-muted); }
+    .sidebar-item .badge {
+      background: var(--accent-maroon);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+    .live-dot {
+      width: 7px; height: 7px;
+      background: var(--live-red);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+      margin-left: auto;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 40px;
+    }
+
+    /* ── HERO BANNERS ── */
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 2px;
+      background: var(--bg-dark);
+      border-bottom: 1px solid var(--border);
+      height: 210px;
+      overflow: hidden;
+    }
+
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .hero-card:hover .hero-overlay { opacity: 0.85; }
+
+    .hero-bg {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: brightness(0.6) saturate(0.8);
+    }
+
+    /* CSS-drawn hero backgrounds */
+    .hero-card-1 .hero-bg-css {
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at 30% 60%, #3a5c28 0%, #2a4018 40%, #1a2a0e 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-card-1 .hero-bg-css::before {
+      content: '🌱';
+      position: absolute;
+      font-size: 80px;
+      opacity: 0.15;
+      bottom: 10px; right: 20px;
+      transform: rotate(-15deg);
+    }
+    .hero-card-2 .hero-bg-css {
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at 60% 40%, #6b2a30 0%, #4a1a1e 40%, #2a0e10 100%);
+    }
+    .hero-card-3 .hero-bg-css {
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at 50% 50%, #2a4a38 0%, #1a3028 40%, #0e1e18 100%);
+    }
+
+    .hero-content {
+      position: absolute;
+      inset: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      background: var(--accent-maroon);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 3px;
+      margin-bottom: 8px;
+      align-self: flex-start;
+    }
+
+    .hero-title {
+      font-size: 26px;
+      font-weight: 900;
+      text-transform: uppercase;
+      line-height: 1.1;
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    }
+    .hero-title em {
+      color: var(--accent-lime);
+      font-style: normal;
+    }
+
+    .hero-sub {
+      font-size: 12px;
+      color: var(--accent-beige);
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    .hero-odds-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .hero-odds-chip {
+      background: rgba(0,0,0,0.6);
+      border: 1px solid var(--accent-green);
+      border-radius: 4px;
+      padding: 5px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .hero-odds-chip:hover { background: var(--odds-hover); }
+    .hero-odds-chip .outcome { color: var(--text-muted); font-size: 10px; display: block; }
+    .hero-odds-chip .price { color: var(--accent-lime); font-weight: 800; }
+
+    /* ── TABS ── */
+    .tabs-row {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      padding: 0 16px;
+      display: flex;
+      gap: 0;
+    }
+    .tab {
+      padding: 14px 18px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-muted);
+      border-bottom: 3px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab:hover { color: var(--text-primary); }
+    .tab.active { color: var(--accent-lime); border-bottom-color: var(--accent-lime); }
+
+    /* ── SPORT FILTER ICONS ── */
+    .sport-filters {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px;
+      display: flex;
+      gap: 24px;
+      overflow-x: auto;
+    }
+    .sport-filter {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .sport-filter:hover, .sport-filter.active { color: var(--accent-lime); }
+    .sport-filter .sf-icon {
+      font-size: 26px;
+      line-height: 1;
+    }
+    .sport-filter .sf-label {
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .sport-filter .sf-count {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .sport-filter.active .sf-count { color: var(--accent-lime); }
+
+    /* ── SECTION HEADERS ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      gap: 10px;
+    }
+    .section-header .sh-bar {
+      width: 4px; height: 18px;
+      background: var(--accent-green);
+      border-radius: 2px;
+    }
+    .section-header .sh-title {
+      font-weight: 700;
+      font-size: 14px;
+      flex: 1;
+    }
+    .section-header .sh-count {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .section-header .sh-toggle { color: var(--text-muted); font-size: 12px; }
+
+    /* ── LEAGUE HEADER ── */
+    .league-header {
+      padding: 8px 16px;
+      background: #c0baa8;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .league-header:hover { background: var(--bg-hover); }
+    .league-header .lh-toggle { margin-left: auto; }
+
+    /* ── EVENT ROW ── */
+    .event-row {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      transition: background 0.12s;
+    }
+    .event-row:hover { background: var(--bg-card); }
+
+    .event-icon { font-size: 20px; flex-shrink: 0; }
+
+    .event-info { flex: 1; min-width: 0; }
+    .event-name {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .event-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .event-time.live { color: var(--live-red); font-weight: 700; }
+    .event-time.live::before { content: '● '; }
+
+    .odds-group {
+      display: flex;
+      gap: 6px;
+    }
+    .odds-btn {
+      background: var(--odds-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 12px;
+      cursor: pointer;
+      text-align: center;
+      min-width: 80px;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .odds-btn:hover { background: var(--odds-hover); border-color: var(--accent-green); }
+    .odds-btn.selected { background: var(--odds-hover); border-color: var(--accent-lime); }
+    .odds-btn .ob-label { font-size: 10px; color: var(--text-muted); display: block; }
+    .odds-btn .ob-price { font-size: 14px; font-weight: 800; color: var(--accent-lime); display: block; }
+    .odds-btn .ob-price.fav { color: var(--accent-maroon); }
+
+    .event-more {
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .event-more:hover { color: var(--accent-lime); }
+
+    /* ── LIVE BADGE ── */
+    .live-badge {
+      background: var(--live-red);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 5px;
+      border-radius: 3px;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+
+    /* ── PROMO BANNER ── */
+    .promo-banner {
+      margin: 16px;
+      background: linear-gradient(135deg, #d4c8ba 0%, #c8b8b0 40%, #d0c8b8 100%);
+      border: 1px solid var(--accent-maroon);
+      border-radius: 8px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .promo-banner:hover { border-color: var(--accent-rose); }
+    .promo-icon { font-size: 40px; }
+    .promo-text .promo-tag {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent-maroon);
+      margin-bottom: 4px;
+    }
+    .promo-text .promo-title {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--accent-cream);
+      text-transform: uppercase;
+    }
+    .promo-text .promo-title em { color: var(--accent-lime); font-style: normal; }
+    .promo-text .promo-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .promo-cta {
+      margin-left: auto;
+      background: var(--accent-maroon);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: background 0.15s;
+    }
+    .promo-cta:hover { background: var(--accent-rose); }
+
+    /* ── BET SLIP (right panel) ── */
+    .betslip {
+      width: 280px;
+      background: var(--bg-panel);
+      border-left: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .betslip-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 800;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .betslip-header .bsh-count {
+      background: var(--accent-green);
+      color: #111;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+    .betslip-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+    .betslip-tab {
+      flex: 1;
+      text-align: center;
+      padding: 9px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+    }
+    .betslip-tab.active { color: var(--accent-lime); border-bottom-color: var(--accent-lime); }
+
+    .betslip-body { padding: 16px; flex: 1; }
+
+    .betslip-empty {
+      text-align: center;
+      padding: 30px 10px;
+      color: var(--text-muted);
+    }
+    .betslip-empty .bei { font-size: 36px; margin-bottom: 10px; }
+    .betslip-empty p { font-size: 13px; line-height: 1.5; }
+
+    .betslip-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .bsi-remove {
+      float: right;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .bsi-remove:hover { color: var(--accent-rose); }
+    .bsi-outcome { font-weight: 700; font-size: 13px; color: var(--accent-cream); }
+    .bsi-market { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .bsi-price {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--accent-lime);
+      margin-top: 6px;
+    }
+    .bsi-input-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      align-items: center;
+    }
+    .bsi-input-row label { font-size: 11px; color: var(--text-muted); }
+    .bsi-input {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 5px 8px;
+      border-radius: 4px;
+      font-size: 13px;
+      width: 90px;
+    }
+    .bsi-input:focus { outline: none; border-color: var(--accent-green); }
+
+    .betslip-summary {
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+    }
+    .bs-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .bs-row.total { color: var(--accent-cream); font-weight: 700; font-size: 14px; }
+    .bs-row.payout { color: var(--accent-lime); font-weight: 800; font-size: 15px; margin-top: 8px; }
+    .btn-place {
+      width: 100%;
+      background: var(--accent-green);
+      color: #111;
+      border: none;
+      padding: 12px;
+      border-radius: 5px;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: background 0.15s;
+    }
+    .btn-place:hover { background: var(--accent-lime); }
+
+    /* ── PROP BET CARDS ── */
+    .props-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 16px;
+    }
+    .prop-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .prop-card:hover { border-color: var(--accent-green); background: var(--bg-hover); }
+    .prop-card .pc-category {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-maroon);
+      margin-bottom: 6px;
+    }
+    .prop-card .pc-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-cream);
+      line-height: 1.3;
+      margin-bottom: 10px;
+    }
+    .prop-card .pc-options {
+      display: flex;
+      gap: 6px;
+    }
+    .prop-card .pc-opt {
+      flex: 1;
+      background: var(--odds-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 4px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .prop-card .pc-opt:hover { background: var(--odds-hover); border-color: var(--accent-green); }
+    .prop-card .pc-opt-label { font-size: 10px; color: var(--text-muted); display: block; }
+    .prop-card .pc-opt-price { font-size: 13px; font-weight: 800; color: var(--accent-lime); display: block; margin-top: 2px; }
+
+    /* ── FANTASY SECTION ── */
+    .fantasy-section {
+      padding: 16px;
+    }
+    .fantasy-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .fantasy-header h3 {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--accent-cream);
+    }
+    .fantasy-header .see-all {
+      font-size: 12px;
+      color: var(--accent-green);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .contest-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .contest-card:hover { border-color: var(--accent-green); }
+    .contest-icon { font-size: 28px; }
+    .contest-info { flex: 1; }
+    .contest-name { font-weight: 700; font-size: 14px; color: var(--accent-cream); }
+    .contest-meta { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .contest-prize {
+      text-align: right;
+    }
+    .contest-prize .prize-amount {
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--accent-lime);
+    }
+    .contest-prize .prize-label {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .contest-entry-btn {
+      background: var(--accent-maroon);
+      color: #fff;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .contest-entry-btn:hover { background: var(--accent-rose); }
+
+    /* ── H2H MATCHUP ── */
+    .h2h-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 0 16px 10px;
+      overflow: hidden;
+    }
+    .h2h-header {
+      background: #c0baa8;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .h2h-body {
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .h2h-side {
+      flex: 1;
+      text-align: center;
+    }
+    .h2h-side .hs-icon { font-size: 32px; margin-bottom: 6px; }
+    .h2h-side .hs-name { font-size: 13px; font-weight: 700; color: var(--accent-cream); }
+    .h2h-side .hs-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .h2h-vs {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      text-align: center;
+    }
+    .h2h-vs .vs-date { font-size: 10px; color: var(--text-muted); display: block; margin-top: 4px; }
+    .h2h-odds {
+      display: flex;
+      gap: 6px;
+      padding: 0 16px 16px;
+    }
+    .h2h-odds .odds-btn { flex: 1; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #b8b2a2;
+      border-top: 1px solid var(--border);
+      padding: 20px 32px;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.7;
+    }
+    footer strong { color: var(--accent-beige); }
+    footer a { color: var(--accent-green); text-decoration: none; }
+
+    /* misc */
+    .spacer { height: 16px; }
+    .section-group { margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="logo">Graft<span>Kings</span> 🌿</div>
+  <ul class="topnav-links">
+    <li><a href="#" class="active">Today's Growth</a></li>
+    <li><a href="#">Live Events</a></li>
+    <li><a href="#">Fantasy Flora</a></li>
+    <li><a href="#">Promotions</a></li>
+    <li><a href="#">Results</a></li>
+  </ul>
+  <div class="topnav-right">
+    <button class="btn-outline">Log In</button>
+    <button class="btn-primary">Join & Plant</button>
+  </div>
+</nav>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-search">
+      🔍 <span>Search event / plant...</span>
+    </div>
+
+    <div class="sidebar-section-label">Featured</div>
+    <div class="sidebar-item active">
+      <span class="icon">🌻</span>
+      <div>
+        <div class="label">GraftKings Boosts</div>
+        <div class="sub">Enhanced odds today</div>
+      </div>
+      <span class="badge">NEW</span>
+    </div>
+
+    <div class="sidebar-section-label">Growth Events</div>
+    <div class="sidebar-item">
+      <span class="icon">🌷</span>
+      <div>
+        <div class="label">Bloom Racing</div>
+        <div class="sub">First-to-flower markets</div>
+      </div>
+      <span class="live-dot"></span>
+    </div>
+    <div class="sidebar-item">
+      <span class="icon">📏</span>
+      <div>
+        <div class="label">Height Milestones</div>
+        <div class="sub">Sunflower O/U lines</div>
+      </div>
+    </div>
+    <div class="sidebar-item">
+      <span class="icon">🍀</span>
+      <div>
+        <div class="label">Propagation Props</div>
+        <div class="sub">Cutting success rates</div>
+      </div>
+    </div>
+    <div class="sidebar-item">
+      <span class="icon">🍂</span>
+      <div>
+        <div class="label">Seasonal Specials</div>
+        <div class="sub">Spring & autumn markets</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section-label">Visitor & Wildlife</div>
+    <div class="sidebar-item">
+      <span class="icon">🦢</span>
+      <div>
+        <div class="label">Goose Incidents</div>
+        <div class="sub">Daily hiss tracker</div>
+      </div>
+      <span class="badge">HOT</span>
+    </div>
+    <div class="sidebar-item">
+      <span class="icon">🐿️</span>
+      <div>
+        <div class="label">Squirrel Activity</div>
+        <div class="sub">Feeder raid lines</div>
+      </div>
+    </div>
+    <div class="sidebar-item">
+      <span class="icon">👣</span>
+      <div>
+        <div class="label">Footfall Count</div>
+        <div class="sub">Daily visitor O/U</div>
+      </div>
+    </div>
+    <div class="sidebar-item">
+      <span class="icon">🦋</span>
+      <div>
+        <div class="label">Butterfly Census</div>
+        <div class="sub">Conservatory specials</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section-label">Staff & Ops</div>
+    <div class="sidebar-item">
+      <span class="icon">👒</span>
+      <div>
+        <div class="label">Hat of the Day</div>
+        <div class="sub">Head horticulturist pick</div>
+      </div>
+    </div>
+    <div class="sidebar-item">
+      <span class="icon">🌧️</span>
+      <div>
+        <div class="label">Weather Impacts</div>
+        <div class="sub">Frost & rain casualties</div>
+      </div>
+    </div>
+    <div class="sidebar-item">
+      <span class="icon">🗓️</span>
+      <div>
+        <div class="label">Event Calendar</div>
+        <div class="sub">All upcoming markets</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HERO BANNERS -->
+    <div class="hero">
+      <div class="hero-card hero-card-1">
+        <div class="hero-bg-css"></div>
+        <div class="hero-content">
+          <div class="hero-tag">Welcome Offer</div>
+          <div class="hero-title">Your first <em>€25</em> donation matched</div>
+          <div class="hero-sub">All matched funds go straight to the garden</div>
+        </div>
+      </div>
+      <div class="hero-card hero-card-2">
+        <div class="hero-bg-css"></div>
+        <div class="hero-content">
+          <div class="hero-tag">🔴 Live Now</div>
+          <div class="hero-title">Titan Arum<br/><em>Bloom Watch</em></div>
+          <div class="hero-sub">Day 12 of monitoring — smells imminent</div>
+          <div class="hero-odds-row">
+            <div class="hero-odds-chip">
+              <span class="outcome">Blooms Today</span>
+              <span class="price">+280</span>
+            </div>
+            <div class="hero-odds-chip">
+              <span class="outcome">Tomorrow</span>
+              <span class="price">+155</span>
+            </div>
+            <div class="hero-odds-chip">
+              <span class="outcome">3+ Days</span>
+              <span class="price">-190</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-card hero-card-3">
+        <div class="hero-bg-css" style="background: radial-gradient(ellipse at 60% 40%, #2a4a38 0%, #1a3028 50%, #0e1e18 100%)"></div>
+        <div class="hero-content">
+          <div class="hero-tag">Acca Bonus</div>
+          <div class="hero-title">Multi-bloom <em>+50%</em> winnings</div>
+          <div class="hero-sub">Combine 4+ blooms for a bonus payout</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROMO BANNER -->
+    <div class="promo-banner">
+      <div class="promo-icon">🌱</div>
+      <div class="promo-text">
+        <div class="promo-tag">New Market</div>
+        <div class="promo-title">Spring <em>Fantasy Flora</em> League — Draft Now</div>
+        <div class="promo-sub">Pick your roster of 8 plants. Score points on blooms, propagation & pest survival. Season ends June 21.</div>
+      </div>
+      <button class="promo-cta">Draft a Roster</button>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs-row">
+      <div class="tab active">Today's Events</div>
+      <div class="tab">Live 🔴</div>
+      <div class="tab">Upcoming</div>
+      <div class="tab">Highlights</div>
+      <div class="tab">Prop Bets</div>
+    </div>
+
+    <!-- SPORT FILTERS -->
+    <div class="sport-filters">
+      <div class="sport-filter active">
+        <div class="sf-icon">🌷</div>
+        <div class="sf-label">Bloom Racing</div>
+        <div class="sf-count">14</div>
+      </div>
+      <div class="sport-filter">
+        <div class="sf-icon">📏</div>
+        <div class="sf-label">Growth H2H</div>
+        <div class="sf-count">8</div>
+      </div>
+      <div class="sport-filter">
+        <div class="sf-icon">👣</div>
+        <div class="sf-label">Visitor Stats</div>
+        <div class="sf-count">12</div>
+      </div>
+      <div class="sport-filter">
+        <div class="sf-icon">🦢</div>
+        <div class="sf-label">Wildlife</div>
+        <div class="sf-count">6</div>
+      </div>
+      <div class="sport-filter">
+        <div class="sf-icon">🌦️</div>
+        <div class="sf-label">Weather</div>
+        <div class="sf-count">4</div>
+      </div>
+      <div class="sport-filter">
+        <div class="sf-icon">🐛</div>
+        <div class="sf-label">Pest Events</div>
+        <div class="sf-count">5</div>
+      </div>
+      <div class="sport-filter">
+        <div class="sf-icon">🍄</div>
+        <div class="sf-label">Fungi Watch</div>
+        <div class="sf-count">3</div>
+      </div>
+      <div class="sport-filter">
+        <div class="sf-icon">👒</div>
+        <div class="sf-label">Staff Props</div>
+        <div class="sf-count">9</div>
+      </div>
+    </div>
+
+    <!-- SECTION: BLOOM RACING -->
+    <div class="section-group">
+      <div class="section-header">
+        <div class="sh-bar"></div>
+        <div class="sh-title">🌷 Bloom Racing</div>
+        <div class="sh-count">14 events</div>
+        <div class="sh-toggle">▾</div>
+      </div>
+
+      <div class="league-header">
+        🌹 Rose Garden — Summer Series (6 events)
+        <span class="lh-toggle">▾</span>
+      </div>
+
+      <div class="event-row">
+        <div class="event-icon">🌹</div>
+        <div class="event-info">
+          <div class="event-name">Rosa 'Queen Elizabeth' vs Rosa 'Climbing Iceberg'</div>
+          <div class="event-time">Today · Judged at 17:00 by head horticulturist</div>
+        </div>
+        <div class="odds-group">
+          <div class="odds-btn">
+            <span class="ob-label">Queen Elizabeth</span>
+            <span class="ob-price">2.20</span>
+          </div>
+          <div class="odds-btn">
+            <span class="ob-label">Same Day</span>
+            <span class="ob-price">4.50</span>
+          </div>
+          <div class="odds-btn">
+            <span class="ob-label">Climbing Iceberg</span>
+            <span class="ob-price fav">1.90</span>
+          </div>
+        </div>
+        <div class="event-more">+8 more ›</div>
+      </div>
+
+      <div class="event-row">
+        <div class="event-icon">🌹</div>
+        <div class="event-info">
+          <div class="event-name">Rosa 'Falstaff' vs Rosa 'Graham Thomas'</div>
+          <div class="event-time">Today · Judged at 17:00</div>
+        </div>
+        <div class="odds-group">
+          <div class="odds-btn">
+            <span class="ob-label">Falstaff</span>
+            <span class="ob-price fav">1.75</span>
+          </div>
+          <div class="odds-btn">
+            <span class="ob-label">Tie</span>
+            <span class="ob-price">6.00</span>
+          </div>
+          <div class="odds-btn">
+            <span class="ob-label">Graham Thomas</span>
+            <span class="ob-price">2.60</span>
+          </div>
+        </div>
+        <div class="event-more">+5 more ›</div>
+      </div>
+
+      <div class="league-header">
+        🌻 Sunflower Showdown — Height League (4 events)
+        <span class="lh-toggle">▾</span>
+      </div>
+
+      <div class="event-row">
+        <div class="live-badge">LIVE</div>
+        <div class="event-icon">🌻</div>
+        <div class="event-info">
+          <div class="event-name">Sunflower Bed A vs Sunflower Bed B — First to 180cm</div>
+          <div class="event-time live">LIVE · Bed A currently at 162cm</div>
+        </div>
+        <div class="odds-group">
+          <div class="odds-btn selected">
+            <span class="ob-label">Bed A</span>
+            <span class="ob-price fav">1.65</span>
+          </div>
+          <div class="odds-btn">
+            <span class="ob-label">Same Height</span>
+            <span class="ob-price">9.00</span>
+          </div>
+          <div class="odds-btn">
+            <span class="ob-label">Bed B</span>
+            <span class="ob-price">2.80</span>
+          </div>
+        </div>
+        <div class="event-more">+3 more ›</div>
+      </div>
+
+      <div class="event-row">
+        <div class="event-icon">🌻</div>
+        <div class="event-info">
+          <div class="event-name">Giant Sunflower Competition — O/U 210cm by Sunday</div>
+          <div class="event-time">Sun 09 Mar · Official measurement 10:00</div>
+        </div>
+        <div class="odds-group">
+          <div class="odds-btn">
+            <span class="ob-label">Over 210cm</span>
+            <span class="ob-price">1.95</span>
+          </div>
+          <div class="odds-btn">
+            <span class="ob-label">Under 210cm</span>
+            <span class="ob-price fav">1.85</span>
+          </div>
+        </div>
+        <div class="event-more">+2 more ›</div>
+      </div>
+    </div>
+
+    <!-- H2H MATCHUP CARD -->
+    <div class="spacer"></div>
+    <div class="section-header">
+      <div class="sh-bar"></div>
+      <div class="sh-title">📏 Featured Head-to-Head</div>
+      <div class="sh-count">8 matchups</div>
+      <div class="sh-toggle">▾</div>
+    </div>
+
+    <div class="h2h-card">
+      <div class="h2h-header">
+        🌿 Invasive Species Territorial War · North Trellis · Ends Fri 07 Mar
+      </div>
+      <div class="h2h-body">
+        <div class="h2h-side">
+          <div class="hs-icon">🌿</div>
+          <div class="hs-name">Morning Glory</div>
+          <div class="hs-sub">Currently covers 4.2m²</div>
+        </div>
+        <div class="h2h-vs">
+          VS
+          <span class="vs-date">Measured Friday</span>
+        </div>
+        <div class="h2h-side">
+          <div class="hs-icon">🍃</div>
+          <div class="hs-name">English Ivy</div>
+          <div class="hs-sub">Currently covers 3.8m²</div>
+        </div>
+      </div>
+      <div class="h2h-odds">
+        <div class="odds-btn">
+          <span class="ob-label">Morning Glory covers more</span>
+          <span class="ob-price fav">1.80</span>
+        </div>
+        <div class="odds-btn">
+          <span class="ob-label">Equal spread (±0.1m²)</span>
+          <span class="ob-price">7.50</span>
+        </div>
+        <div class="odds-btn">
+          <span class="ob-label">English Ivy covers more</span>
+          <span class="ob-price">2.30</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="h2h-card">
+      <div class="h2h-header">
+        🌿 Composting Speed Trial · Compost Bays 1 & 2 · Ends Mon 10 Mar
+      </div>
+      <div class="h2h-body">
+        <div class="h2h-side">
+          <div class="hs-icon">🍎</div>
+          <div class="hs-name">Kitchen Scraps Heap</div>
+          <div class="hs-sub">Brown & green mix</div>
+        </div>
+        <div class="h2h-vs">
+          VS
+          <span class="vs-date">Monday morning</span>
+        </div>
+        <div class="h2h-side">
+          <div class="hs-icon">🍂</div>
+          <div class="hs-name">Leaf Litter Heap</div>
+          <div class="hs-sub">Turned twice this week</div>
+        </div>
+      </div>
+      <div class="h2h-odds">
+        <div class="odds-btn">
+          <span class="ob-label">Kitchen Scraps faster</span>
+          <span class="ob-price">2.10</span>
+        </div>
+        <div class="odds-btn">
+          <span class="ob-label">Both ready same day</span>
+          <span class="ob-price">5.00</span>
+        </div>
+        <div class="odds-btn">
+          <span class="ob-label">Leaf Litter faster</span>
+          <span class="ob-price fav">1.75</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION: VISITOR STATS -->
+    <div class="spacer"></div>
+    <div class="section-header">
+      <div class="sh-bar"></div>
+      <div class="sh-title">👣 Visitor Stats — Over/Under Lines</div>
+      <div class="sh-count">12 markets</div>
+      <div class="sh-toggle">▾</div>
+    </div>
+
+    <div class="league-header">📊 Today, Saturday 04 Mar</div>
+
+    <div class="event-row">
+      <div class="event-icon">👶</div>
+      <div class="event-info">
+        <div class="event-name">Crying Toddlers in the Butterfly Conservatory</div>
+        <div class="event-time">Today · Butterfly Conservatory · Counted noon–4pm</div>
+      </div>
+      <div class="odds-group">
+        <div class="odds-btn">
+          <span class="ob-label">Over 3.5</span>
+          <span class="ob-price fav">1.80</span>
+        </div>
+        <div class="odds-btn">
+          <span class="ob-label">Under 3.5</span>
+          <span class="ob-price">2.00</span>
+        </div>
+      </div>
+      <div class="event-more">+4 more ›</div>
+    </div>
+
+    <div class="event-row">
+      <div class="event-icon">📸</div>
+      <div class="event-info">
+        <div class="event-name">Visitors photographing the Japanese Garden — O/U 47.5</div>
+        <div class="event-time">Today · Japanese Zen Garden · Staff tally at closing</div>
+      </div>
+      <div class="odds-group">
+        <div class="odds-btn">
+          <span class="ob-label">Over 47.5</span>
+          <span class="ob-price">1.90</span>
+        </div>
+        <div class="odds-btn">
+          <span class="ob-label">Under 47.5</span>
+          <span class="ob-price fav">1.90</span>
+        </div>
+      </div>
+      <div class="event-more">+2 more ›</div>
+    </div>
+
+    <div class="event-row">
+      <div class="event-icon">🗓️</div>
+      <div class="event-info">
+        <div class="event-name">Total Daily Footfall — O/U 340.5 visitors</div>
+        <div class="event-time">Today · Main gate counter · Result at 18:00</div>
+      </div>
+      <div class="odds-group">
+        <div class="odds-btn">
+          <span class="ob-label">Over 340.5</span>
+          <span class="ob-price fav">1.75</span>
+        </div>
+        <div class="odds-btn">
+          <span class="ob-label">Under 340.5</span>
+          <span class="ob-price">2.05</span>
+        </div>
+      </div>
+      <div class="event-more">+6 more ›</div>
+    </div>
+
+    <div class="event-row">
+      <div class="event-icon">🌸</div>
+      <div class="event-info">
+        <div class="event-name">Most visited garden section this weekend</div>
+        <div class="event-time">Weekend · Footfall sensors · Declared Sunday 18:00</div>
+      </div>
+      <div class="odds-group">
+        <div class="odds-btn">
+          <span class="ob-label">Rose Garden</span>
+          <span class="ob-price fav">2.10</span>
+        </div>
+        <div class="odds-btn">
+          <span class="ob-label">Zen Garden</span>
+          <span class="ob-price">2.80</span>
+        </div>
+        <div class="odds-btn">
+          <span class="ob-label">Glasshouse</span>
+          <span class="ob-price">3.20</span>
+        </div>
+      </div>
+      <div class="event-more">+5 more ›</div>
+    </div>
+
+    <!-- SECTION: WILDLIFE -->
+    <div class="spacer"></div>
+    <div class="section-header">
+      <div class="sh-bar"></div>
+      <div class="sh-title">🦢 Wildlife Events</div>
+      <div class="sh-count">6 markets</div>
+      <div class="sh-toggle">▾</div>
+    </div>
+
+    <div class="event-row">
+      <div class="live-badge">LIVE</div>
+      <div class="event-icon">🦢</div>
+      <div class="event-info">
+        <div class="event-name">Canada Goose Aggression Incident — Koi Pond Area</div>
+        <div class="event-time live">LIVE · Today · Verified by garden staff</div>
+      </div>
+      <div class="odds-group">
+        <div class="odds-btn">
+          <span class="ob-label">Yes, hisses today</span>
+          <span class="ob-price fav">-110</span>
+        </div>
+        <div class="odds-btn">
+          <span class="ob-label">No incidents</span>
+          <span class="ob-price">+120</span>
+        </div>
+      </div>
+      <div class="event-more">+3 more ›</div>
+    </div>
+
+    <div class="event-row">
+      <div class="event-icon">🐿️</div>
+      <div class="event-info">
+        <div class="event-name">Squirrel Bird Feeder Raids — O/U 12.5 this week</div>
+        <div class="event-time">This week · Feeder cameras · Count resets Monday</div>
+      </div>
+      <div class="odds-group">
+        <div class="odds-btn">
+          <span class="ob-label">Over 12.5</span>
+          <span class="ob-price fav">1.70</span>
+        </div>
+        <div class="odds-btn">
+          <span class="ob-label">Under 12.5</span>
+          <span class="ob-price">2.15</span>
+        </div>
+      </div>
+      <div class="event-more">+2 more ›</div>
+    </div>
+
+    <div class="event-row">
+      <div class="event-icon">🦋</div>
+      <div class="event-info">
+        <div class="event-name">Rare species sighted in conservatory this month</div>
+        <div class="event-time">March · Butterfly Conservatory · Expert verified</div>
+      </div>
+      <div class="odds-group">
+        <div class="odds-btn">
+          <span class="ob-label">Over 2.5 species</span>
+          <span class="ob-price">2.30</span>
+        </div>
+        <div class="odds-btn">
+          <span class="ob-label">Under 2.5 species</span>
+          <span class="ob-price fav">1.65</span>
+        </div>
+      </div>
+      <div class="event-more">+1 more ›</div>
+    </div>
+
+    <!-- SECTION: PROP BETS -->
+    <div class="spacer"></div>
+    <div class="section-header">
+      <div class="sh-bar"></div>
+      <div class="sh-title">🎯 Prop Bets of the Day</div>
+      <div class="sh-count">9 props</div>
+      <div class="sh-toggle">▾</div>
+    </div>
+
+    <div class="props-grid">
+      <div class="prop-card">
+        <div class="pc-category">Staff Props</div>
+        <div class="pc-title">What will the head horticulturist be wearing in Tuesday's Instagram update?</div>
+        <div class="pc-options">
+          <div class="pc-opt">
+            <span class="pc-opt-label">🪣 Bucket hat</span>
+            <span class="pc-opt-price">-140</span>
+          </div>
+          <div class="pc-opt">
+            <span class="pc-opt-label">🧢 Baseball cap</span>
+            <span class="pc-opt-price">+200</span>
+          </div>
+          <div class="pc-opt">
+            <span class="pc-opt-label">👒 Sun hat</span>
+            <span class="pc-opt-price">+350</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="prop-card">
+        <div class="pc-category">Weather Impact</div>
+        <div class="pc-title">Will the incoming frost kill the newly planted petunias before Tuesday?</div>
+        <div class="pc-options">
+          <div class="pc-opt">
+            <span class="pc-opt-label">✅ Yes (frostbitten)</span>
+            <span class="pc-opt-price">+180</span>
+          </div>
+          <div class="pc-opt">
+            <span class="pc-opt-label">❌ No (they survive)</span>
+            <span class="pc-opt-price">-220</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="prop-card">
+        <div class="pc-category">Bloom Colour Prop</div>
+        <div class="pc-title">What colour will the first tulip of spring be?</div>
+        <div class="pc-options">
+          <div class="pc-opt">
+            <span class="pc-opt-label">🔴 Red</span>
+            <span class="pc-opt-price">+150</span>
+          </div>
+          <div class="pc-opt">
+            <span class="pc-opt-label">💛 Yellow</span>
+            <span class="pc-opt-price">+200</span>
+          </div>
+          <div class="pc-opt">
+            <span class="pc-opt-label">🩷 Pink</span>
+            <span class="pc-opt-price">+300</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="prop-card">
+        <div class="pc-category">Volunteer Event</div>
+        <div class="pc-title">Total dandelions pulled by the volunteer team this Saturday</div>
+        <div class="pc-options">
+          <div class="pc-opt">
+            <span class="pc-opt-label">📈 Over 50.5</span>
+            <span class="pc-opt-price">-105</span>
+          </div>
+          <div class="pc-opt">
+            <span class="pc-opt-label">📉 Under 50.5</span>
+            <span class="pc-opt-price">-115</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="prop-card">
+        <div class="pc-category">Pest Tracker</div>
+        <div class="pc-title">Will aphids be detected on the Heritage Rose section this week?</div>
+        <div class="pc-options">
+          <div class="pc-opt">
+            <span class="pc-opt-label">🐛 Yes, aphids found</span>
+            <span class="pc-opt-price">+160</span>
+          </div>
+          <div class="pc-opt">
+            <span class="pc-opt-label">✅ Pest-free</span>
+            <span class="pc-opt-price">-190</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="prop-card">
+        <div class="pc-category">Corpse Flower Watch</div>
+        <div class="pc-title">Days until Titan Arum (Amorphophallus titanum) emits smell</div>
+        <div class="pc-options">
+          <div class="pc-opt">
+            <span class="pc-opt-label">Over 14.5 days</span>
+            <span class="pc-opt-price">-130</span>
+          </div>
+          <div class="pc-opt">
+            <span class="pc-opt-label">Under 14.5 days</span>
+            <span class="pc-opt-price">+110</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FANTASY FLORA SECTION -->
+    <div class="spacer"></div>
+    <div class="section-header">
+      <div class="sh-bar"></div>
+      <div class="sh-title">🌿 Fantasy Flora — Live Contests</div>
+      <div class="sh-count">Draft closes in 2h 14m</div>
+      <div class="sh-toggle">▾</div>
+    </div>
+
+    <div class="fantasy-section">
+      <div class="fantasy-header">
+        <h3>Featured Contests</h3>
+        <span class="see-all">See all contests →</span>
+      </div>
+
+      <div class="contest-card">
+        <div class="contest-icon">🏆</div>
+        <div class="contest-info">
+          <div class="contest-name">Grand Spring Flora Championship</div>
+          <div class="contest-meta">Draft 8 plants · Season score · Top 20% win · 142 of 200 entries filled</div>
+        </div>
+        <div class="contest-prize">
+          <div class="prize-amount">€500</div>
+          <div class="prize-label">Prize pool</div>
+        </div>
+        <button class="contest-entry-btn">Enter €5</button>
+      </div>
+
+      <div class="contest-card">
+        <div class="contest-icon">🌱</div>
+        <div class="contest-info">
+          <div class="contest-name">Weekend Propagation Sprint</div>
+          <div class="contest-meta">Pick 5 cuttings · Score by Monday · Winner takes all · 38 of 50 entries</div>
+        </div>
+        <div class="contest-prize">
+          <div class="prize-amount">€120</div>
+          <div class="prize-label">Prize pool</div>
+        </div>
+        <button class="contest-entry-btn">Enter €3</button>
+      </div>
+
+      <div class="contest-card">
+        <div class="contest-icon">🆓</div>
+        <div class="contest-info">
+          <div class="contest-name">Free-to-Play Bloom Predictor</div>
+          <div class="contest-meta">No entry fee · Donate any amount · Win garden naming rights · Open entry</div>
+        </div>
+        <div class="contest-prize">
+          <div class="prize-amount">🌹</div>
+          <div class="prize-label">Name a bench</div>
+        </div>
+        <button class="contest-entry-btn" style="background: var(--accent-green)">Play Free</button>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+  </main>
+
+  <!-- BET SLIP -->
+  <aside class="betslip">
+    <div class="betslip-header">
+      🌿 Bet Slip <span class="bsh-count">1</span>
+    </div>
+    <div class="betslip-tabs">
+      <div class="betslip-tab active">Single</div>
+      <div class="betslip-tab">Multi</div>
+      <div class="betslip-tab">System</div>
+    </div>
+    <div class="betslip-body">
+      <div class="betslip-item">
+        <span class="bsi-remove">✕</span>
+        <div class="bsi-outcome">Sunflower Bed A wins</div>
+        <div class="bsi-market">Sunflower Bed A vs Bed B · First to 180cm</div>
+        <div class="bsi-price">1.65</div>
+        <div class="bsi-input-row">
+          <label>Donation (€)</label>
+          <input class="bsi-input" type="number" value="10" min="1" />
+        </div>
+      </div>
+    </div>
+    <div class="betslip-summary">
+      <div class="bs-row">
+        <span>Donation total</span>
+        <span>€10.00</span>
+      </div>
+      <div class="bs-row">
+        <span>Garden receives</span>
+        <span>€10.00</span>
+      </div>
+      <div class="bs-row payout">
+        <span>You could win</span>
+        <span>€16.50</span>
+      </div>
+      <button class="btn-place">Place Donation Bet</button>
+      <div style="font-size:10px; color: var(--text-muted); margin-top: 8px; text-align:center; line-height:1.5;">
+        100% of all donations support the botanical garden. Winners receive prizes, not cash payouts. <a href="#">Learn more</a>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <strong>GraftKings</strong> is a charitable gamified donation platform. All "bets" are donations to support botanical garden conservation and education. This platform operates as a non-profit sweepstakes — no real money is wagered. Winners receive experiential prizes including garden naming rights, VIP tours, annual memberships, and exclusive horticultural merchandise.<br/>
+  <br/>
+  <a href="#">Terms & Conditions</a> · <a href="#">Responsible Donating</a> · <a href="#">Privacy Policy</a> · <a href="#">About the NGO</a> · <a href="#">Contact</a><br/>
+  <br/>
+  GraftKings supports <strong>responsible donating</strong>. Please donate only what you can afford. If you feel you may have a problem, visit <a href="#">BeGambleAware.org</a>.<br/>
+  © 2026 GraftKings — Growing Good, One Bet at a Time 🌱
+</footer>
+
+<script>
+  // Make tabs clickable
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      tab.closest('.tabs-row').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  // Make sport filters clickable
+  document.querySelectorAll('.sport-filter').forEach(sf => {
+    sf.addEventListener('click', () => {
+      sf.closest('.sport-filters').querySelectorAll('.sport-filter').forEach(s => s.classList.remove('active'));
+      sf.classList.add('active');
+    });
+  });
+
+  // Make sidebar items clickable
+  document.querySelectorAll('.sidebar-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+
+  // Toggle odds buttons
+  document.querySelectorAll('.odds-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.closest('.odds-group, .h2h-odds');
+      if (group) group.querySelectorAll('.odds-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.toggle('selected');
+    });
+  });
+
+  // Prop card options
+  document.querySelectorAll('.pc-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const card = opt.closest('.pc-options');
+      card.querySelectorAll('.pc-opt').forEach(o => o.style.borderColor = '');
+      opt.style.borderColor = 'var(--accent-lime)';
+    });
+  });
+
+  // Dynamic bet slip total
+  const input = document.querySelector('.bsi-input');
+  const payoutEl = document.querySelector('.bs-row.payout span:last-child');
+  const totalEl = document.querySelector('.bs-row span:last-child');
+  if (input) {
+    input.addEventListener('input', () => {
+      const stake = parseFloat(input.value) || 0;
+      const odds = 1.65;
+      totalEl.textContent = '€' + stake.toFixed(2);
+      payoutEl.textContent = '€' + (stake * odds).toFixed(2);
+      document.querySelector('.betslip-body .bs-row span:last-child').textContent = '€' + stake.toFixed(2);
+    });
+  }
+</script>
+
+</body>
+</html>
