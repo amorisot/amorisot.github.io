@@ -817,6 +817,150 @@
     /* misc */
     .spacer { height: 16px; }
     .section-group { margin-top: 4px; }
+
+    /* ── MOBILE BET SLIP TRIGGER ── */
+    .mobile-slip-bar {
+      display: none;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+
+      /* Nav: logo + join only */
+      .topnav { padding: 0 14px; gap: 0; }
+      .topnav-links { display: none; }
+      .topnav-right .btn-outline { display: none; }
+      .topnav-right { margin-left: auto; }
+
+      /* Hide sidebar and betslip panels */
+      .sidebar { display: none; }
+      .betslip { display: none; }
+      .layout { display: block; }
+
+      /* Hero: horizontal snap scroll */
+      .hero {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        height: 200px;
+        gap: 0;
+      }
+      .hero::-webkit-scrollbar { display: none; }
+      .hero-card {
+        min-width: 88%;
+        scroll-snap-align: start;
+        flex-shrink: 0;
+      }
+      .hero-title { font-size: 20px; }
+      .hero-odds-row { flex-wrap: wrap; gap: 4px; }
+      .hero-odds-chip { padding: 4px 8px; }
+
+      /* Promo banner: stack */
+      .promo-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        margin: 10px;
+      }
+      .promo-cta { width: 100%; text-align: center; }
+      .promo-text .promo-title { font-size: 16px; }
+
+      /* Event rows: stack odds below info */
+      .event-row { flex-wrap: wrap; padding: 10px 12px; gap: 6px; }
+      .event-info { width: 100%; min-width: 0; }
+      .odds-group { width: 100%; }
+      .odds-btn { min-width: 0; flex: 1; padding: 6px 4px; }
+      .odds-btn .ob-label { font-size: 9px; }
+      .odds-btn .ob-price { font-size: 13px; }
+      .event-more { margin-left: auto; }
+      .live-badge { align-self: flex-start; }
+
+      /* H2H cards */
+      .h2h-card { margin: 0 10px 10px; }
+      .h2h-body { flex-direction: column; gap: 6px; padding: 12px 14px 4px; }
+      .h2h-side { display: flex; align-items: center; gap: 10px; text-align: left; }
+      .h2h-side .hs-icon { font-size: 22px; margin-bottom: 0; }
+      .h2h-vs { font-size: 13px; text-align: center; padding: 2px 0; }
+      .h2h-vs .vs-date { display: inline; margin-left: 6px; }
+      .h2h-odds { flex-wrap: wrap; padding: 8px 14px 12px; }
+      .h2h-odds .odds-btn { min-width: calc(50% - 4px); flex: none; }
+
+      /* Prop bets: single column */
+      .props-grid { grid-template-columns: 1fr; padding: 10px 10px; gap: 8px; }
+
+      /* Contest cards */
+      .contest-card { flex-wrap: wrap; gap: 8px; padding: 12px; }
+      .contest-info { min-width: 0; flex: 1 1 calc(100% - 80px); }
+      .contest-prize { order: -1; }
+      .contest-entry-btn { width: 100%; }
+      .fantasy-section { padding: 10px; }
+
+      /* Section headers */
+      .section-header { padding: 9px 12px; }
+      .sh-title { font-size: 13px; }
+
+      /* League headers */
+      .league-header { padding: 7px 12px; }
+
+      /* Sport filters: slightly smaller */
+      .sport-filter { gap: 4px; }
+      .sport-filter .sf-icon { font-size: 22px; }
+      .sport-filter .sf-label { font-size: 10px; }
+
+      /* Tabs */
+      .tab { padding: 12px 12px; font-size: 13px; }
+
+      /* Mobile bet slip trigger bar */
+      .mobile-slip-bar {
+        display: flex;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        background: #2a2420;
+        color: #f0e8cc;
+        padding: 14px 20px;
+        align-items: center;
+        gap: 12px;
+        z-index: 200;
+        cursor: pointer;
+        box-shadow: 0 -2px 16px rgba(0,0,0,0.2);
+      }
+      .mobile-slip-bar .msb-count {
+        background: var(--accent-green);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 800;
+        width: 22px; height: 22px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+      }
+      .mobile-slip-bar .msb-label { flex: 1; font-size: 14px; font-weight: 700; }
+      .mobile-slip-bar .msb-amount { font-size: 14px; font-weight: 800; color: var(--accent-lime); }
+      .mobile-slip-bar .msb-cta {
+        background: var(--accent-green);
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-weight: 800;
+        font-size: 13px;
+        cursor: pointer;
+      }
+
+      /* Bottom padding so content isn't hidden behind fixed bar */
+      .main { padding-bottom: 70px; }
+      footer { padding-bottom: 80px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero-card { min-width: 95%; }
+      .hero { height: 185px; }
+      .hero-title { font-size: 18px; }
+      .odds-btn .ob-price { font-size: 12px; }
+      .event-name { font-size: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -1504,6 +1648,14 @@
 
 </div>
 
+<!-- MOBILE BET SLIP BAR -->
+<div class="mobile-slip-bar" id="mobile-slip-bar">
+  <div class="msb-count">1</div>
+  <span class="msb-label">PlantSearch 1.6M · Dec 31</span>
+  <span class="msb-amount">€10 → €17</span>
+  <button class="msb-cta">Place Bet</button>
+</div>
+
 <!-- FOOTER -->
 <footer>
   <strong>GraftKings</strong> is a charitable gamified donation platform in support of <strong>BGCI — Botanic Gardens Conservation International</strong>. All "bets" are donations funding plant conservation, threatened species recovery, and the maintenance of PlantSearch, ThreatSearch, and GlobalTreeSearch. No real money is wagered. Winners receive experiential prizes including named tree sponsorships, VIP garden tours, annual memberships, and exclusive horticultural merchandise.<br/>
@@ -1613,6 +1765,22 @@
       showToast(el.dataset.toast);
     });
   });
+
+  // Mobile bet slip bar
+  const mobileBar = document.getElementById('mobile-slip-bar');
+  if (mobileBar) {
+    mobileBar.addEventListener('click', () => {
+      showToast('Your €10 donation goes to BGCI. If PlantSearch hits 1.6M records by Dec 31, you receive a prize worth €17 in garden experiences!');
+    });
+  }
+
+  // Hide mobile bar when bet slip item is removed
+  const origRemove = document.querySelector('.bsi-remove');
+  if (origRemove) {
+    origRemove.addEventListener('click', () => {
+      setTimeout(() => { if (mobileBar) mobileBar.style.display = 'none'; }, 300);
+    }, true);
+  }
 
   // Nav smooth scroll (prevent default jump, scroll to section)
   document.querySelectorAll('.topnav-links a[href^="#"]').forEach(link => {
