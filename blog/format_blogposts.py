@@ -175,7 +175,7 @@ And of course, human attention remains finite, with ever-better software competi
 
 When building software, especially software that is meant to be doing a long-running work task, we are confronted with a choice: 
 Should we explain or help the user understand what is going on in the backend, encouraging the user to pay attention to us and the work we are doing?
-Or should we instead stay mute and alert the user once the work is done, at the cost of the user paying context switching elsewhere and not paying us as much attention?
+Or should we instead stay mute and alert the user once the work is done, at the cost of the user context switching elsewhere and not paying us as much attention?
 
 This is something that we are actively grappling with, and have for now settled on a compromise whereby we reveal some, but not too much, of the backend processing.
 
@@ -192,6 +192,17 @@ You're late for an appointment, you hop onto a bikeshare, pedal like mad, ginger
 There are several edge cases in a piece of software that will be demoed soon, that might make the demo fail. You spin up several Claude Code sessions, prompt like mad, have it write the hackiest code that sets up the contrived setup. Many files have been edited. The code runs. The demo still works despite the edge cases. You discard all the modified code.
 
 The act of slamming the bikeshare into the dock feels the same as the act of deleting the code. It's a feeling of pure satisfaction. Not because the act of discarding is inherently pleasing, but because the act of creation was fluid and its output no longer feels precious, and not gripped by the feeling of sunk cost.
+    """.strip()
+  },
+  "Properties of tasks that are good for Agents": {
+    "published": "2026-03-09",
+    "content": """
+- It is easy to verify whether a change is good or bad --there is some quantity that summarises the goodness or badness of the system.
+- There are no major real-world consequences to your changes. If you make a change and it leads to worse performance, you discard it and move on.
+- Changes stack additively: if change X makes the system better and change Y makes the system better, then making the system use both X and Y improves the overall system.
+- You have enough datapoints that you have confidence you are not just cheating. Otherwise you are just overfitting to the test set.
+- You can make a change and measure its effects quickly and relatively cheaply.
+- What else? <a href="mailto:adrien@silmo.ai">adrien@silmo.ai</a>
     """.strip()
   },
 #   "New Post": {

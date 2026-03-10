@@ -10,7 +10,7 @@
   </url>
   <url>
     <loc>https://amorisot.github.io/art</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-03-04</lastmod>
   </url>
   <url>
     <loc>https://amorisot.github.io/ml</loc>
@@ -22,11 +22,11 @@
   </url>
   <url>
     <loc>https://amorisot.github.io/blog</loc>
-    <lastmod>2026-03-03</lastmod>
+    <lastmod>2026-03-04</lastmod>
   </url>
   <url>
     <loc>https://amorisot.github.io/blog/seedlings.html</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-04</lastmod>
   </url>
   <url>
     <loc>https://amorisot.github.io/blog/hi.html</loc>
@@ -67,5 +67,9 @@
   <url>
     <loc>https://amorisot.github.io/blog/The_Joy_of_Discarding.html</loc>
     <lastmod>2026-03-04</lastmod>
+  </url>
+  <url>
+    <loc>https://amorisot.github.io/blog/Properties_of_tasks_that_are_good_for_Agents.html</loc>
+    <lastmod>2026-03-09</lastmod>
   </url>
 </urlset>
