@@ -29,6 +29,7 @@ body {
 }
 
 #content li {
+  list-style-type: none;
   margin-bottom: 0.7em;
 }
 
