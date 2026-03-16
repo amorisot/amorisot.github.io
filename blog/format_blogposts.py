@@ -444,7 +444,7 @@ def main():
         formatted = format_post(post=content, post_name=post_name, published=published, updated=updated)
         if extra_html_path := post_data.get("extra_html"):
             with open(extra_html_path, "r") as f:
-                formatted += "\n" + f.read()
+                formatted += "\n<!-- Shoutout Claude for this visualisation -->\n" + f.read()
         write_if_changed(filepath, BLOG_TEMPLATE.format(
             title=post_name,
             og_url=f"https://amorisot.github.io/blog/{slug}.html",
