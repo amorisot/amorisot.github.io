@@ -1,0 +1,268 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="icon" type="image/png" href="/favicon.png"/>
+    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="I've recently been reading a series of David McCullough's books, on the Wright Brothers' discovery of flight, the building of the Brooklyn bridge, and the...">
+    <meta property="og:title" content="Pre-electricity ScreenTime - Adrien Morisot">
+    <meta property="og:description" content="I've recently been reading a series of David McCullough's books, on the Wright Brothers' discovery of flight, the building of the Brooklyn bridge, and the...">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://amorisot.github.io/blog/Pre-electricity_ScreenTime.html">
+    <link rel="canonical" href="https://amorisot.github.io/blog/Pre-electricity_ScreenTime.html">
+    <title>Blog - Pre-electricity ScreenTime</title>
+    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Pre-electricity ScreenTime", "datePublished": "2026-03-15"}</script>
+  </head>
+  <body>
+    <div id="menu">
+      <li><a href="/about">🏡</a></li>
+      <li><a href="/art">👨‍🎨</a></li>
+      <li><a href="/ml">🤖</a></li>
+      <li><a href="/books">📚</a></li>
+      <li><a href="/blog">📝</a></li>
+    </div>
+    <div id="left">
+      &nbsp;
+    </div>
+    <div id="content">
+      <h3>Pre-electricity ScreenTime</h3>
+      <p class="post-dates"><small>Published: Mar 15, 2026</small></p>
+      <p>I've recently been reading a series of David McCullough's books, on the Wright Brothers' discovery of flight, the building of the Brooklyn bridge, and the digging of the Panama canal.</p>
+      <p>Each story is striking in its own way, but the throughline that I keep coming back to, and that stands in starkest contrast to my current life, is how much everyone in that era wrote, and documented what they were doing.</p>
+      <p>Perhaps this is a selection bias issue, and historians like McCullough only write about people who left behind written artifacts, but it nevertheless prompts me to wonder what the median 19th century person's "ScreenTime" looked like, and whether they spent meaningfully more time writing longform media than we do today. Would Wilbur and Orville look at my screen time and nod knowingly and ask "Is TikTok modern scandalous pamphlets? We read our fair share of those as we were inventing flight" or would they simply not comprehend that huge chunks of the world today pour hours of their day into watching short-form video tailored to keep everyone maximally hooked?</p>
+      <p>I would venture that the distribution was more bimodal, and lots of people back then wrote more, created more, spent time in church or in conferences, and others did very little of that and went to the gambling den or to drink. Meanwhile, all of us here in the present are free of sin or exceptional virtue, largely because we can't be bothered to get off our phones.</p>
+      <p>In closing, if anyone has a better estimate of pre-electricity ScreenTime than the (facetious) one below, I would happily read it.</p>
+<div style="max-width: 390px; margin: 0 auto; background: #f2f2f7; border-radius: var(--border-radius-lg); overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif; -webkit-font-smoothing: antialiased; color: #000;">
+
+  <div style="padding: 16px 16px 0;">
+    <div style="display: flex; background: rgba(118,118,128,0.12); border-radius: 8px; padding: 2px; margin-bottom: 16px;">
+      <div id="tab-week" style="flex: 1; text-align: center; padding: 6px 0; font-size: 13px; font-weight: 500; color: #8e8e93; border-radius: 7px; cursor: pointer;" onclick="switchTab('week')">Fortnight</div>
+      <div id="tab-day" style="flex: 1; text-align: center; padding: 6px 0; font-size: 13px; font-weight: 600; color: #000; background: #fff; border-radius: 7px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); cursor: pointer;" onclick="switchTab('day')">Day</div>
+    </div>
+
+    <div style="background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+      <div style="font-size: 13px; color: #8e8e93; margin-bottom: 2px;" id="chart-label">Total desk time</div>
+      <div style="font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 16px;" id="total-time">9h 47min</div>
+
+      <div id="bar-chart" style="display: flex; align-items: flex-end; height: 108px;"></div>
+      <div style="height: 0.5px; background: #e5e5ea;"></div>
+      <div id="bar-labels" style="display: flex; padding-top: 6px;"></div>
+
+      <div style="display: flex; align-items: center; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 0.5px solid #e5e5ea;">
+        <div style="width: 10px; height: 10px; border-radius: 2px; background: #007aff;"></div>
+        <span style="font-size: 13px; color: #8e8e93;">Correspondence</span>
+        <div style="width: 10px; height: 10px; border-radius: 2px; background: #5ac8fa; margin-left: 10px;"></div>
+        <span style="font-size: 13px; color: #8e8e93;">Engineering</span>
+        <div style="width: 10px; height: 10px; border-radius: 2px; background: #34c759; margin-left: 10px;"></div>
+        <span style="font-size: 13px; color: #8e8e93;">Leisure</span>
+      </div>
+    </div>
+
+    <div style="font-size: 13px; color: #8e8e93; text-transform: uppercase; padding: 0 0 6px; letter-spacing: 0.5px;">Most used</div>
+    <div style="background: #fff; border-radius: 12px; overflow: hidden; margin-bottom: 20px;">
+      <div id="app-list"></div>
+      <div id="show-more-row" style="padding: 12px 16px; text-align: center; border-top: 0.5px solid #e5e5ea; cursor: pointer;" onclick="showMore()">
+        <span style="font-size: 15px; color: #007aff;">Show more</span>
+      </div>
+    </div>
+
+    <div style="font-size: 13px; color: #8e8e93; text-transform: uppercase; padding: 0 0 6px; letter-spacing: 0.5px;">Desk returns</div>
+    <div style="background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <div>
+          <div style="font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">23</div>
+          <div style="font-size: 13px; color: #8e8e93;">desk returns today</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 13px; color: #34c759; font-weight: 500;">&#9660; 34%</div>
+          <div style="font-size: 12px; color: #8e8e93;">from last fortnight</div>
+        </div>
+      </div>
+      <div style="margin-top: 12px; padding-top: 12px; border-top: 0.5px solid #e5e5ea;">
+        <div style="display: flex; justify-content: space-between; font-size: 14px;">
+          <span style="color: #8e8e93;">First desk return</span>
+          <span style="font-weight: 500;">5:12 AM</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size: 13px; color: #8e8e93; text-transform: uppercase; padding: 0 0 6px; letter-spacing: 0.5px;">Interruptions</div>
+    <div style="background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <div>
+          <div style="font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">7</div>
+          <div style="font-size: 13px; color: #8e8e93;">interruptions today</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 13px; color: #34c759; font-weight: 500;">&#9660; 89%</div>
+          <div style="font-size: 12px; color: #8e8e93;">from your era</div>
+        </div>
+      </div>
+      <div style="margin-top: 12px; padding-top: 12px; border-top: 0.5px solid #e5e5ea;" id="notif-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var notifs = [
+  { name: 'Post Office', emoji: '\u{1F4EE}', bg: 'linear-gradient(135deg, #8B4513, #A0522D)', count: 3 },
+  { name: 'Telegraph', emoji: '\u26A1', bg: 'linear-gradient(135deg, #B8860B, #DAA520)', count: 2 },
+  { name: 'Courier Boy', emoji: '\u{1F3C3}', bg: 'linear-gradient(135deg, #556B2F, #6B8E23)', count: 2 },
+];
+var nl = document.getElementById('notif-list');
+notifs.forEach(function(n, i) {
+  nl.innerHTML += '<div style="display: flex; align-items: center; gap: 10px; font-size: 14px;' + (i > 0 ? ' margin-top: 10px;' : '') + '">' +
+    '<div style="width: 28px; height: 28px; border-radius: 6px; background: ' + n.bg + '; display: flex; align-items: center; justify-content: center;">' +
+    '<span style="font-size: 16px; line-height: 1;">' + n.emoji + '</span></div>' +
+    '<span style="flex: 1;">' + n.name + '</span>' +
+    '<span style="color: #8e8e93;">' + n.count + '</span></div>';
+});
+
+var catColor = {
+  Correspondence: '#007aff',
+  Engineering: '#5ac8fa',
+  Leisure: '#34c759',
+  Reference: '#ff9500',
+};
+
+var allApps = [
+  { name: 'Letter Writing Desk', cat: 'Correspondence', bg: 'linear-gradient(135deg, #1a1a2e, #34495e)', emoji: '\u{1FAB6}', time: '3h 12min', pct: 100 },
+  { name: 'Drawing Board', cat: 'Engineering', bg: 'linear-gradient(135deg, #2c3e50, #4a6fa5)', emoji: '\u{1F4D0}', time: '2h 47min', pct: 87 },
+  { name: 'Library & Reading Room', cat: 'Reference', bg: 'linear-gradient(135deg, #8B4513, #A0522D)', emoji: '\u{1F4DA}', time: '1h 38min', pct: 51 },
+  { name: 'Telegraph Office', cat: 'Correspondence', bg: 'linear-gradient(135deg, #B8860B, #DAA520)', emoji: '\u26A1', time: '52min', pct: 27 },
+  { name: 'Scandalous Pamphlets', cat: 'Leisure', bg: 'linear-gradient(135deg, #c0392b, #e74c3c)', emoji: '\u{1F525}', time: '41min', pct: 21 },
+  { name: 'Field Journal', cat: 'Engineering', bg: 'linear-gradient(135deg, #556B2F, #6B8E23)', emoji: '\u{1F4D3}', time: '34min', pct: 18 },
+  { name: 'Penny Dreadfuls', cat: 'Leisure', bg: 'linear-gradient(135deg, #4a0e0e, #8b1a1a)', emoji: '\u{1F480}', time: '28min', pct: 15 },
+  { name: 'Burlesque Revue', cat: 'Leisure', bg: 'linear-gradient(135deg, #943f71, #c2577a)', emoji: '\u{1F483}', time: '19min', pct: 10 },
+  { name: 'Public Lectures', cat: 'Reference', bg: 'linear-gradient(135deg, #2c3e50, #5d6d7e)', emoji: '\u{1F393}', time: '14min', pct: 7 },
+  { name: 'Parlour Piano', cat: 'Leisure', bg: 'linear-gradient(135deg, #1a1a1a, #4a4a4a)', emoji: '\u{1F3B9}', time: '11min', pct: 6 },
+];
+
+var showCount = 5;
+var expanded = false;
+
+function renderApps() {
+  var al = document.getElementById('app-list');
+  al.innerHTML = '';
+  var count = expanded ? allApps.length : showCount;
+  for (var i = 0; i < count; i++) {
+    var a = allApps[i];
+    var c = catColor[a.cat] || '#8e8e93';
+    al.innerHTML += '<div style="padding: 10px 16px; display: flex; align-items: center; gap: 12px;' + (i > 0 ? ' border-top: 0.5px solid #e5e5ea;' : '') + '">' +
+      '<div style="width: 36px; height: 36px; border-radius: 8px; background: ' + a.bg + '; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">' +
+      '<span style="font-size: 18px; line-height: 1;">' + a.emoji + '</span></div>' +
+      '<div style="flex: 1; min-width: 0;">' +
+      '<div style="display: flex; justify-content: space-between; align-items: center;">' +
+      '<div><div style="font-size: 15px;">' + a.name + '</div><div style="font-size: 12px; color: #8e8e93;">' + a.cat + '</div></div>' +
+      '<div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;"><span style="font-size: 14px; color: #8e8e93;">' + a.time + '</span><span style="font-size: 14px; color: #c7c7cc;">›</span></div></div>' +
+      '<div style="height: 4px; background: #f2f2f7; border-radius: 2px; margin-top: 6px; overflow: hidden;">' +
+      '<div style="height: 100%; width: ' + a.pct + '%; background: ' + c + '; border-radius: 2px;"></div></div></div></div>';
+  }
+  var btn = document.getElementById('show-more-row');
+  btn.innerHTML = '<span style="font-size: 15px; color: #007aff;">' + (expanded ? 'Show less' : 'Show more') + '</span>';
+}
+
+function showMore() {
+  expanded = !expanded;
+  renderApps();
+}
+
+renderApps();
+
+var weekData = [
+  { label: 'M', s: 3.5, e: 3.2, p: 1.2 },
+  { label: 'T', s: 3.8, e: 2.8, p: 0.9 },
+  { label: 'W', s: 3.2, e: 3.5, p: 1.4 },
+  { label: 'T', s: 4.0, e: 3.0, p: 0.7 },
+  { label: 'F', s: 3.6, e: 3.3, p: 1.1 },
+  { label: 'S', s: 2.0, e: 1.5, p: 2.8 },
+  { label: 'S', s: 1.2, e: 0.8, p: 3.5 },
+];
+
+function makeDayData() {
+  var d = [];
+  for (var i = 0; i < 24; i++) {
+    var corr = 0, eng = 0, lei = 0;
+    if (i >= 5 && i <= 22) {
+      corr = (i >= 6 && i <= 10) ? Math.random() * 0.4 + 0.4 : (i >= 14 && i <= 16) ? Math.random() * 0.3 + 0.3 : Math.random() * 0.1;
+      eng = (i >= 8 && i <= 12) ? Math.random() * 0.3 + 0.35 : (i >= 13 && i <= 17) ? Math.random() * 0.3 + 0.3 : Math.random() * 0.05;
+      lei = (i >= 19) ? Math.random() * 0.3 + 0.25 : (i === 12 || i === 13) ? Math.random() * 0.15 + 0.1 : Math.random() * 0.03;
+    }
+    var label = '';
+    if (i === 6) label = '6a';
+    else if (i === 9) label = '9a';
+    else if (i === 12) label = '12p';
+    else if (i === 15) label = '3p';
+    else if (i === 18) label = '6p';
+    else if (i === 21) label = '9p';
+    d.push({ label: label, s: corr, e: eng, p: lei });
+  }
+  return d;
+}
+var dayData = makeDayData();
+
+function renderChart(data, isDay) {
+  var chart = document.getElementById('bar-chart');
+  var labels = document.getElementById('bar-labels');
+  var maxVal = 0;
+  for (var i = 0; i < data.length; i++) {
+    var t = data[i].s + data[i].e + data[i].p;
+    if (t > maxVal) maxVal = t;
+  }
+  var html = '';
+  var lhtml = '';
+  var barW = isDay ? 8 : 32;
+  var gap = isDay ? 2 : 6;
+  var r = isDay ? 1.5 : 3;
+
+  for (var i = 0; i < data.length; i++) {
+    var d = data[i];
+    var total = d.s + d.e + d.p;
+    var h = maxVal > 0 ? (total / maxVal) * 108 : 0;
+    var sH = total > 0 ? (d.s / total) * h : 0;
+    var eH = total > 0 ? (d.e / total) * h : 0;
+    var pH = total > 0 ? (d.p / total) * h : 0;
+
+    html += '<div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; height: 108px;">' +
+      '<div style="width: ' + barW + 'px; border-radius: ' + r + 'px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; height: 100%;">' +
+      '<div style="height: ' + Math.round(pH * 10) / 10 + 'px; background: #34c759; flex-shrink: 0;"></div>' +
+      '<div style="height: ' + Math.round(eH * 10) / 10 + 'px; background: #5ac8fa; flex-shrink: 0;"></div>' +
+      '<div style="height: ' + Math.round(sH * 10) / 10 + 'px; background: #007aff; flex-shrink: 0;"></div>' +
+      '</div></div>';
+
+    lhtml += '<div style="flex: 1; text-align: center; font-size: 11px; color: #8e8e93; height: 14px;">' + d.label + '</div>';
+  }
+  chart.style.gap = gap + 'px';
+  chart.innerHTML = html;
+  labels.innerHTML = lhtml;
+}
+
+function switchTab(tab) {
+  var dayTab = document.getElementById('tab-day');
+  var weekTab = document.getElementById('tab-week');
+  var active = 'flex: 1; text-align: center; padding: 6px 0; font-size: 13px; font-weight: 600; color: #000; background: #fff; border-radius: 7px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); cursor: pointer;';
+  var inactive = 'flex: 1; text-align: center; padding: 6px 0; font-size: 13px; font-weight: 500; color: #8e8e93; border-radius: 7px; cursor: pointer; background: transparent; box-shadow: none;';
+
+  if (tab === 'day') {
+    dayTab.style.cssText = active;
+    weekTab.style.cssText = inactive;
+    document.getElementById('total-time').textContent = '9h 47min';
+    document.getElementById('chart-label').textContent = 'Total desk time';
+    renderChart(dayData, true);
+  } else {
+    weekTab.style.cssText = active;
+    dayTab.style.cssText = inactive;
+    document.getElementById('total-time').textContent = '8h 53min';
+    document.getElementById('chart-label').textContent = 'Daily average';
+    renderChart(weekData, false);
+  }
+}
+
+renderChart(dayData, true);
+</script>
+
+    </div>
+    <script data-goatcounter="https://amorisot.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  </body>
+</html>

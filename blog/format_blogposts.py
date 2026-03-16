@@ -205,6 +205,33 @@ The act of slamming the bikeshare into the dock feels the same as the act of del
 - What else? <a href="mailto:adrien@silmo.ai">adrien@silmo.ai</a>
     """.strip()
   },
+  "Pre-electricity ScreenTime": {
+    "published": "2026-03-15",
+    "extra_html": "blog/screentime_widget.html",
+    "content": """
+I've recently been reading a series of David McCullough's books, on the Wright Brothers' discovery of flight, the building of the Brooklyn bridge, and the digging of the Panama canal.
+
+Each story is striking in its own way, but the throughline that I keep coming back to, and that stands in starkest contrast to my current life, is how much everyone in that era wrote, and documented what they were doing.
+
+Perhaps this is a selection bias issue, and historians like McCullough only write about people who left behind written artifacts, but it nevertheless prompts me to wonder what the median 19th century person's "ScreenTime" looked like, and whether they spent meaningfully more time writing longform media than we do today. Would Wilbur and Orville look at my screen time and nod knowingly and ask "Is TikTok modern scandalous pamphlets? We read our fair share of those as we were inventing flight" or would they simply not comprehend that huge chunks of the world today pour hours of their day into watching short-form video tailored to keep everyone maximally hooked?
+
+I would venture that the distribution was more bimodal, and lots of people back then wrote more, created more, spent time in church or in conferences, and others did very little of that and went to the gambling den or to drink. Meanwhile, all of us here in the present are free of sin or exceptional virtue, largely because we can't be bothered to get off our phones.
+
+In closing, if anyone has a better estimate of pre-electricity ScreenTime than the (facetious) one below, I would happily read it.
+    """.strip()
+  },
+#   "New Post": {
+#     "published": "2026-03-03",
+#     "content": """
+# Content
+#     """.strip()
+#   },
+#   "New Post": {
+#     "published": "2026-03-03",
+#     "content": """
+# Content
+#     """.strip()
+#   },
 #   "New Post": {
 #     "published": "2026-03-03",
 #     "content": """
@@ -414,11 +441,15 @@ def main():
         blog_slugs[slug] = updated or published  # Use updated if present, else published
 
         all_post_links += f"{' '*6}<li><a href='/blog/{slug}.html'>{post_name}</a></li>\n"
+        formatted = format_post(post=content, post_name=post_name, published=published, updated=updated)
+        if extra_html_path := post_data.get("extra_html"):
+            with open(extra_html_path, "r") as f:
+                formatted += "\n" + f.read()
         write_if_changed(filepath, BLOG_TEMPLATE.format(
             title=post_name,
             og_url=f"https://amorisot.github.io/blog/{slug}.html",
             description=make_description(content),
-            content=format_post(post=content, post_name=post_name, published=published, updated=updated),
+            content=formatted,
             structured_data=make_structured_data(post_name, published, updated)
         ))
 
