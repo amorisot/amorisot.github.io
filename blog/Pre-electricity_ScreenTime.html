@@ -1,38 +1,5 @@
-<!doctype html>
-<html>
-  <head>
-    <link rel="icon" type="image/png" href="/favicon.png"/>
-    <link rel="stylesheet" href="/static/style.css">
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="I've recently been reading a series of David McCullough's books, on the Wright Brothers' discovery of flight, the building of the Brooklyn bridge, and the...">
-    <meta property="og:title" content="Pre-electricity ScreenTime - Adrien Morisot">
-    <meta property="og:description" content="I've recently been reading a series of David McCullough's books, on the Wright Brothers' discovery of flight, the building of the Brooklyn bridge, and the...">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="https://amorisot.github.io/blog/Pre-electricity_ScreenTime.html">
-    <link rel="canonical" href="https://amorisot.github.io/blog/Pre-electricity_ScreenTime.html">
-    <title>Blog - Pre-electricity ScreenTime</title>
-    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Pre-electricity ScreenTime", "datePublished": "2026-03-15"}</script>
-  </head>
-  <body>
-    <div id="menu">
-      <li><a href="/about">🏡</a></li>
-      <li><a href="/art">👨‍🎨</a></li>
-      <li><a href="/ml">🤖</a></li>
-      <li><a href="/books">📚</a></li>
-      <li><a href="/blog">📝</a></li>
-    </div>
-    <div id="left">
-      &nbsp;
-    </div>
-    <div id="content">
-      <h3>Pre-electricity ScreenTime</h3>
-      <p class="post-dates"><small>Published: Mar 15, 2026</small></p>
-      <p>I've recently been reading a series of David McCullough's books, on the Wright Brothers' discovery of flight, the building of the Brooklyn bridge, and the digging of the Panama canal.</p>
-      <p>Each story is striking in its own way, but the throughline that I keep coming back to, and that stands in starkest contrast to my current life, is how much everyone in that era wrote, and documented what they were doing.</p>
-      <p>Perhaps this is a selection bias issue, and historians like McCullough only write about people who left behind written artifacts, but it nevertheless prompts me to wonder what the median 19th century person's "ScreenTime" looked like, and whether they spent meaningfully more time writing longform media than we do today. Would Wilbur and Orville look at my screen time and nod knowingly and ask "Is TikTok modern scandalous pamphlets? We read our fair share of those as we were inventing flight" or would they simply not comprehend that huge chunks of the world today pour hours of their day into watching short-form video tailored to keep everyone maximally hooked?</p>
-      <p>I would venture that the distribution was more bimodal, and lots of people back then wrote more, created more, spent time in church or in conferences, and others did very little of that and went to the gambling den or to drink. Meanwhile, all of us here in the present are free of sin or exceptional virtue, largely because we can't be bothered to get off our phones.</p>
-      <p>In closing, if anyone has a better estimate of pre-electricity ScreenTime than the (facetious) one below, I would happily read it.</p>
+
+
 <div style="max-width: 390px; margin: 0 auto; background: #f2f2f7; border-radius: var(--border-radius-lg); overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif; -webkit-font-smoothing: antialiased; color: #000;">
 
   <div style="padding: 16px 16px 0;">
@@ -126,7 +93,7 @@ var catColor = {
   Reference: '#ff9500',
 };
 
-var allApps = [
+var dayApps = [
   { name: 'Letter Writing Desk', cat: 'Correspondence', bg: 'linear-gradient(135deg, #1a1a2e, #34495e)', emoji: '\u{1FAB6}', time: '3h 12min', pct: 100 },
   { name: 'Drawing Board', cat: 'Engineering', bg: 'linear-gradient(135deg, #2c3e50, #4a6fa5)', emoji: '\u{1F4D0}', time: '2h 47min', pct: 87 },
   { name: 'Library & Reading Room', cat: 'Reference', bg: 'linear-gradient(135deg, #8B4513, #A0522D)', emoji: '\u{1F4DA}', time: '1h 38min', pct: 51 },
@@ -139,15 +106,29 @@ var allApps = [
   { name: 'Parlour Piano', cat: 'Leisure', bg: 'linear-gradient(135deg, #1a1a1a, #4a4a4a)', emoji: '\u{1F3B9}', time: '11min', pct: 6 },
 ];
 
+var weekApps = [
+  { name: 'Letter Writing Desk', cat: 'Correspondence', bg: 'linear-gradient(135deg, #1a1a2e, #34495e)', emoji: '\u{1FAB6}', time: '42h 18min', pct: 100 },
+  { name: 'Drawing Board', cat: 'Engineering', bg: 'linear-gradient(135deg, #2c3e50, #4a6fa5)', emoji: '\u{1F4D0}', time: '36h 54min', pct: 87 },
+  { name: 'Library & Reading Room', cat: 'Reference', bg: 'linear-gradient(135deg, #8B4513, #A0522D)', emoji: '\u{1F4DA}', time: '19h 12min', pct: 45 },
+  { name: 'Telegraph Office', cat: 'Correspondence', bg: 'linear-gradient(135deg, #B8860B, #DAA520)', emoji: '\u26A1', time: '11h 24min', pct: 27 },
+  { name: 'Scandalous Pamphlets', cat: 'Leisure', bg: 'linear-gradient(135deg, #c0392b, #e74c3c)', emoji: '\u{1F525}', time: '8h 36min', pct: 20 },
+  { name: 'Field Journal', cat: 'Engineering', bg: 'linear-gradient(135deg, #556B2F, #6B8E23)', emoji: '\u{1F4D3}', time: '7h 8min', pct: 17 },
+  { name: 'Penny Dreadfuls', cat: 'Leisure', bg: 'linear-gradient(135deg, #4a0e0e, #8b1a1a)', emoji: '\u{1F480}', time: '5h 52min', pct: 14 },
+  { name: 'Burlesque Revue', cat: 'Leisure', bg: 'linear-gradient(135deg, #943f71, #c2577a)', emoji: '\u{1F483}', time: '4h 26min', pct: 10 },
+  { name: 'Public Lectures', cat: 'Reference', bg: 'linear-gradient(135deg, #2c3e50, #5d6d7e)', emoji: '\u{1F393}', time: '3h 18min', pct: 8 },
+  { name: 'Parlour Piano', cat: 'Leisure', bg: 'linear-gradient(135deg, #1a1a1a, #4a4a4a)', emoji: '\u{1F3B9}', time: '2h 34min', pct: 6 },
+];
+
+var currentApps = dayApps;
 var showCount = 5;
 var expanded = false;
 
 function renderApps() {
   var al = document.getElementById('app-list');
   al.innerHTML = '';
-  var count = expanded ? allApps.length : showCount;
+  var count = expanded ? currentApps.length : showCount;
   for (var i = 0; i < count; i++) {
-    var a = allApps[i];
+    var a = currentApps[i];
     var c = catColor[a.cat] || '#8e8e93';
     al.innerHTML += '<div style="padding: 10px 16px; display: flex; align-items: center; gap: 12px;' + (i > 0 ? ' border-top: 0.5px solid #e5e5ea;' : '') + '">' +
       '<div style="width: 36px; height: 36px; border-radius: 8px; background: ' + a.bg + '; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">' +
@@ -167,8 +148,6 @@ function showMore() {
   expanded = !expanded;
   renderApps();
 }
-
-renderApps();
 
 var weekData = [
   { label: 'M', s: 3.5, e: 3.2, p: 1.2 },
@@ -244,25 +223,27 @@ function switchTab(tab) {
   var active = 'flex: 1; text-align: center; padding: 6px 0; font-size: 13px; font-weight: 600; color: #000; background: #fff; border-radius: 7px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); cursor: pointer;';
   var inactive = 'flex: 1; text-align: center; padding: 6px 0; font-size: 13px; font-weight: 500; color: #8e8e93; border-radius: 7px; cursor: pointer; background: transparent; box-shadow: none;';
 
+  expanded = false;
+
   if (tab === 'day') {
     dayTab.style.cssText = active;
     weekTab.style.cssText = inactive;
     document.getElementById('total-time').textContent = '9h 47min';
     document.getElementById('chart-label').textContent = 'Total desk time';
+    currentApps = dayApps;
     renderChart(dayData, true);
   } else {
     weekTab.style.cssText = active;
     dayTab.style.cssText = inactive;
     document.getElementById('total-time').textContent = '8h 53min';
     document.getElementById('chart-label').textContent = 'Daily average';
+    currentApps = weekApps;
     renderChart(weekData, false);
   }
+  renderApps();
 }
 
+currentApps = dayApps;
+renderApps();
 renderChart(dayData, true);
 </script>
-
-    </div>
-    <script data-goatcounter="https://amorisot.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-  </body>
-</html>
