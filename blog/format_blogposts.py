@@ -207,7 +207,7 @@ The act of slamming the bikeshare into the dock feels the same as the act of del
   },
   "Pre-electricity ScreenTime": {
     "published": "2026-03-15",
-    "extra_html": "blog/screentime_widget.html",
+    "extra_html": "static/screentime_widget.html",
     "content": """
 I've recently been reading a series of David McCullough's books, on the Wright Brothers' discovery of flight, the building of the Brooklyn bridge, and the digging of the Panama canal.
 
@@ -220,12 +220,20 @@ I would venture that the distribution was more bimodal, and lots of people back 
 In closing, if anyone has a better estimate of pre-electricity ScreenTime than the (facetious) one below, I would happily read it.
     """.strip()
   },
-#   "New Post": {
-#     "published": "2026-03-03",
-#     "content": """
-# Content
-#     """.strip()
-#   },
+  "A hypothesis on why people say models get dumber": {
+    "published": "2026-03-19",
+    "extra_html": "static/shepard.html",
+    "content": """
+People mostly use models to write code to write new features fast, adding lots of code to the codebase.
+You can make progress on individual pieces of work quite fast, the models are good at finding their way around a codebase and implementing a feature in a total-session-token efficient way.
+
+So naturally each new feature feels good to implement, and the model feels smart.
+
+But as the project grows, and you uncover bugs, it becomes harder to do things in it, the model spends more time looking at different parts of the repo, gets distracted. And so you are disappointed in the model's intellect, and you complain about it on twitter dot com.
+
+The next step change model drops, you try it, it is very good because it is a step change, and the cycle repeats again.
+    """.strip()
+  },
 #   "New Post": {
 #     "published": "2026-03-03",
 #     "content": """

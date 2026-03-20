@@ -1,0 +1,287 @@
+
+<div id="shepard-container" style="max-width: 500px; margin: 24px auto 10px; position: relative; font-family: -apple-system, BlinkMacSystemFont, Helvetica, sans-serif;">
+  <canvas id="shepard-canvas" style="display: block; width: 100%;"></canvas>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+    <div style="display: flex; gap: 16px; font-size: 11px; color: #999;">
+      <span style="display: flex; align-items: center; gap: 4px;"><span style="display:inline-block; width:18px; height:2px; background:#333;"></span> perceived</span>
+      <span style="display: flex; align-items: center; gap: 4px;"><span style="display:inline-block; width:18px; height:0; border-top:1.5px dashed #aaa;"></span> actual</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var canvas = document.getElementById('shepard-canvas');
+  var ctx = canvas.getContext('2d');
+  var container = document.getElementById('shepard-container');
+  var dpr = window.devicePixelRatio || 1;
+  var pad = { top: 20, right: 20, bottom: 28, left: 50 };
+
+  var W, H, plotW, plotH;
+
+  // Simulation state
+  var time = 0;             // current simulation time
+  var generations = [];     // [{tStart, peak, trough, duration}]
+  var running = false;
+  var started = false;
+
+  // Generation parameters
+  var BASE_PEAK = 60;
+  var PEAK_GROWTH = 8;      // each gen peak rises by this much
+  var TROUGH_RATIO = 0.62;  // trough is this fraction of peak
+  var BASE_DURATION = 120;  // time units per generation
+  var DURATION_VARIANCE = 30;
+  var TIME_PER_FRAME = 1.2; // how fast time advances per frame
+
+  function seedGen(index, tStart) {
+    var peak = BASE_PEAK + PEAK_GROWTH * index + Math.random() * 4 - 2;
+    var trough = peak * TROUGH_RATIO + Math.random() * 3 - 1.5;
+    var duration = BASE_DURATION + (Math.random() - 0.5) * DURATION_VARIANCE * 2;
+    return { tStart: tStart, peak: peak, trough: trough, duration: duration, index: index };
+  }
+
+  function init() {
+    time = 0;
+    generations = [];
+    // Seed first generation
+    generations.push(seedGen(0, 0));
+  }
+
+  function ensureGenerations() {
+    // Make sure we have enough generations to cover current time + a little ahead
+    var last = generations[generations.length - 1];
+    while (last.tStart + last.duration < time + 50) {
+      var nextStart = last.tStart + last.duration;
+      var nextIdx = last.index + 1;
+      var g = seedGen(nextIdx, nextStart);
+      generations.push(g);
+      last = g;
+    }
+  }
+
+  function getValueAt(t) {
+    // Find which generation this time falls in
+    for (var i = generations.length - 1; i >= 0; i--) {
+      var g = generations[i];
+      if (t >= g.tStart) {
+        var dt = t - g.tStart;
+        var decayRate = 3.0 / g.duration;
+        var decayed = g.trough + (g.peak - g.trough) * Math.exp(-decayRate * dt);
+        var wobble = 1.5 * Math.sin(0.1 * dt * Math.PI);
+        return decayed + wobble;
+      }
+    }
+    return BASE_PEAK;
+  }
+
+  function resize() {
+    W = container.offsetWidth;
+    H = Math.round(W * 0.52);
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    plotW = W - pad.left - pad.right;
+    plotH = H - pad.top - pad.bottom;
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    ensureGenerations();
+
+    // Compute axis ranges -- expand to fit all data so far
+    var xMax = Math.max(time + 20, 150); // always show a bit ahead
+    var yMax = 0;
+    for (var i = 0; i < generations.length; i++) {
+      if (generations[i].tStart <= time && generations[i].peak > yMax) {
+        yMax = generations[i].peak;
+      }
+    }
+    yMax = Math.max(yMax * 1.15, 80); // some headroom
+
+    function tToX(t) { return pad.left + (t / xMax) * plotW; }
+    function vToY(v) { return pad.top + plotH * (1 - v / yMax); }
+
+    // Draw axes
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, pad.top + plotH);
+    ctx.lineTo(pad.left + plotW, pad.top + plotH);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(pad.left, pad.top);
+    ctx.lineTo(pad.left, pad.top + plotH);
+    ctx.stroke();
+
+    // Y axis label
+    ctx.save();
+    ctx.translate(14, pad.top + plotH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = '#aaa';
+    ctx.font = '10px -apple-system, Helvetica, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('perceived intelligence', 0, 0);
+    ctx.restore();
+
+    // X axis label
+    ctx.fillStyle = '#aaa';
+    ctx.font = '10px -apple-system, Helvetica, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('time', pad.left + plotW / 2, H - 2);
+
+    // Draw "actual capability" dashed trend line through peaks
+    ctx.save();
+    ctx.setLineDash([5, 4]);
+    ctx.strokeStyle = '#bbb';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    var firstPeak = true;
+    for (var i = 0; i < generations.length; i++) {
+      var g = generations[i];
+      if (g.tStart > time) break;
+      var px = tToX(g.tStart);
+      var py = vToY(g.peak);
+      if (firstPeak) { ctx.moveTo(px, py); firstPeak = false; }
+      else { ctx.lineTo(px, py); }
+    }
+    // Extend trend line slightly beyond last visible peak
+    if (!firstPeak && generations.length > 1) {
+      var lastVisible = null;
+      for (var i = 0; i < generations.length; i++) {
+        if (generations[i].tStart <= time) lastVisible = i;
+      }
+      if (lastVisible !== null && lastVisible < generations.length - 1) {
+        var ng = generations[lastVisible + 1];
+        var extT = Math.min(time + 10, ng.tStart);
+        var frac = (extT - generations[lastVisible].tStart) / (ng.tStart - generations[lastVisible].tStart);
+        var extPeak = generations[lastVisible].peak + frac * (ng.peak - generations[lastVisible].peak);
+        ctx.lineTo(tToX(extT), vToY(extPeak));
+      }
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // Draw the sawtooth perceived line
+    if (time <= 0) return;
+
+    var step = xMax / plotW; // one pixel = one step in t
+    var prevT = 0;
+    var prevV = getValueAt(0);
+
+    ctx.save();
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+
+    // We need to detect jumps (generation boundaries) to draw them differently
+    var genStarts = {};
+    for (var i = 0; i < generations.length; i++) {
+      genStarts[generations[i].tStart] = true;
+    }
+
+    // Build segments: each segment is a continuous decay within one generation
+    var segments = []; // [{points: [{x,y}], genIdx}]
+    var currentSeg = { points: [], genIdx: 0 };
+
+    for (var px = 0; px <= plotW; px++) {
+      var t = px * step;
+      if (t > time) break;
+
+      // Find which generation
+      var gi = 0;
+      for (var j = generations.length - 1; j >= 0; j--) {
+        if (t >= generations[j].tStart) { gi = j; break; }
+      }
+
+      if (gi !== currentSeg.genIdx && currentSeg.points.length > 0) {
+        segments.push(currentSeg);
+        currentSeg = { points: [], genIdx: gi };
+      }
+
+      var v = getValueAt(t);
+      currentSeg.points.push({ x: tToX(t), y: vToY(v) });
+    }
+    if (currentSeg.points.length > 0) segments.push(currentSeg);
+
+    // Draw each segment
+    for (var s = 0; s < segments.length; s++) {
+      var seg = segments[s];
+      if (seg.points.length < 2) continue;
+
+      // Draw jump from previous segment's end to this segment's start
+      if (s > 0) {
+        var prevSeg = segments[s - 1];
+        var fromPt = prevSeg.points[prevSeg.points.length - 1];
+        var toPt = seg.points[0];
+        ctx.beginPath();
+        ctx.strokeStyle = '#999';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.moveTo(fromPt.x, fromPt.y);
+        ctx.lineTo(toPt.x, toPt.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Draw the decay curve
+      ctx.beginPath();
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 2;
+      ctx.moveTo(seg.points[0].x, seg.points[0].y);
+      for (var p = 1; p < seg.points.length; p++) {
+        ctx.lineTo(seg.points[p].x, seg.points[p].y);
+      }
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  function animate() {
+    if (!running) return;
+    time += TIME_PER_FRAME;
+    draw();
+    requestAnimationFrame(animate);
+  }
+
+  function start() {
+    init();
+    resize();
+    running = true;
+    started = true;
+    requestAnimationFrame(animate);
+  }
+
+  function restart() {
+    running = false;
+    start();
+  }
+
+  // Scroll-triggered start
+  var observer = new IntersectionObserver(function(entries) {
+    if (entries[0].isIntersecting && !started) {
+      start();
+    } else if (entries[0].isIntersecting && !running) {
+      // Resume when scrolled back into view
+      running = true;
+      requestAnimationFrame(animate);
+    } else if (!entries[0].isIntersecting && running) {
+      // Pause when scrolled away
+      running = false;
+    }
+  }, { threshold: 0.3 });
+  observer.observe(canvas);
+
+  // Resize handling
+  window.addEventListener('resize', function() {
+    resize();
+    if (!running) draw();
+  });
+
+  // Initial render (blank canvas with axes)
+  resize();
+  draw();
+})();
+</script>
