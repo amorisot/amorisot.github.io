@@ -28,6 +28,7 @@
     <div id="content">
       <h1>Books</h1>
       <p>A subset of my bookshelf. I particularly enjoyed the sparkling books. Their order is random.</p>
+      <hr>
       <div id="book_list">
         <li>Proofs and Refutations</li>
         <li class="good_book">My Family and Other Animals</li>
@@ -235,14 +236,11 @@
       }
       // rebuild with <hr> separators and sparkles
       book_list.innerHTML = '';
-      items.forEach(function(item, idx) {
+      items.forEach(function(item) {
           if (item.classList.contains('good_book')) {
               item.textContent = "✨ " + item.textContent;
           }
           book_list.appendChild(item);
-          if (idx < items.length - 1) {
-              book_list.appendChild(document.createElement('hr'));
-          }
       });
     </script>
     <script data-goatcounter="https://amorisot.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
