@@ -5,24 +5,25 @@ import re
 
 BLOG_TEMPLATE = """
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <link rel="icon" type="image/png" href="/favicon.png"/>
     <link rel="stylesheet" href="/static/style.css">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Adrien Morisot">
     <meta name="description" content="{description}">
-    <meta property="og:title" content="{title} - Adrien Morisot">
+    <meta property="og:title" content="{title} | Adrien Morisot">
     <meta property="og:description" content="{description}">
-    <meta property="og:type" content="article">
+    <meta property="og:type" content="{og_type}">
     <meta property="og:url" content="{og_url}">
     <link rel="canonical" href="{og_url}">
-    <title>Blog - {title}</title>
+    <title>{title} | Adrien Morisot</title>
     {structured_data}
   </head>
   <body>
     <div id="menu">
-      <li><a href="/about">🏡</a></li>
+      <li><a href="/">🏡</a></li>
       <li><a href="/art">👨‍🎨</a></li>
       <li><a href="/ml">🤖</a></li>
       <li><a href="/books">📚</a></li>
@@ -317,6 +318,11 @@ def make_structured_data(title: str, published: str | None, updated: str | None)
     }
     if upd_date and pub_date != upd_date:
         data["dateModified"] = upd_date
+    data["author"] = {
+        "@type": "Person",
+        "name": "Adrien Morisot",
+        "url": "https://amorisot.github.io/"
+    }
     import json
     return f'<script type="application/ld+json">{json.dumps(data)}</script>'
 
@@ -381,7 +387,6 @@ def generate_sitemap(blog_posts: dict[str, str]):
     # Static pages
     static_pages = [
         ("https://amorisot.github.io/", "index.html"),
-        ("https://amorisot.github.io/about", "about.html"),
         ("https://amorisot.github.io/art", "art.html"),
         ("https://amorisot.github.io/ml", "ml.html"),
         ("https://amorisot.github.io/books", "books.html"),
@@ -434,6 +439,7 @@ def main():
 
     write_if_changed(filepath, BLOG_TEMPLATE.format(
         title="🌱 seedlings",
+        og_type="article",
         og_url=f"https://amorisot.github.io/blog/{seedlings_slug}.html",
         description="Ideas I'm mulling over, that may one day grow into fuller posts.",
         content=f"    <h3>🌱 seedlings</h3>\n      {seedlings_content}",
@@ -455,6 +461,7 @@ def main():
                 formatted += "\n<!-- Shoutout Claude for this visualisation -->\n" + f.read()
         write_if_changed(filepath, BLOG_TEMPLATE.format(
             title=post_name,
+            og_type="article",
             og_url=f"https://amorisot.github.io/blog/{slug}.html",
             description=make_description(content),
             content=formatted,
@@ -462,7 +469,8 @@ def main():
         ))
 
     write_if_changed("blog.html", BLOG_TEMPLATE.format(
-        title="all",
+        title="Blog",
+        og_type="website",
         og_url="https://amorisot.github.io/blog",
         description="Blog posts by Adrien Morisot on ML, LLMs, and other topics.",
         content=all_post_links.strip(),
