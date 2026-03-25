@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>random walk</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: #f5f5f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        canvas { display: block; cursor: grab; }
+        canvas:active { cursor: grabbing; }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // === CONSTANTS ===
+        const WORLD_SCALE = 14;
+        const MARGIN = 200;
+        const LLOYD_ITERATIONS = 4;
+        const TRAIL_MAX = 5000;
+        const STEPS_PER_FRAME = 2;
+        const WALKER_SIGMA = 0.35;
+        const WALKER_DAMPING = 0.995;
+        const CAMERA_LERP = 0.04;
+        const ZOOM_MIN = 0.04;
+        const ZOOM_MAX = 3.0;
+        const ZOOM_SPEED = 0.0015;
+        const PHI_INV = 0.618033988749895;
+
+        // === INDUSTRY NAMES ===
+        const CORE_SECTORS = [
+            'Nuts & Bolts',
+            'Truck Leasing',
+            'Road Salting',
+            'Out-of-Home Advertising',
+            'Glassmaking',
+            'Italian Food Distribution'
+        ];
+
+        const OTHER_SECTORS = [
+            'Industrial Laundry', 'Parking Garage Management', 'Concrete Mixing',
+            'Fire Extinguisher Servicing', 'Vending Machines', 'Commercial Flooring',
+            'Portable Sanitation', 'Scaffold Hire', 'Pallet Logistics',
+            'Elevator Maintenance', 'Pest Control', 'Uniform Supply',
+            'Gravel Quarrying', 'Septic Tank Pumping', 'Dumpster Rental',
+            'Commercial Fencing', 'Janitorial Supplies', 'Industrial Gases',
+            'Paper Shredding', 'Linen Services', 'Key Cutting',
+            'Forklift Repair', 'Water Treatment Chemicals', 'Rebar Fabrication',
+            'Roofing Materials', 'Traffic Cone Rental', 'Handrail Installation',
+            'Loading Dock Equipment', 'Label Printing', 'Bolt Torquing',
+            'Corrugated Packaging', 'Drain Cleaning', 'Parking Meter Manufacturing',
+            'Ice Distribution', 'Fire Sprinkler Inspection', 'Industrial Shelving',
+            'Porta-Cabin Hire', 'Generator Rental', 'Tank Cleaning',
+            'Gasket Manufacturing', 'Commercial Plumbing', 'Mat Rental & Cleaning',
+            'Cold Storage Warehousing', 'Sewer Lining', 'Boiler Servicing',
+            'Commercial Waste Brokerage', 'Propane Distribution', 'Conveyor Belt Repair',
+            'Highway Guardrail', 'Manhole Cover Casting', 'Street Sweeping',
+            'Industrial Adhesives', 'Paving & Sealcoating', 'Commercial Doors',
+            'Pipe Insulation', 'Compressed Air Systems', 'Crane Rental',
+            'Welding Supply', 'Hydraulic Hose Repair', 'Sandblasting Services',
+            'Commercial Fumigation', 'Pallet Racking', 'Freight Brokerage',
+            'Dust Collection Systems', 'Water Tower Maintenance', 'Envelope Manufacturing',
+            'Commercial Ice Machines', 'Gutter Installation', 'Bollard Manufacturing',
+            'Drywall Supply', 'Asphalt Plant Operations', 'Bearing Distribution',
+            'Safety Signage', 'Fastener Distribution', 'Chain-Link Fencing',
+            'Electrical Panel Assembly', 'Bulk Chemical Transport', 'Traffic Signal Maintenance',
+            'Industrial Fan Repair', 'Commercial Laundry Equipment', 'Warehouse Striping',
+            'Geotextile Supply', 'Well Drilling', 'Window Tinting',
+            'Scrap Metal Processing', 'Commercial Locksmith',
+            'Cargo Netting', 'Steel Drum Reconditioning', 'Tarpaulin Supply',
+            'Industrial Brush Manufacturing', 'Pallet Wrapping', 'Dock Leveler Repair',
+            'Commercial Refrigeration', 'Waste Oil Collection', 'Manhole Rehabilitation',
+            'Thermal Insulation', 'Fence Post Driving', 'Hydraulic Lift Tables',
+            'Industrial Caster Supply', 'Cable Tray Installation', 'Concrete Pumping',
+            'Overhead Crane Inspection', 'Rubber Flooring', 'Freight Consolidation',
+            'Tank Farm Operations', 'Aggregate Supply', 'Valve & Actuator Repair',
+            'Commercial Roofing', 'Lubricant Distribution', 'Wire Rope Inspection',
+            'Culvert Installation', 'Mechanical Insulation', 'Tugboat Operations',
+            'Barge Cleaning', 'Rigging Services', 'Kiln Repair',
+            'Air Duct Cleaning', 'Powder Coating', 'Die Casting',
+            'Spring Manufacturing', 'Hose Assembly', 'Commercial Glazing',
+            'Piling Contractors', 'Precast Concrete', 'Demolition Contractors',
+            'Metal Stamping', 'Heat Treating', 'Centrifuge Repair',
+            'Hopper Fabrication', 'Chiller Maintenance', 'Commercial Caulking',
+            'Bulk Bag Supply', 'Shrink Wrap Services', 'Pumpjack Servicing',
+            'Grain Elevator Maintenance', 'Cathodic Protection', 'Refractory Installation',
+            'Industrial Painting', 'Blasting & Coating', 'Brine Processing',
+            'Silo Cleaning', 'Scaffolding Inspection', 'Tank Insulation',
+            'Drag Chain Conveyor', 'Bucket Elevator Repair', 'Cooling Tower Maintenance',
+            'Commercial Compressor Repair', 'Fuel Polishing', 'Marine Coatings',
+            'Industrial Epoxy Flooring', 'Stack Testing', 'Lightning Protection',
+            'Grout Pumping', 'Expansion Joint Repair', 'Flange Management',
+            'Industrial Vacuum Services', 'Hydro Excavation', 'Corrosion Monitoring',
+            'Roof Anchor Testing', 'Chimney Lining', 'Backflow Prevention',
+            'Commercial Awnings', 'Bollard Installation', 'Parking Lot Striping',
+            'Fire Door Inspection', 'Stormwater Management', 'Grease Trap Cleaning',
+            'Autoclave Servicing', 'Pallet Manufacturing', 'Dock Bumper Replacement',
+            'Industrial Hinge Supply', 'Transformer Oil Testing', 'Baghouse Maintenance',
+            'Steam Trap Surveying', 'Commercial Gutter Guards', 'Pipe Jacking',
+            'Cable Pulling Services', 'Concrete Scanning', 'Truck Scale Calibration',
+            'Acid Wash Services', 'Commercial Waterproofing', 'Fire Alarm Testing',
+            'Roof Drain Cleaning', 'Pneumatic Tube Systems', 'Commercial Pest Barriers',
+            'Overhead Door Repair', 'Industrial Curtain Walls', 'Tank Lining',
+            'Asbestos Abatement', 'Elevator Rope Replacement', 'Commercial Snow Removal',
+            'Floor Drain Maintenance', 'Safety Shower Testing', 'Commercial Mold Removal',
+            'Eyewash Station Servicing', 'Scissor Lift Rental', 'Emergency Spill Response',
+            'Commercial Carpet Cleaning', 'Fire Shutter Testing', 'Bin Cleaning Services',
+            'Commercial Blinds', 'Ventilation Ductwork', 'Pallet Recycling',
+            'Pothole Repair', 'Guard Booth Installation', 'Sump Pump Servicing',
+            'Commercial Flagpoles', 'Thermal Imaging Services', 'Manhole Frame Adjustment',
+            'Commercial Signage Installation', 'Tree Stump Grinding', 'Catch Basin Cleaning',
+            'Roll-Off Container Rental', 'Industrial Battery Recycling', 'Commercial Window Washing',
+            'Speed Bump Installation', 'Pavement Marking', 'Loading Ramp Repair',
+            'Commercial Pressure Washing', 'Forklift Battery Services', 'Waste Compactor Repair',
+            'Fiber Optic Splicing', 'Commercial Fence Repair', 'Fuel Tank Removal',
+            'Ground Penetrating Radar', 'Commercial Bird Control', 'Elevator Phone Monitoring',
+            'Industrial Rubber Supply', 'Warehouse Racking Inspection', 'Dock Plate Servicing',
+            'Commercial Gas Detection', 'Fire Escape Inspection', 'Catch Fence Installation',
+            'Industrial Dehumidification', 'Commercial Grout Sealing', 'Storm Drain Inspection',
+            'Warehouse Climate Control', 'Commercial Pipe Relining', 'Ballast Water Treatment',
+            'Concrete Core Drilling', 'Industrial Air Filtration', 'Commercial Roof Inspection',
+            'Loading Bay Maintenance', 'Industrial Odor Control', 'Mechanical Seal Repair',
+            // Insurance / Claims
+            'Boat Insurance Adjustment', 'Livestock Transit Claims', 'Hailstorm Damage Appraisal',
+            'Crane Accident Reporting', 'Cargo Loss Adjudication', 'Marina Liability Claims',
+            'Flood Damage Documentation', 'Construction Defect Claims',
+            // TPA / RCM / Compliance paperwork
+            'Workers Comp for Roofers', 'Restaurant Health Inspections', 'Elevator Certificate Renewal',
+            'Hazmat Shipping Paperwork', 'Boiler Permit Processing', 'Fire Marshal Compliance Filing',
+            'Septic System Permitting', 'Commercial Weigh Station Audits', 'OSHA Incident Reporting',
+            'EPA Discharge Permitting', 'DOT Hours-of-Service Logging', 'Asbestos Survey Filing',
+            'Underground Tank Registration', 'Crane Operator Certification', 'Scaffold Safety Permits',
+            'Confined Space Entry Permits', 'Hot Work Permit Processing', 'Radiation Badge Tracking',
+            // Billing / Invoicing in absurd niches
+            'Portable Toilet Billing Reconciliation', 'Dumpster Overage Invoicing',
+            'Parking Violation Appeals Processing', 'Toll Road Dispute Resolution',
+            'Tow Truck Dispatch Billing', 'Scrap Metal Weight Ticketing',
+            'Fuel Surcharge Calculation', 'Demurrage Fee Processing',
+            'Container Detention Billing', 'Overweight Truck Fine Appeals',
+            // Scheduling / Logistics
+            'Grease Trap Pumping Scheduling', 'Fire Extinguisher Recheck Routing',
+            'Vending Machine Restocking Routes', 'Pest Control Recertification Tracking',
+            'Backflow Preventer Test Scheduling', 'Elevator Inspection Scheduling',
+            'Septic Pump-Out Route Optimization', 'Hydrant Flow Test Scheduling',
+            'Cooling Tower Legionella Testing', 'Grease Interceptor Compliance Tracking',
+            // Procurement / Inventory
+            'Road Salt Futures Purchasing', 'Manhole Cover Inventory',
+            'Safety Cone Depreciation Tracking', 'Porta-Potty Fleet Management',
+            'Hi-Vis Vest Procurement', 'Hard Hat Expiry Tracking',
+            'Fire Hose Replacement Scheduling', 'Spill Kit Restocking',
+            // More wonderfully specific niches
+            'Tugboat Fuel Reconciliation', 'Barge Demurrage Accounting',
+            'Grain Moisture Testing', 'Feedlot Runoff Monitoring',
+            'Rendering Plant Logistics', 'Fish Processing Waste Hauling',
+            'Poultry Barn Ventilation', 'Egg Grading Equipment Calibration',
+            'Slaughterhouse Sanitation Audits', 'Cold Chain Temperature Logging',
+            'Produce Ripeness Tracking', 'Flour Mill Dust Explosion Prevention',
+            'Brewery Tank Cleaning Scheduling', 'Commercial Dishwasher Leasing',
+            'Restaurant Exhaust Hood Cleaning', 'Industrial Laundry Chemical Dosing',
+            'Uniform Tear & Repair Tracking', 'Linen Inventory Par Level Management',
+            'Hotel Mattress Rotation Scheduling', 'Commercial Carpet Tile Replacement',
+            'Parking Garage Revenue Auditing', 'Coin-Op Laundry Cash Collection',
+            'Car Wash Water Recycling', 'Self-Storage Unit Lien Processing',
+            'Mini Golf Course Maintenance', 'Bowling Alley Lane Oiling',
+            'Ice Rink Resurfacing Scheduling', 'Swimming Pool Chemical Compliance',
+            'Gym Equipment Maintenance Contracts', 'Commercial Aquarium Servicing',
+            'Cemetery Plot Record Keeping', 'Crematorium Scheduling Software',
+            'Funeral Home Fleet Management', 'Church HVAC Maintenance',
+            'Steeple Inspection Services', 'Bell Tower Rope Replacement',
+            'Pipe Organ Maintenance', 'Stadium Seat Repair',
+            'Scoreboard Parts Procurement', 'Athletic Field Turf Management',
+            'Running Track Resurfacing', 'Tennis Court Crack Filling',
+            'Driving Range Ball Collection', 'Golf Cart Fleet Servicing',
+            'Marina Dock Repair', 'Boat Bottom Painting',
+            'Buoy Maintenance', 'Lighthouse Lens Polishing',
+            'Bridge Bearing Inspection', 'Tunnel Ventilation Testing',
+            'Railroad Tie Replacement', 'Grade Crossing Signal Repair',
+            'Airport Runway Rubber Removal', 'Taxiway Light Replacement',
+            'Baggage Carousel Maintenance', 'Jetway Servicing',
+            'Prison Commissary Logistics', 'Courthouse Metal Detector Calibration',
+            'Traffic Camera Maintenance', 'Parking Meter Coin Collection',
+            'Street Light Bulb Replacement', 'Utility Pole Inspection',
+            'Transformer Bushing Testing', 'Substation Grass Cutting',
+            'Pipeline Pig Launching', 'Gas Meter Reading Routes',
+            'Water Meter Replacement Programs', 'Sewer Camera Inspection',
+            'Fire Hydrant Flushing Routes', 'Catch Basin Mosquito Treatment',
+            'Storm Sewer Jetting', 'Retention Pond Algae Control'
+        ];
+
+        const ALL_SECTORS = [...CORE_SECTORS, ...OTHER_SECTORS];
+
+        // === PASTEL COLOR PALETTE ===
+        // Bright, pleasant pastels for a white background
+        const PALETTE = [
+            [255, 179, 186], [255, 198, 179], [255, 218, 179], [255, 236, 179],
+            [240, 255, 179], [213, 255, 179], [186, 255, 179], [179, 255, 198],
+            [179, 255, 218], [179, 255, 240], [179, 240, 255], [179, 218, 255],
+            [179, 198, 255], [186, 179, 255], [213, 179, 255], [236, 179, 255],
+            [255, 179, 236], [255, 179, 213], [255, 204, 204], [204, 236, 255],
+            [204, 255, 220], [255, 230, 204], [230, 204, 255], [204, 255, 245],
+            [255, 204, 230], [220, 255, 204], [204, 220, 255], [245, 204, 255],
+            [255, 245, 204], [204, 255, 230]
+        ];
+
+        // === STATE ===
+        let W, H, WORLD_W, WORLD_H;
+        let cells = [];
+        let walker = { x: 0, y: 0, vx: 0, vy: 0 };
+        let trail = [];
+        let trailHead = 0;
+        let trailCount = 0;
+        let camera = { x: 0, y: 0, zoom: 1, following: false };
+        let isDragging = false;
+        let dragLastX = 0, dragLastY = 0;
+        let initialized = false;
+
+        // Touch state
+        let lastTouchDist = 0;
+        let touchStartTime = 0;
+        let lastTapTime = 0;
+
+        // Silmo logo
+        const LOGO_W = 140; // world-space width
+        const LOGO_ASPECT = 64350 / 12281; // ~5.24:1
+        const LOGO_H = LOGO_W / LOGO_ASPECT;
+        const logoImg = new Image();
+        let logoReady = false;
+        const logoSvg = `<svg width="644" height="123" viewBox="0 0 64350 12281" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M53397.7 6218.94C53397.7 6710.44 53452.3 7191.01 53561.6 7660.67C53681.7 8119.4 53867.4 8534.44 54118.6 8905.8C54369.8 9277.15 54697.5 9577.51 55101.6 9806.88C55505.7 10025.3 55997.2 10134.5 56576.1 10134.5C57155 10134.5 57646.5 10025.3 58050.6 9806.88C58454.7 9577.51 58782.4 9277.15 59033.6 8905.8C59284.8 8534.44 59465 8119.4 59574.2 7660.67C59694.4 7191.01 59754.5 6710.44 59754.5 6218.94C59754.5 5705.59 59694.4 5208.63 59574.2 4728.06C59465 4247.48 59284.8 3821.52 59033.6 3450.16C58782.4 3067.88 58454.7 2767.52 58050.6 2549.08C57646.5 2319.71 57155 2205.03 56576.1 2205.03C55997.2 2205.03 55505.7 2319.71 55101.6 2549.08C54697.5 2767.52 54369.8 3067.88 54118.6 3450.16C53867.4 3821.52 53681.7 4247.48 53561.6 4728.06C53452.3 5208.63 53397.7 5705.59 53397.7 6218.94ZM50825.6 6218.94C50825.6 5345.16 50956.6 4536.92 51218.8 3794.21C51480.9 3040.58 51857.7 2385.25 52349.2 1828.22C52840.7 1271.18 53441.4 834.296 54151.4 517.553C54872.2 200.809 55680.5 42.4375 56576.1 42.4375C57482.6 42.4375 58290.9 200.809 59000.8 517.553C59710.8 834.296 60311.5 1271.18 60803 1828.22C61294.5 2385.25 61671.3 3040.58 61933.4 3794.21C62195.6 4536.92 62326.6 5345.16 62326.6 6218.94C62326.6 7070.87 62195.6 7868.19 61933.4 8610.9C61671.3 9342.68 61294.5 9981.63 60803 10527.7C60311.5 11073.9 59710.8 11505.3 59000.8 11822C58290.9 12127.8 57482.6 12280.8 56576.1 12280.8C55680.5 12280.8 54872.2 12127.8 54151.4 11822C53441.4 11505.3 52840.7 11073.9 52349.2 10527.7C51857.7 9981.63 51480.9 9342.68 51218.8 8610.9C50956.6 7868.19 50825.6 7070.87 50825.6 6218.94Z" fill="black"/>
+<path d="M37585.9 321.008H41206.6L43942.6 8365.2H43975.4L46563.9 321.008H50184.6V12018.7H47776.3V3728.73H47743.5L44876.5 12018.7H42894.1L40027 3810.65H39994.2V12018.7H37585.9V321.008Z" fill="black"/>
+<path d="M28790.9 321.008H31363.1V9856.08H37064.5V12018.7H28790.9V321.008Z" fill="black"/>
+<path d="M25141.3 321.008H27713.5V12018.7H25141.3V321.008Z" fill="black"/>
+<path d="M16976.5 8135.78C16976.5 8528.98 17047.5 8862.11 17189.5 9135.16C17331.5 9408.22 17517.2 9632.12 17746.6 9806.88C17986.8 9970.71 18265.4 10096.3 18582.1 10183.7C18898.8 10260.1 19226.5 10298.4 19565.1 10298.4C19794.5 10298.4 20040.2 10282 20302.4 10249.2C20564.5 10205.5 20810.2 10129.1 21039.6 10019.9C21269 9910.64 21460.1 9763.19 21613 9577.51C21765.9 9380.91 21842.4 9135.16 21842.4 8840.26C21842.4 8523.52 21738.6 8266.85 21531.1 8070.25C21334.5 7873.65 21072.4 7709.82 20744.7 7578.75C20417 7447.68 20045.7 7333 19630.6 7234.7C19215.6 7136.4 18795.1 7027.18 18369.1 6907.03C17932.2 6797.81 17506.3 6666.75 17091.2 6513.84C16676.2 6350 16304.8 6142.48 15977.2 5891.27C15649.5 5640.06 15381.9 5328.78 15174.4 4957.42C14977.8 4575.15 14879.5 4116.41 14879.5 3581.23C14879.5 2980.51 15005.1 2461.7 15256.3 2024.82C15518.4 1577.01 15857 1205.65 16272.1 910.751C16687.1 615.852 17156.8 397.408 17681 255.419C18205.3 113.431 18729.6 42.4375 19253.8 42.4375C19865.5 42.4375 20449.8 113.431 21006.8 255.419C21574.8 386.486 22077.2 604.93 22514.1 910.751C22951 1216.57 23295 1609.77 23546.2 2090.35C23808.4 2560 23939.4 3133.42 23939.4 3810.59H21449.2C21427.3 3461.08 21350.9 3171.64 21219.8 2942.28C21099.7 2712.91 20935.8 2532.7 20728.3 2401.63C20520.8 2270.56 20280.5 2177.73 20007.5 2123.11C19745.3 2068.5 19455.9 2041.2 19139.1 2041.2C18931.6 2041.2 18724.1 2063.04 18516.6 2106.73C18309.1 2150.42 18117.9 2226.88 17943.2 2336.1C17779.3 2445.32 17642.8 2581.85 17533.6 2745.68C17424.4 2909.51 17369.7 3117.03 17369.7 3368.25C17369.7 3597.61 17413.4 3783.29 17500.8 3925.28C17588.2 4067.26 17757.5 4198.33 18008.7 4318.48C18270.8 4438.62 18625.8 4558.76 19073.6 4678.91C19532.3 4799.05 20127.6 4951.96 20859.4 5137.64C21077.8 5181.33 21378.2 5263.25 21760.5 5383.39C22153.7 5492.61 22541.4 5672.83 22923.7 5924.04C23306 6175.25 23633.6 6513.84 23906.7 6939.8C24190.6 7354.84 24332.6 7890.03 24332.6 8545.36C24332.6 9080.55 24228.9 9577.51 24021.4 10036.2C23813.8 10495 23502.6 10893.6 23087.5 11232.2C22683.4 11559.9 22175.5 11816.6 21563.9 12002.2C20963.1 12187.9 20264.1 12280.8 19466.8 12280.8C18822.4 12280.8 18194.4 12198.8 17582.7 12035C16982 11882.1 16446.8 11636.3 15977.2 11297.8C15518.4 10959.2 15152.5 10527.7 14879.5 10003.5C14606.4 9479.21 14475.4 8856.65 14486.3 8135.78H16976.5Z" fill="black"/>
+<path d="M63034.7 0C63260.2 0 63476.5 56.6523 63683.6 169.957C63890.8 282.117 64053.3 443.49 64171.2 654.076C64290.2 864.662 64349.7 1084.98 64349.7 1315.02C64349.7 1543.92 64291.3 1762.51 64174.6 1970.81C64059 2177.96 63897.1 2339.91 63688.8 2456.65C63481.6 2572.24 63263.6 2630.04 63034.7 2630.04C62805.8 2630.04 62587.2 2572.24 62378.9 2456.65C62171.8 2339.91 62009.8 2177.96 61893.1 1970.81C61777.5 1762.51 61719.7 1543.92 61719.7 1315.02C61719.7 1084.98 61778.6 864.662 61896.5 654.076C62015.5 443.49 62178.6 282.117 62385.8 169.957C62592.9 56.6523 62809.2 0 63034.7 0ZM63036.4 257.51C62855.6 257.51 62682.2 302.718 62516.2 393.132C62350.3 483.547 62219.3 613.447 62123.1 782.831C62028.1 952.216 61980.6 1129.61 61980.6 1315.02C61980.6 1499.28 62027 1674.96 62119.7 1842.06C62213.5 2009.15 62344 2139.62 62511.1 2233.47C62678.2 2327.32 62853.3 2374.24 63036.4 2374.24C63220.7 2374.24 63395.8 2327.32 63561.7 2233.47C63728.8 2139.62 63859.3 2009.15 63953.2 1842.06C64047 1674.96 64093.9 1499.28 64093.9 1315.02C64093.9 1129.61 64045.9 952.216 63949.7 782.831C63854.7 613.447 63723.7 483.547 63556.6 393.132C63390.6 302.718 63217.2 257.51 63036.4 257.51ZM62440.7 2018.88V623.175H62724C62989.5 623.175 63138.3 624.319 63170.3 626.608C63264.2 634.62 63336.8 653.504 63388.3 683.26C63441 711.873 63484.5 756.508 63518.8 817.166C63554.3 876.679 63572 943.06 63572 1016.31C63572 1117.02 63538.8 1203.43 63472.5 1275.53C63407.2 1346.49 63315.1 1390.56 63196.1 1407.72C63238.4 1423.75 63271 1441.48 63293.9 1460.94C63316.8 1479.25 63348.3 1514.73 63388.3 1567.38C63398.6 1581.11 63433 1637.77 63491.4 1737.34L63656.2 2018.88H63305.9L63189.2 1792.27C63110.2 1640.05 63045 1544.49 62993.5 1505.58C62942 1465.52 62876.8 1445.49 62797.8 1445.49H62724V2018.88H62440.7ZM62724 1225.75H62839C63002.7 1225.75 63103.9 1219.45 63142.9 1206.86C63182.9 1194.28 63214.4 1172.53 63237.3 1141.63C63260.2 1109.58 63271.6 1073.53 63271.6 1033.47C63271.6 994.562 63260.2 960.227 63237.3 930.47C63215.5 899.569 63184.1 877.824 63142.9 865.234C63101.7 851.5 63000.4 844.634 62839 844.634H62724V1225.75Z" fill="black"/>
+<path d="M0.000976562 7057.11L2321.42 7057.11L2042.85 7614.25L278.571 7614.25L0.000976562 7057.11Z" fill="black"/>
+<path d="M9378.53 7057.11L11700 7057.11L11421.4 7614.25L9657.1 7614.25L9378.53 7057.11Z" fill="black"/>
+<path d="M0.000976562 8171.39L3528.56 8171.39L3249.99 8728.53L278.571 8728.53L0.000976562 8171.39Z" fill="black"/>
+<path d="M8171.39 8171.39L11700 8171.4L11421.4 8728.53L8449.96 8728.53L8171.39 8171.39Z" fill="black"/>
+<path d="M0.000976562 9192.82L5014.27 9192.82L4735.7 9749.96L195.362 9749.96L0.000976562 9192.82Z" fill="black"/>
+<path d="M6685.69 9192.82L11700 9192.82L11421.4 9749.96L6964.26 9749.96L6685.69 9192.82Z" fill="black"/>
+<path d="M0.000976562 10307.1L11700 10307.1L11421.4 10864.2L278.571 10864.2L0.000976562 10307.1Z" fill="black"/>
+<path d="M0.000976562 11421.4L11700 11421.4L11421.4 11978.5L278.571 11978.5L0.000976562 11421.4Z" fill="black"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M11700 6314.26L9378.53 6314.26L9378.53 6314.26C9378.53 4365.49 7798.74 2785.7 5849.98 2785.7C3901.21 2785.7 2321.42 4365.49 2321.42 6314.26L2321.42 6314.26L-4.62797e-05 6314.26L0.000976562 464.283L11700 464.285L11700 6314.26Z" fill="black"/>
+</svg>`;
+        logoImg.onload = () => { logoReady = true; };
+        logoImg.src = 'data:image/svg+xml;base64,' + btoa(logoSvg);
+
+        // === UTILITIES ===
+
+        function gaussianRandom() {
+            let u = 0, v = 0;
+            while (u === 0) u = Math.random();
+            while (v === 0) v = Math.random();
+            return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        }
+
+        function clamp(val, min, max) {
+            return val < min ? min : val > max ? max : val;
+        }
+
+        function dist2(ax, ay, bx, by) {
+            const dx = ax - bx, dy = ay - by;
+            return dx * dx + dy * dy;
+        }
+
+        function wrapText(text, maxWidth) {
+            const words = text.split(' ');
+            const lines = [];
+            let current = '';
+            for (const word of words) {
+                const test = current ? current + ' ' + word : word;
+                if (ctx.measureText(test).width > maxWidth && current) {
+                    lines.push(current);
+                    current = word;
+                } else {
+                    current = test;
+                }
+            }
+            if (current) lines.push(current);
+            return lines;
+        }
+
+        function screenToWorld(sx, sy) {
+            return {
+                x: (sx - W / 2) / camera.zoom + camera.x,
+                y: (sy - H / 2) / camera.zoom + camera.y
+            };
+        }
+
+        function getVisibleRect() {
+            const halfW = (W / 2) / camera.zoom;
+            const halfH = (H / 2) / camera.zoom;
+            return {
+                left: camera.x - halfW,
+                right: camera.x + halfW,
+                top: camera.y - halfH,
+                bottom: camera.y + halfH
+            };
+        }
+
+        // === VORONOI: HALF-PLANE CLIPPING ===
+
+        function clipPolygon(polygon, mx, my, nx, ny) {
+            const out = [];
+            const len = polygon.length;
+            if (len === 0) return out;
+
+            for (let i = 0; i < len; i++) {
+                const curr = polygon[i];
+                const next = polygon[(i + 1) % len];
+                const dCurr = (curr.x - mx) * nx + (curr.y - my) * ny;
+                const dNext = (next.x - mx) * nx + (next.y - my) * ny;
+
+                if (dCurr <= 0) {
+                    out.push(curr);
+                    if (dNext > 0) {
+                        const t = dCurr / (dCurr - dNext);
+                        out.push({
+                            x: curr.x + t * (next.x - curr.x),
+                            y: curr.y + t * (next.y - curr.y)
+                        });
+                    }
+                } else if (dNext <= 0) {
+                    const t = dCurr / (dCurr - dNext);
+                    out.push({
+                        x: curr.x + t * (next.x - curr.x),
+                        y: curr.y + t * (next.y - curr.y)
+                    });
+                }
+            }
+            return out;
+        }
+
+        function computeVoronoiPolygons(seeds) {
+            const pad = 100;
+            const polygons = [];
+
+            for (let i = 0; i < seeds.length; i++) {
+                let poly = [
+                    { x: -pad, y: -pad },
+                    { x: WORLD_W + pad, y: -pad },
+                    { x: WORLD_W + pad, y: WORLD_H + pad },
+                    { x: -pad, y: WORLD_H + pad }
+                ];
+
+                const others = [];
+                for (let j = 0; j < seeds.length; j++) {
+                    if (j === i) continue;
+                    others.push({ idx: j, d: dist2(seeds[i].x, seeds[i].y, seeds[j].x, seeds[j].y) });
+                }
+                others.sort((a, b) => a.d - b.d);
+
+                for (const other of others) {
+                    const j = other.idx;
+                    const mx = (seeds[i].x + seeds[j].x) / 2;
+                    const my = (seeds[i].y + seeds[j].y) / 2;
+                    const nx = seeds[j].x - seeds[i].x;
+                    const ny = seeds[j].y - seeds[i].y;
+                    poly = clipPolygon(poly, mx, my, nx, ny);
+                    if (poly.length < 3) break;
+                }
+
+                polygons.push(poly);
+            }
+            return polygons;
+        }
+
+        function polygonCentroid(vertices) {
+            if (vertices.length < 3) return { x: 0, y: 0 };
+            let cx = 0, cy = 0, area = 0;
+            for (let i = 0; i < vertices.length; i++) {
+                const j = (i + 1) % vertices.length;
+                const cross = vertices[i].x * vertices[j].y - vertices[j].x * vertices[i].y;
+                area += cross;
+                cx += (vertices[i].x + vertices[j].x) * cross;
+                cy += (vertices[i].y + vertices[j].y) * cross;
+            }
+            area /= 2;
+            if (Math.abs(area) < 1e-10) {
+                let sx = 0, sy = 0;
+                for (const v of vertices) { sx += v.x; sy += v.y; }
+                return { x: sx / vertices.length, y: sy / vertices.length };
+            }
+            cx /= (6 * area);
+            cy /= (6 * area);
+            return { x: cx, y: cy };
+        }
+
+        // === SEED GENERATION ===
+
+        function generateSeeds() {
+            const seeds = [];
+            const cx = WORLD_W / 2;
+            const cy = WORLD_H / 2;
+
+            // Core sectors in a ring near center
+            const coreRadius = Math.min(WORLD_W, WORLD_H) * 0.025;
+            for (let i = 0; i < CORE_SECTORS.length; i++) {
+                const angle = (i / CORE_SECTORS.length) * 2 * Math.PI + (Math.random() - 0.5) * 0.3;
+                const r = coreRadius + (Math.random() - 0.5) * coreRadius * 0.3;
+                seeds.push({
+                    x: cx + r * Math.cos(angle),
+                    y: cy + r * Math.sin(angle),
+                    name: CORE_SECTORS[i],
+                    isCore: true
+                });
+            }
+
+            // Other sectors distributed across the world
+            for (let i = 0; i < OTHER_SECTORS.length; i++) {
+                let x, y, tooClose;
+                let attempts = 0;
+                do {
+                    x = MARGIN + Math.random() * (WORLD_W - 2 * MARGIN);
+                    y = MARGIN + Math.random() * (WORLD_H - 2 * MARGIN);
+                    tooClose = false;
+                    const minDist2 = Math.pow(Math.min(WORLD_W, WORLD_H) * 0.012, 2);
+                    for (const s of seeds) {
+                        if (dist2(x, y, s.x, s.y) < minDist2) {
+                            tooClose = true;
+                            break;
+                        }
+                    }
+                    attempts++;
+                } while (tooClose && attempts < 30);
+
+                seeds.push({
+                    x, y,
+                    name: OTHER_SECTORS[i],
+                    isCore: false
+                });
+            }
+
+            return seeds;
+        }
+
+        // === INIT ===
+
+        function init() {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+
+            if (initialized) return;
+
+            WORLD_W = W * WORLD_SCALE;
+            WORLD_H = H * WORLD_SCALE;
+
+            const seeds = generateSeeds();
+
+            // Lloyd relaxation
+            for (let iter = 0; iter < LLOYD_ITERATIONS; iter++) {
+                const polys = computeVoronoiPolygons(seeds);
+                for (let i = 0; i < seeds.length; i++) {
+                    if (seeds[i].isCore && iter > 1) continue;
+                    if (polys[i].length < 3) continue;
+                    const c = polygonCentroid(polys[i]);
+                    seeds[i].x = clamp(c.x, MARGIN, WORLD_W - MARGIN);
+                    seeds[i].y = clamp(c.y, MARGIN, WORLD_H - MARGIN);
+                }
+            }
+
+            // Final Voronoi
+            const polygons = computeVoronoiPolygons(seeds);
+
+            // Build cells
+            cells = ALL_SECTORS.map((name, i) => {
+                const poly = polygons[i];
+                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+                for (const v of poly) {
+                    if (v.x < minX) minX = v.x;
+                    if (v.x > maxX) maxX = v.x;
+                    if (v.y < minY) minY = v.y;
+                    if (v.y > maxY) maxY = v.y;
+                }
+                const cellW = maxX - minX;
+                const cellH = maxY - minY;
+                const colorIdx = Math.floor((i * PHI_INV * PALETTE.length) % PALETTE.length);
+                // Scale font to cell: aim for text to fill ~60% of cell width
+                const wordCount = name.split(' ').length;
+                const avgCharsPerLine = wordCount <= 2 ? name.length : name.length / 2;
+                const targetFontSize = Math.min(cellW * 0.6 / Math.max(avgCharsPerLine * 0.55, 1), cellH * 0.2);
+                return {
+                    index: i,
+                    name: name,
+                    seed: { x: seeds[i].x, y: seeds[i].y },
+                    polygon: poly,
+                    isCore: seeds[i].isCore,
+                    visited: false,
+                    brightness: 0,
+                    color: PALETTE[colorIdx],
+                    labelMaxWidth: cellW * 0.75,
+                    fontSize: clamp(targetFontSize, 20, 80)
+                };
+            });
+
+            // Init walker at world center
+            walker.x = WORLD_W / 2;
+            walker.y = WORLD_H / 2;
+            walker.vx = 0;
+            walker.vy = 0;
+            trail = new Array(TRAIL_MAX);
+            trailHead = 0;
+            trailCount = 0;
+
+            // Init camera
+            camera.x = WORLD_W / 2;
+            camera.y = WORLD_H / 2;
+            camera.zoom = 1;
+            camera.following = false;
+
+            initialized = true;
+        }
+
+        // === WALKER ===
+
+        function updateWalker() {
+            walker.vx += WALKER_SIGMA * gaussianRandom();
+            walker.vy += WALKER_SIGMA * gaussianRandom();
+            walker.vx *= WALKER_DAMPING;
+            walker.vy *= WALKER_DAMPING;
+            walker.x += walker.vx;
+            walker.y += walker.vy;
+
+            const pad = 50;
+            if (walker.x < pad) { walker.x = pad; walker.vx = Math.abs(walker.vx) * 0.5; }
+            if (walker.x > WORLD_W - pad) { walker.x = WORLD_W - pad; walker.vx = -Math.abs(walker.vx) * 0.5; }
+            if (walker.y < pad) { walker.y = pad; walker.vy = Math.abs(walker.vy) * 0.5; }
+            if (walker.y > WORLD_H - pad) { walker.y = WORLD_H - pad; walker.vy = -Math.abs(walker.vy) * 0.5; }
+
+            trail[trailHead] = { x: walker.x, y: walker.y };
+            trailHead = (trailHead + 1) % TRAIL_MAX;
+            if (trailCount < TRAIL_MAX) trailCount++;
+
+            let minD = Infinity, nearest = 0;
+            for (let i = 0; i < cells.length; i++) {
+                const d = dist2(walker.x, walker.y, cells[i].seed.x, cells[i].seed.y);
+                if (d < minD) { minD = d; nearest = i; }
+            }
+            if (!cells[nearest].visited) {
+                cells[nearest].visited = true;
+            }
+        }
+
+        // === CAMERA ===
+
+        function updateCamera() {
+            if (camera.following && !isDragging) {
+                camera.x += (walker.x - camera.x) * CAMERA_LERP;
+                camera.y += (walker.y - camera.y) * CAMERA_LERP;
+            }
+        }
+
+        // === RENDERING ===
+
+        function drawPolygonPath(poly) {
+            if (poly.length < 3) return;
+            ctx.beginPath();
+            ctx.moveTo(poly[0].x, poly[0].y);
+            for (let i = 1; i < poly.length; i++) {
+                ctx.lineTo(poly[i].x, poly[i].y);
+            }
+            ctx.closePath();
+        }
+
+        function render() {
+            // White/cream background
+            ctx.fillStyle = '#f5f5f0';
+            ctx.fillRect(0, 0, W, H);
+
+            // Animate brightness
+            for (const cell of cells) {
+                if (cell.visited && cell.brightness < 1) {
+                    cell.brightness += (1.0 - cell.brightness) * 0.015;
+                    if (cell.brightness > 0.99) cell.brightness = 1;
+                }
+            }
+
+            const vis = getVisibleRect();
+            const cullMargin = 800 / camera.zoom;
+            const expanded = {
+                left: vis.left - cullMargin,
+                right: vis.right + cullMargin,
+                top: vis.top - cullMargin,
+                bottom: vis.bottom + cullMargin
+            };
+
+            ctx.save();
+            ctx.translate(W / 2, H / 2);
+            ctx.scale(camera.zoom, camera.zoom);
+            ctx.translate(-camera.x, -camera.y);
+
+            // Cell fills
+            for (const cell of cells) {
+                const s = cell.seed;
+                if (s.x < expanded.left || s.x > expanded.right ||
+                    s.y < expanded.top || s.y > expanded.bottom) continue;
+
+                const [cr, cg, cb] = cell.color;
+                if (cell.visited) {
+                    const b = cell.brightness;
+                    ctx.fillStyle = `rgba(${cr},${cg},${cb},${0.15 + b * 0.55})`;
+                } else {
+                    ctx.fillStyle = `rgba(${cr},${cg},${cb},0.08)`;
+                }
+                drawPolygonPath(cell.polygon);
+                ctx.fill();
+            }
+
+            // Cell borders
+            ctx.lineWidth = 1.5;
+            for (const cell of cells) {
+                const s = cell.seed;
+                if (s.x < expanded.left || s.x > expanded.right ||
+                    s.y < expanded.top || s.y > expanded.bottom) continue;
+
+                if (cell.visited) {
+                    const [cr, cg, cb] = cell.color;
+                    const dr = Math.round(cr * 0.6);
+                    const dg = Math.round(cg * 0.6);
+                    const db = Math.round(cb * 0.6);
+                    ctx.strokeStyle = `rgba(${dr},${dg},${db},${0.2 + cell.brightness * 0.4})`;
+                } else {
+                    ctx.strokeStyle = 'rgba(180,180,170,0.2)';
+                }
+
+                drawPolygonPath(cell.polygon);
+                ctx.stroke();
+            }
+
+            // Labels
+            if (camera.zoom > 0.05) {
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                for (const cell of cells) {
+                    const s = cell.seed;
+                    if (s.x < vis.left - 500 || s.x > vis.right + 500 ||
+                        s.y < vis.top - 500 || s.y > vis.bottom + 500) continue;
+
+                    const fs = cell.fontSize;
+                    if (cell.visited) {
+                        ctx.font = `700 ${fs}px Helvetica, Arial, sans-serif`;
+                        ctx.fillStyle = `rgba(30,30,30,${0.4 + cell.brightness * 0.55})`;
+                    } else {
+                        ctx.font = `500 ${fs}px Helvetica, Arial, sans-serif`;
+                        ctx.fillStyle = 'rgba(80,80,70,0.3)';
+                    }
+
+                    const lines = wrapText(cell.name, cell.labelMaxWidth);
+                    const lineHeight = fs * 1.3;
+                    const startY = s.y - ((lines.length - 1) * lineHeight) / 2;
+                    for (let li = 0; li < lines.length; li++) {
+                        ctx.fillText(lines[li], s.x, startY + li * lineHeight);
+                    }
+                }
+            }
+
+            // Trail
+            if (trailCount > 1) {
+                const batchSize = 40;
+                const startIdx = trailHead - trailCount;
+                for (let b = 0; b < trailCount - 1; b += batchSize) {
+                    const end = Math.min(b + batchSize, trailCount - 1);
+                    const age = 1 - (b + batchSize / 2) / trailCount;
+                    const alpha = 0.6 * (1 - age * 0.85);
+                    const lw = 2 * (1 - age * 0.6);
+
+                    ctx.strokeStyle = `rgba(80,80,80,${alpha})`;
+                    ctx.lineWidth = lw;
+                    ctx.beginPath();
+                    const fi = ((startIdx + b) % TRAIL_MAX + TRAIL_MAX) % TRAIL_MAX;
+                    ctx.moveTo(trail[fi].x, trail[fi].y);
+                    for (let i = b + 1; i <= end; i++) {
+                        const idx = ((startIdx + i) % TRAIL_MAX + TRAIL_MAX) % TRAIL_MAX;
+                        ctx.lineTo(trail[idx].x, trail[idx].y);
+                    }
+                    ctx.stroke();
+                }
+            }
+
+            // Walker: Silmo logo
+            if (logoReady) {
+                ctx.drawImage(logoImg,
+                    walker.x - LOGO_W / 2,
+                    walker.y - LOGO_H / 2,
+                    LOGO_W, LOGO_H);
+            } else {
+                ctx.fillStyle = '#333';
+                ctx.beginPath();
+                ctx.arc(walker.x, walker.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+
+            // HUD (screen space)
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.font = '12px Helvetica, Arial, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            const modeText = camera.following
+                ? 'Following walker \u2022 click to detach'
+                : 'Double-click to follow walker';
+            ctx.fillText(modeText, 14, H - 14);
+
+            ctx.textAlign = 'right';
+            ctx.fillText('Scroll to zoom \u2022 Drag to pan', W - 14, H - 14);
+        }
+
+        // === ANIMATION LOOP ===
+
+        function frame() {
+            for (let i = 0; i < STEPS_PER_FRAME; i++) {
+                updateWalker();
+            }
+            updateCamera();
+            render();
+            requestAnimationFrame(frame);
+        }
+
+        // === EVENT HANDLERS ===
+
+        canvas.addEventListener('mousedown', e => {
+            isDragging = true;
+            dragLastX = e.clientX;
+            dragLastY = e.clientY;
+            camera.following = false;
+        });
+
+        canvas.addEventListener('mousemove', e => {
+            if (!isDragging) return;
+            const dx = e.clientX - dragLastX;
+            const dy = e.clientY - dragLastY;
+            camera.x -= dx / camera.zoom;
+            camera.y -= dy / camera.zoom;
+            dragLastX = e.clientX;
+            dragLastY = e.clientY;
+        });
+
+        canvas.addEventListener('mouseup', () => { isDragging = false; });
+        canvas.addEventListener('mouseleave', () => { isDragging = false; });
+
+        canvas.addEventListener('wheel', e => {
+            e.preventDefault();
+            const wx = (e.clientX - W / 2) / camera.zoom + camera.x;
+            const wy = (e.clientY - H / 2) / camera.zoom + camera.y;
+
+            camera.zoom *= Math.exp(-e.deltaY * ZOOM_SPEED);
+            camera.zoom = clamp(camera.zoom, ZOOM_MIN, ZOOM_MAX);
+
+            camera.x = wx - (e.clientX - W / 2) / camera.zoom;
+            camera.y = wy - (e.clientY - H / 2) / camera.zoom;
+        }, { passive: false });
+
+        canvas.addEventListener('dblclick', () => {
+            camera.following = true;
+        });
+
+        canvas.addEventListener('touchstart', e => {
+            e.preventDefault();
+            if (e.touches.length === 1) {
+                isDragging = true;
+                dragLastX = e.touches[0].clientX;
+                dragLastY = e.touches[0].clientY;
+                camera.following = false;
+                touchStartTime = Date.now();
+            } else if (e.touches.length === 2) {
+                isDragging = false;
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                lastTouchDist = Math.sqrt(dx * dx + dy * dy);
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (e.touches.length === 1 && isDragging) {
+                const dx = e.touches[0].clientX - dragLastX;
+                const dy = e.touches[0].clientY - dragLastY;
+                camera.x -= dx / camera.zoom;
+                camera.y -= dy / camera.zoom;
+                dragLastX = e.touches[0].clientX;
+                dragLastY = e.touches[0].clientY;
+            } else if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (lastTouchDist > 0) {
+                    const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                    const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                    const wx = (midX - W / 2) / camera.zoom + camera.x;
+                    const wy = (midY - H / 2) / camera.zoom + camera.y;
+
+                    camera.zoom *= dist / lastTouchDist;
+                    camera.zoom = clamp(camera.zoom, ZOOM_MIN, ZOOM_MAX);
+
+                    camera.x = wx - (midX - W / 2) / camera.zoom;
+                    camera.y = wy - (midY - H / 2) / camera.zoom;
+                }
+                lastTouchDist = dist;
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', e => {
+            isDragging = false;
+            lastTouchDist = 0;
+            const now = Date.now();
+            if (now - touchStartTime < 200 && e.touches.length === 0) {
+                if (now - lastTapTime < 350) {
+                    camera.following = true;
+                    lastTapTime = 0;
+                } else {
+                    lastTapTime = now;
+                }
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        });
+
+        // === START ===
+        init();
+        requestAnimationFrame(frame);
+    </script>
+</body>
+</html>
