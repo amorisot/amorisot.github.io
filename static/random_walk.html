@@ -43,17 +43,21 @@
         const CORE_SECTORS = [
             'Nuts & Bolts',
             'Truck Leasing',
-            'Road Salting',
-            'Out-of-Home Advertising',
-            'Glassmaking',
-            'Italian Food Distribution'
+            'Municipal Road Salting',
+            'Billboard Selling',
+            'Italian Food Distribution',
+            'Boat Insurance',
+            'Commercial Internet Installation',
+            'Flood Insurance',
+            'HVAC',
+            'Pest Control'
         ];
 
         const OTHER_SECTORS = [
             'Industrial Laundry', 'Parking Garage Management', 'Concrete Mixing',
             'Fire Extinguisher Servicing', 'Vending Machines', 'Commercial Flooring',
             'Portable Sanitation', 'Scaffold Hire', 'Pallet Logistics',
-            'Elevator Maintenance', 'Pest Control', 'Uniform Supply',
+            'Elevator Maintenance', 'Glassmaking', 'Uniform Supply',
             'Gravel Quarrying', 'Septic Tank Pumping', 'Dumpster Rental',
             'Commercial Fencing', 'Janitorial Supplies', 'Industrial Gases',
             'Paper Shredding', 'Linen Services', 'Key Cutting',
@@ -505,18 +509,20 @@
                 };
             });
 
-            // Init walker at world center
-            walker.x = WORLD_W / 2;
-            walker.y = WORLD_H / 2;
+            // Init walker on Nuts & Bolts
+            const nutsAndBolts = cells[0].seed;
+            walker.x = nutsAndBolts.x;
+            walker.y = nutsAndBolts.y;
             walker.vx = 0;
             walker.vy = 0;
+            cells[0].visited = true;
             trail = new Array(TRAIL_MAX);
             trailHead = 0;
             trailCount = 0;
 
-            // Init camera
-            camera.x = WORLD_W / 2;
-            camera.y = WORLD_H / 2;
+            // Init camera on walker
+            camera.x = nutsAndBolts.x;
+            camera.y = nutsAndBolts.y;
             camera.zoom = 1;
             camera.following = false;
 
