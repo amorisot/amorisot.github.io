@@ -63,3 +63,5 @@ venv.bak/
 # Whatever
 .DS_Store
 CLAUDE.md
+.claude/
+.playwright-cli/

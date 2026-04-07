@@ -53,7 +53,8 @@
             'Pest Control',
             'Real Estate Portfolio Management',
             'Procurement Acceleration',
-            'Reception Automation'
+            'Receptionist Automation',
+            'Retirement Home Intake'
         ];
 
         const OTHER_SECTORS = [
@@ -412,10 +413,16 @@
             const cx = WORLD_W / 2;
             const cy = WORLD_H / 2;
 
-            // Core sectors in a ring near center
+            // Nuts & Bolts at center, other core sectors in a ring around it
+            seeds.push({
+                x: cx,
+                y: cy,
+                name: CORE_SECTORS[0], // 'Nuts & Bolts'
+                isCore: true
+            });
             const coreRadius = Math.min(WORLD_W, WORLD_H) * 0.025;
-            for (let i = 0; i < CORE_SECTORS.length; i++) {
-                const angle = (i / CORE_SECTORS.length) * 2 * Math.PI + (Math.random() - 0.5) * 0.3;
+            for (let i = 1; i < CORE_SECTORS.length; i++) {
+                const angle = ((i - 1) / (CORE_SECTORS.length - 1)) * 2 * Math.PI + (Math.random() - 0.5) * 0.3;
                 const r = coreRadius + (Math.random() - 0.5) * coreRadius * 0.3;
                 seeds.push({
                     x: cx + r * Math.cos(angle),

@@ -15,3 +15,5 @@
 * Chess set where all the pieces are made of pure tungsten. Excellent for blitz.
 * Alcohol chess set where every piece is a glass and if you take that piece you drink whatever is in that glass. The great equaliser.
 * You've heard of desks, you've heard of standing desks, you've never heard of squatting desks. Why?
+* VC's and PE's are both just ploys to get bright young people to dedicate their career to unsexy industries like pest control
+* Why are agent harnesses called harnesses instead of saddles?
