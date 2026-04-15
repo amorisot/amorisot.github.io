@@ -17,3 +17,4 @@
 * You've heard of desks, you've heard of standing desks, you've never heard of squatting desks. Why?
 * VC's and PE's are both just ploys to get bright young people to dedicate their career to unsexy industries like pest control
 * Why are agent harnesses called harnesses instead of saddles?
+* [angrily] its not a random walk its a brownian motion
