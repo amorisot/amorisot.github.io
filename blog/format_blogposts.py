@@ -235,6 +235,30 @@ But as the project grows, and you uncover bugs, it becomes harder to do things i
 The next step change model drops, you try it, it is very good because it is a step change, and the cycle repeats again.
     """.strip()
   },
+#   "What I learnt from my grandmother": {
+#     "published": "2026-04-15",
+#     "content": """
+# Resilience in the face of adversity || Deep pragmatism || Deep humanism --she 
+#     """.strip()
+#   },
+#   "New Post": {
+#     "published": "2026-03-03",
+#     "content": """
+# Content
+#     """.strip()
+#   },
+#   "New Post": {
+#     "published": "2026-03-03",
+#     "content": """
+# Content
+#     """.strip()
+#   },
+#   "New Post": {
+#     "published": "2026-03-03",
+#     "content": """
+# Content
+#     """.strip()
+#   },
 #   "New Post": {
 #     "published": "2026-03-03",
 #     "content": """
