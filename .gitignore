@@ -65,3 +65,4 @@ venv.bak/
 CLAUDE.md
 .claude/
 .playwright-cli/
+bees/
