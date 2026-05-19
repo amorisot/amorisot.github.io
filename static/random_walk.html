@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>random walk</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧑‍🦯</text></svg>">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -28,7 +29,7 @@
         // === CONSTANTS ===
         const WORLD_SCALE = 14;
         const MARGIN = 200;
-        const LLOYD_ITERATIONS = 4;
+        const LLOYD_ITERATIONS = 2;
         const TRAIL_MAX = 5000;
         const STEPS_PER_FRAME = 2;
         const WALKER_SIGMA = 0.35;
@@ -57,78 +58,83 @@
             'Retirement Home Intake'
         ];
 
-        const OTHER_SECTORS = [
-            'Industrial Laundry', 'Parking Garage Management', 'Concrete Mixing',
-            'Fire Extinguisher Servicing', 'Vending Machines', 'Commercial Flooring',
+        // Common B2B back-office niches -- inner-to-mid annulus
+        const COMMON_SECTORS = [
+            'Hospital Gown Anxiety',
+            'Parking Garage Echo Mitigation',
+            'Fire Extinguisher Recheck Routing',
+            'Vending Machine Restocking Routes',
+            'Vending Machine Stuck-Item Refund Processing',
+            'Commercial Flooring',
             'Portable Sanitation', 'Scaffold Hire', 'Pallet Logistics',
-            'Elevator Maintenance', 'Glassmaking', 'Uniform Supply',
-            'Gravel Quarrying', 'Septic Tank Pumping', 'Dumpster Rental',
-            'Commercial Fencing', 'Janitorial Supplies', 'Industrial Gases',
+            'Elevator Rope Replacement', 'Glassmaking', 'Uniform Supply',
+            'Gravel Quarrying', 'Septic Pump-Out Route Optimization', 'Dumpster Rental',
+            'Commercial Fencing', 'Janitorial Supplies',
             'Paper Shredding', 'Linen Services', 'Key Cutting',
             'Forklift Repair', 'Water Treatment Chemicals', 'Rebar Fabrication',
             'Roofing Materials', 'Traffic Cone Rental', 'Handrail Installation',
-            'Loading Dock Equipment', 'Label Printing', 'Bolt Torquing',
-            'Corrugated Packaging', 'Drain Cleaning', 'Parking Meter Manufacturing',
-            'Ice Distribution', 'Fire Sprinkler Inspection', 'Industrial Shelving',
+            'Loading Dock Bumper Wear Auditing', 'Label Printing', 'Bolt Torquing',
+            'Cardboard Bale Weight Ticketing', 'Drain Cleaning', 'Parking Meter Coin Collection',
+            'Ice Distribution', 'Fire Sprinkler Inspection', 'Warehouse Shelf Load Rating Certification',
             'Porta-Cabin Hire', 'Generator Rental', 'Tank Cleaning',
-            'Gasket Manufacturing', 'Commercial Plumbing', 'Mat Rental & Cleaning',
-            'Cold Storage Warehousing', 'Sewer Lining', 'Boiler Servicing',
+            'Gasket Manufacturing', 'Restaurant Grease Line Snaking Dispatch', 'Mat Rental & Cleaning',
+            'Cold Storage Door-Open Alarm Triage', 'Sewer Lining', 'Boiler Servicing',
             'Commercial Waste Brokerage', 'Propane Distribution', 'Conveyor Belt Repair',
-            'Highway Guardrail', 'Manhole Cover Casting', 'Street Sweeping',
-            'Industrial Adhesives', 'Paving & Sealcoating', 'Commercial Doors',
-            'Pipe Insulation', 'Compressed Air Systems', 'Crane Rental',
-            'Welding Supply', 'Hydraulic Hose Repair', 'Sandblasting Services',
+            'Highway Guardrail', 'Manhole Frame Adjustment', 'Street Sweeping',
+            'Tackiness Arbitration', 'Paving & Sealcoating', 'Automatic Door Activation Mat Replacement',
+            'Steam Line Asbestos Surveys', 'Pneumatic Whispering',
+            'Spark Etiquette', 'Hydraulic Hose Repair', 'Sandblasting Services',
             'Commercial Fumigation', 'Pallet Racking', 'Freight Brokerage',
             'Dust Collection Systems', 'Water Tower Maintenance', 'Envelope Manufacturing',
-            'Commercial Ice Machines', 'Gutter Installation', 'Bollard Manufacturing',
-            'Drywall Supply', 'Asphalt Plant Operations', 'Bearing Distribution',
-            'Safety Signage', 'Fastener Distribution', 'Chain-Link Fencing',
-            'Electrical Panel Assembly', 'Bulk Chemical Transport', 'Traffic Signal Maintenance',
+            'Commercial Ice Machines', 'Gutter Installation', 'Bollard Installation',
+            'Gypsum Diplomacy', 'Asphalt Plant Operations', 'Ball Bearing Custody',
+            'Safety Signage', 'Fastener Distribution', 'Chain-Link Confessions',
+            'Electrical Panel Schedule Updating', 'Bulk Chemical Transport', 'Traffic Signal Maintenance',
             'Industrial Fan Repair', 'Commercial Laundry Equipment', 'Warehouse Striping',
             'Geotextile Supply', 'Well Drilling', 'Window Tinting',
             'Scrap Metal Processing', 'Commercial Locksmith',
-            'Cargo Netting', 'Steel Drum Reconditioning', 'Tarpaulin Supply',
+            'Net Knot Notarization', 'Steel Drum Reconditioning', 'Grommet Grief',
             'Industrial Brush Manufacturing', 'Pallet Wrapping', 'Dock Leveler Repair',
-            'Commercial Refrigeration', 'Waste Oil Collection', 'Manhole Rehabilitation',
+            'Commercial Refrigeration', 'Waste Oil Collection',
             'Thermal Insulation', 'Fence Post Driving', 'Hydraulic Lift Tables',
             'Industrial Caster Supply', 'Cable Tray Installation', 'Concrete Pumping',
-            'Overhead Crane Inspection', 'Rubber Flooring', 'Freight Consolidation',
-            'Tank Farm Operations', 'Aggregate Supply', 'Valve & Actuator Repair',
-            'Commercial Roofing', 'Lubricant Distribution', 'Wire Rope Inspection',
+            'Overhead Crane Inspection', 'Floor Mat Forgiveness', 'Freight Consolidation',
+            'Tank Farm Operations', 'Gravel Mediation', 'Valve & Actuator Repair',
+            'Commercial Roofing', 'Grease Etiquette', 'Wire Rope Inspection',
             'Culvert Installation', 'Mechanical Insulation', 'Tugboat Operations',
             'Barge Cleaning', 'Rigging Services', 'Kiln Repair',
-            'Air Duct Cleaning', 'Powder Coating', 'Die Casting',
-            'Spring Manufacturing', 'Hose Assembly', 'Commercial Glazing',
+            'Air Duct Cleaning', 'Powder Coat Confessions', 'Mold Bereavement',
+            'Spring Manufacturing', 'Hydraulic Hose Crimp Audit Trails', 'Commercial Glazing',
             'Piling Contractors', 'Precast Concrete', 'Demolition Contractors',
-            'Metal Stamping', 'Heat Treating', 'Centrifuge Repair',
-            'Hopper Fabrication', 'Chiller Maintenance', 'Commercial Caulking',
-            'Bulk Bag Supply', 'Shrink Wrap Services', 'Pumpjack Servicing',
+            'Metal Stamp Die Sharpening Scheduling', 'Heat Treat Oven Temperature Log Auditing', 'Centrifuge Repair',
+            'Hopper Counsel', 'Chiller Maintenance', 'Commercial Caulking',
+            'Super Sack Returnable Deposit Tracking', 'Shrink Wrap Services', 'Pumpjack Servicing',
             'Grain Elevator Maintenance', 'Cathodic Protection', 'Refractory Installation',
-            'Industrial Painting', 'Blasting & Coating', 'Brine Processing',
+            'Hue Arbitration', 'Blasting & Coating', 'Brine Processing',
             'Silo Cleaning', 'Scaffolding Inspection', 'Tank Insulation',
-            'Drag Chain Conveyor', 'Bucket Elevator Repair', 'Cooling Tower Maintenance',
-            'Commercial Compressor Repair', 'Fuel Polishing', 'Marine Coatings',
+            'Drag Chain Sprocket Wear Tracking', 'Bucket Elevator Repair', 'Cooling Tower Maintenance',
+            'Commercial Compressor Repair', 'Fuel Polishing', 'Hull Coating Warranty Claim Processing',
             'Industrial Epoxy Flooring', 'Stack Testing', 'Lightning Protection',
             'Grout Pumping', 'Expansion Joint Repair', 'Flange Management',
-            'Industrial Vacuum Services', 'Hydro Excavation', 'Corrosion Monitoring',
+            'Industrial Vacuum Services', 'Hydro-Vac Truck Dump Site Permitting', 'Corrosion Monitoring',
             'Roof Anchor Testing', 'Chimney Lining', 'Backflow Prevention',
-            'Commercial Awnings', 'Bollard Installation', 'Parking Lot Striping',
+            'Commercial Awnings', 'Parking Lot Striping',
             'Fire Door Inspection', 'Stormwater Management', 'Grease Trap Cleaning',
-            'Autoclave Servicing', 'Pallet Manufacturing', 'Dock Bumper Replacement',
+            'Autoclave Servicing', 'Dock Bumper Replacement',
             'Industrial Hinge Supply', 'Transformer Oil Testing', 'Baghouse Maintenance',
-            'Steam Trap Surveying', 'Commercial Gutter Guards', 'Pipe Jacking',
-            'Cable Pulling Services', 'Concrete Scanning', 'Truck Scale Calibration',
+            'Steam Trap Surveying', 'Commercial Gutter Guards', 'Pipe Bursting Subcontractor Disputes',
+            'Conduit Fill Ratio Reporting', 'Concrete Scanning', 'Truck Scale Calibration',
             'Acid Wash Services', 'Commercial Waterproofing', 'Fire Alarm Testing',
             'Roof Drain Cleaning', 'Pneumatic Tube Systems', 'Commercial Pest Barriers',
             'Overhead Door Repair', 'Industrial Curtain Walls', 'Tank Lining',
-            'Asbestos Abatement', 'Elevator Rope Replacement', 'Commercial Snow Removal',
+            'Asbestos Abatement', 'Commercial Snow Removal',
             'Floor Drain Maintenance', 'Safety Shower Testing', 'Commercial Mold Removal',
             'Eyewash Station Servicing', 'Scissor Lift Rental', 'Emergency Spill Response',
-            'Commercial Carpet Cleaning', 'Fire Shutter Testing', 'Bin Cleaning Services',
-            'Commercial Blinds', 'Ventilation Ductwork', 'Pallet Recycling',
+            'Fire Shutter Testing', 'Bin Cleaning Services',
+            'Commercial Blinds', 'Ductwork Damper Position Auditing', 'Pallet Recycling',
             'Pothole Repair', 'Guard Booth Installation', 'Sump Pump Servicing',
-            'Commercial Flagpoles', 'Thermal Imaging Services', 'Manhole Frame Adjustment',
-            'Commercial Signage Installation', 'Tree Stump Grinding', 'Catch Basin Cleaning',
+            'Commercial Flagpoles', 'Thermal Imaging Services',
+            'Commercial Signage Installation', 'Tree Stump Grinding', 'Catch Basin Mosquito Treatment',
             'Roll-Off Container Rental', 'Industrial Battery Recycling', 'Commercial Window Washing',
             'Speed Bump Installation', 'Pavement Marking', 'Loading Ramp Repair',
             'Commercial Pressure Washing', 'Forklift Battery Services', 'Waste Compactor Repair',
@@ -141,7 +147,7 @@
             'Concrete Core Drilling', 'Industrial Air Filtration', 'Commercial Roof Inspection',
             'Loading Bay Maintenance', 'Industrial Odor Control', 'Mechanical Seal Repair',
             // Insurance / Claims
-            'Boat Insurance Adjustment', 'Livestock Transit Claims', 'Hailstorm Damage Appraisal',
+            'Livestock Transit Claims', 'Hailstorm Damage Appraisal',
             'Crane Accident Reporting', 'Cargo Loss Adjudication', 'Marina Liability Claims',
             'Flood Damage Documentation', 'Construction Defect Claims',
             // TPA / RCM / Compliance paperwork
@@ -153,22 +159,22 @@
             'Confined Space Entry Permits', 'Hot Work Permit Processing', 'Radiation Badge Tracking',
             // Billing / Invoicing in absurd niches
             'Portable Toilet Billing Reconciliation', 'Dumpster Overage Invoicing',
-            'Parking Violation Appeals Processing', 'Toll Road Dispute Resolution',
+            'Parking Violation Appeals Processing',
             'Tow Truck Dispatch Billing', 'Scrap Metal Weight Ticketing',
             'Fuel Surcharge Calculation', 'Demurrage Fee Processing',
             'Container Detention Billing', 'Overweight Truck Fine Appeals',
             // Scheduling / Logistics
-            'Grease Trap Pumping Scheduling', 'Fire Extinguisher Recheck Routing',
-            'Vending Machine Restocking Routes', 'Pest Control Recertification Tracking',
+            'Grease Trap Pumping Scheduling',
+            'Pest Control Recertification Tracking',
             'Backflow Preventer Test Scheduling', 'Elevator Inspection Scheduling',
-            'Septic Pump-Out Route Optimization', 'Hydrant Flow Test Scheduling',
+            'Hydrant Flow Test Scheduling',
             'Cooling Tower Legionella Testing', 'Grease Interceptor Compliance Tracking',
             // Procurement / Inventory
             'Road Salt Futures Purchasing', 'Manhole Cover Inventory',
-            'Safety Cone Depreciation Tracking', 'Porta-Potty Fleet Management',
+            'Porta-Potty Fleet Management',
             'Hi-Vis Vest Procurement', 'Hard Hat Expiry Tracking',
             'Fire Hose Replacement Scheduling', 'Spill Kit Restocking',
-            // More wonderfully specific niches
+            // Wonderfully specific niches
             'Tugboat Fuel Reconciliation', 'Barge Demurrage Accounting',
             'Grain Moisture Testing', 'Feedlot Runoff Monitoring',
             'Rendering Plant Logistics', 'Fish Processing Waste Hauling',
@@ -178,7 +184,7 @@
             'Brewery Tank Cleaning Scheduling', 'Commercial Dishwasher Leasing',
             'Restaurant Exhaust Hood Cleaning', 'Industrial Laundry Chemical Dosing',
             'Uniform Tear & Repair Tracking', 'Linen Inventory Par Level Management',
-            'Hotel Mattress Rotation Scheduling', 'Commercial Carpet Tile Replacement',
+            'Commercial Carpet Tile Replacement',
             'Parking Garage Revenue Auditing', 'Coin-Op Laundry Cash Collection',
             'Car Wash Water Recycling', 'Self-Storage Unit Lien Processing',
             'Mini Golf Course Maintenance', 'Bowling Alley Lane Oiling',
@@ -198,16 +204,97 @@
             'Airport Runway Rubber Removal', 'Taxiway Light Replacement',
             'Baggage Carousel Maintenance', 'Jetway Servicing',
             'Prison Commissary Logistics', 'Courthouse Metal Detector Calibration',
-            'Traffic Camera Maintenance', 'Parking Meter Coin Collection',
+            'Traffic Camera Maintenance',
             'Street Light Bulb Replacement', 'Utility Pole Inspection',
             'Transformer Bushing Testing', 'Substation Grass Cutting',
             'Pipeline Pig Launching', 'Gas Meter Reading Routes',
             'Water Meter Replacement Programs', 'Sewer Camera Inspection',
-            'Fire Hydrant Flushing Routes', 'Catch Basin Mosquito Treatment',
-            'Storm Sewer Jetting', 'Retention Pond Algae Control'
+            'Fire Hydrant Flushing Routes',
+            'Storm Sewer Jetting', 'Retention Pond Algae Control',
+            // Section C additions
+            'Hotel Mini-Bar Reconciliation',
+            'Bouncy Castle Insurance Renewals',
+            'Mascot Costume Dry Cleaning Scheduling',
+            'Cremation Urn Inventory Reconciliation',
+            'Funeral Hearse Fleet Routing',
+            'Drive-Thru Speaker Volume Calibration',
+            'Mall Santa Background Check Renewals',
+            'Trampoline Park Sock Inventory',
+            'Casino Felt Replacement Scheduling',
+            'Carnival Ride Bolt-Torque Logging',
+            'Petting Zoo Hand Sanitizer Restocking',
+            'Theme Park Lost Property Disposition',
+            'Christmas Tree Lot Permit Filing',
+            'Parade Float Storage Billing',
+            'Ice Cream Truck Jingle Licensing',
+            'Aquarium Glass Scratch Incident Reports',
+            'Roadside Memorial Removal Permitting',
+            'Drive-In Theater Speaker Inventory',
+            'Slaughterhouse Stunner Calibration Logs',
+            'Pawn Shop Holding Period Compliance',
+            'Driving Range Ball Dimple Wear Auditing',
+            'Bingo Card Loss Adjudication',
+            'School Bus Lost-Coat Recovery'
         ];
 
-        const ALL_SECTORS = [...CORE_SECTORS, ...OTHER_SECTORS];
+        // Adjacency pairs -- placed as tight clusters so they share a Voronoi edge.
+        // The reader discovers each gag by panning between two neighbouring cells.
+        const ADJACENCY_PAIRS = [
+            ['Concrete Forgiveness', 'Concrete Resentment'],
+            ['Argon Anxiety', 'Argon Despair'],
+            ['Toll Road Dispute Resolution', 'Toll Road Forgiveness'],
+            ['Safety Cone Depreciation Tracking', 'Safety Cone Bereavement'],
+            ['Hotel Mattress Rotation Scheduling', 'Hotel Mattress Bereavement'],
+            ['Voronoi Tessellation as a Service', 'B2B SaaS Naming Consultancy'],
+            ['Witness Relocation Receipt Filing', 'Subpoena Envelope Logistics'],
+            ['Floppy Disk Insurance Adjustment', 'Microfiche Migration Services'],
+            ['Pallet Heat-Treatment Stamp Compliance', 'Pallet Stamp Forgery Triage'],
+            ['Goose Population Management Permitting', 'Goose Bereavement Counseling']
+        ];
+
+        // Fringe sectors -- weirder registers (anachronism, sinister-mundane,
+        // wrong-era qualifier, implied scandal, self-referential). Placed in the
+        // outer band so the map gets stranger the further you walk from the center.
+        const FRINGE_SECTORS = [
+            // Self-referential
+            'Random Walk Optimization Consulting',
+            'Pastel Color Palette Licensing',
+            'Lloyd Relaxation Compliance',
+            // Anachronism
+            'Telegraph Pole Re-Numbering',
+            'Daguerreotype Restoration Insurance',
+            'VHS Tape Demagnetization Logging',
+            'Carbon Paper Reconciliation',
+            'Pager Network Decommissioning',
+            'Fax Cover Sheet Standards Compliance',
+            // Sinister-mundane
+            'Plausible Deniability Drafting',
+            'Non-Disclosure Renewal Reminders',
+            'Off-Site Document Incineration Scheduling',
+            'Records Retention Sunset Compliance',
+            'Trust & Estate Quiet Settlement Filing',
+            'Severance Agreement Boilerplate Localization',
+            'Decedent Transport Permit Routing',
+            // Wrong-era / wrong-place qualifier
+            'Vegan Slaughterhouse Consulting',
+            'Inflatable Concrete Distribution',
+            'Wireless Plumbing Diagnostics',
+            'Posthumous Onboarding',
+            'Halal Pork Logistics',
+            'Sober Bar Inventory Management',
+            'Dry Aquarium Servicing',
+            'Silent Air Horn Procurement',
+            'Edible Insulation Compliance',
+            // Implied scandal
+            '737-MAX Door Plug Aftermarket',
+            'Theranos Centrifuge Liquidation',
+            'DeLorean Hinge Recertification',
+            'Hindenburg Helium Audit Compliance',
+            'WeWork Sublease Restructuring',
+            'FTX Cold Wallet Forensics',
+            'Volkswagen Emissions Coefficient Recalibration',
+            'Enron Shredder Maintenance Records'
+        ];
 
         // === PASTEL COLOR PALETTE ===
         // Bright, pleasant pastels for a white background
@@ -412,13 +499,17 @@
             const seeds = [];
             const cx = WORLD_W / 2;
             const cy = WORLD_H / 2;
+            const halfRX = (WORLD_W / 2) - MARGIN;
+            const halfRY = (WORLD_H / 2) - MARGIN;
+            const minDist = Math.min(WORLD_W, WORLD_H) * 0.012;
+            const minDistSq = minDist * minDist;
+            const pairOffset = minDist * 0.55; // tight enough to guarantee Voronoi adjacency
 
             // Nuts & Bolts at center, other core sectors in a ring around it
             seeds.push({
-                x: cx,
-                y: cy,
-                name: CORE_SECTORS[0], // 'Nuts & Bolts'
-                isCore: true
+                x: cx, y: cy,
+                name: CORE_SECTORS[0],
+                tier: 0, paired: false
             });
             const coreRadius = Math.min(WORLD_W, WORLD_H) * 0.025;
             for (let i = 1; i < CORE_SECTORS.length; i++) {
@@ -428,33 +519,56 @@
                     x: cx + r * Math.cos(angle),
                     y: cy + r * Math.sin(angle),
                     name: CORE_SECTORS[i],
-                    isCore: true
+                    tier: 0, paired: false
                 });
             }
 
-            // Other sectors distributed across the world
-            for (let i = 0; i < OTHER_SECTORS.length; i++) {
-                let x, y, tooClose;
-                let attempts = 0;
-                do {
-                    x = MARGIN + Math.random() * (WORLD_W - 2 * MARGIN);
-                    y = MARGIN + Math.random() * (WORLD_H - 2 * MARGIN);
-                    tooClose = false;
-                    const minDist2 = Math.pow(Math.min(WORLD_W, WORLD_H) * 0.012, 2);
+            // Place a seed within a tier's radial band (elliptical, matched to world aspect).
+            // tier 1 = inner-to-mid annulus (COMMON), tier 2 = outer band (FRINGE).
+            // Area-uniform sampling via sqrt keeps density even across the band.
+            function placeByTier(tier) {
+                const rMin = tier === 2 ? 0.55 : 0.05;
+                const rMax = tier === 2 ? 0.95 : 0.60;
+                for (let attempts = 0; attempts < 40; attempts++) {
+                    const u = rMin * rMin + Math.random() * (rMax * rMax - rMin * rMin);
+                    const rFrac = Math.sqrt(u);
+                    const angle = Math.random() * 2 * Math.PI;
+                    const x = cx + rFrac * halfRX * Math.cos(angle);
+                    const y = cy + rFrac * halfRY * Math.sin(angle);
+                    if (x < MARGIN || x > WORLD_W - MARGIN || y < MARGIN || y > WORLD_H - MARGIN) continue;
+                    let tooClose = false;
                     for (const s of seeds) {
-                        if (dist2(x, y, s.x, s.y) < minDist2) {
-                            tooClose = true;
-                            break;
-                        }
+                        if (dist2(x, y, s.x, s.y) < minDistSq) { tooClose = true; break; }
                     }
-                    attempts++;
-                } while (tooClose && attempts < 30);
+                    if (!tooClose) return { x, y };
+                }
+                return {
+                    x: MARGIN + Math.random() * (WORLD_W - 2 * MARGIN),
+                    y: MARGIN + Math.random() * (WORLD_H - 2 * MARGIN)
+                };
+            }
 
-                seeds.push({
-                    x, y,
-                    name: OTHER_SECTORS[i],
-                    isCore: false
-                });
+            // Adjacency pairs: anchor placed in tier-1 band, partner placed tightly nearby
+            // so they share a Voronoi edge. Both members are frozen during Lloyd relaxation.
+            for (const pair of ADJACENCY_PAIRS) {
+                const anchor = placeByTier(1);
+                seeds.push({ x: anchor.x, y: anchor.y, name: pair[0], tier: 1, paired: true });
+                const offAngle = Math.random() * 2 * Math.PI;
+                const px = clamp(anchor.x + pairOffset * Math.cos(offAngle), MARGIN, WORLD_W - MARGIN);
+                const py = clamp(anchor.y + pairOffset * Math.sin(offAngle), MARGIN, WORLD_H - MARGIN);
+                seeds.push({ x: px, y: py, name: pair[1], tier: 1, paired: true });
+            }
+
+            // Common sectors (tier 1, inner-to-mid annulus)
+            for (const name of COMMON_SECTORS) {
+                const p = placeByTier(1);
+                seeds.push({ x: p.x, y: p.y, name, tier: 1, paired: false });
+            }
+
+            // Fringe sectors (tier 2, outer band)
+            for (const name of FRINGE_SECTORS) {
+                const p = placeByTier(2);
+                seeds.push({ x: p.x, y: p.y, name, tier: 2, paired: false });
             }
 
             return seeds;
@@ -473,11 +587,12 @@
 
             const seeds = generateSeeds();
 
-            // Lloyd relaxation
+            // Lloyd relaxation. Paired seeds and tier-2 (fringe) seeds are frozen so
+            // adjacency-pair clusters and the radial weirdness gradient both survive.
             for (let iter = 0; iter < LLOYD_ITERATIONS; iter++) {
                 const polys = computeVoronoiPolygons(seeds);
                 for (let i = 0; i < seeds.length; i++) {
-                    if (seeds[i].isCore && iter > 1) continue;
+                    if (seeds[i].paired || seeds[i].tier === 2) continue;
                     if (polys[i].length < 3) continue;
                     const c = polygonCentroid(polys[i]);
                     seeds[i].x = clamp(c.x, MARGIN, WORLD_W - MARGIN);
@@ -488,8 +603,8 @@
             // Final Voronoi
             const polygons = computeVoronoiPolygons(seeds);
 
-            // Build cells
-            cells = ALL_SECTORS.map((name, i) => {
+            // Build cells from seeds (name + tier carried on each seed)
+            cells = seeds.map((seed, i) => {
                 const poly = polygons[i];
                 let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
                 for (const v of poly) {
@@ -501,16 +616,15 @@
                 const cellW = maxX - minX;
                 const cellH = maxY - minY;
                 const colorIdx = Math.floor((i * PHI_INV * PALETTE.length) % PALETTE.length);
-                // Scale font to cell: aim for text to fill ~60% of cell width
-                const wordCount = name.split(' ').length;
-                const avgCharsPerLine = wordCount <= 2 ? name.length : name.length / 2;
+                const wordCount = seed.name.split(' ').length;
+                const avgCharsPerLine = wordCount <= 2 ? seed.name.length : seed.name.length / 2;
                 const targetFontSize = Math.min(cellW * 0.6 / Math.max(avgCharsPerLine * 0.55, 1), cellH * 0.2);
                 return {
                     index: i,
-                    name: name,
-                    seed: { x: seeds[i].x, y: seeds[i].y },
+                    name: seed.name,
+                    seed: { x: seed.x, y: seed.y },
                     polygon: poly,
-                    isCore: seeds[i].isCore,
+                    isCore: seed.tier === 0,
                     visited: false,
                     brightness: 0,
                     color: PALETTE[colorIdx],
