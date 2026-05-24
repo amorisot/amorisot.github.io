@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" href="/favicon.png"/>
+<title>Perlin Survival</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #000; overflow: hidden; height: 100%; }
+  canvas { display: block; }
+  #c { position: fixed; inset: 0; }
+  #ui {
+    position: fixed; top: 12px; left: 12px;
+    color: #fff;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 13px;
+    text-shadow: 0 0 4px #000, 0 0 4px #000;
+    pointer-events: none;
+    z-index: 10;
+    line-height: 1.5;
+  }
+  #overlay {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-family: ui-monospace, Menlo, monospace;
+    background: rgba(0,0,0,0.55);
+    text-align: center;
+    z-index: 20;
+    pointer-events: none;
+  }
+  #overlay.hidden { display: none; }
+  #overlay h1 { margin: 0 0 10px; font-size: 28px; letter-spacing: 0.5px; }
+  #overlay p { margin: 4px 0; font-size: 14px; opacity: 0.85; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui">
+  <div>difficulty: <span id="diff">-0.50</span></div>
+  <div>time: <span id="time">0.0</span>s</div>
+</div>
+<div id="overlay">
+  <div>
+    <h1 id="msg">Perlin Survival</h1>
+    <p>WASD / arrows to move &middot; SPACE to jump (press again for double jump)</p>
+    <p>Jumping makes you big and invincible &mdash; land in the light before it ends.</p>
+  </div>
+</div>
+<script>
+// ---------- Perlin noise (Ken Perlin's improved noise, 3D) ----------
+const perm = new Uint8Array(512);
+(function () {
+  const p = new Uint8Array(256);
+  for (let i = 0; i < 256; i++) p[i] = i;
+  let s = 0x9E3779B9 >>> 0;
+  const rnd = () => { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return (s >>> 0) / 4294967296; };
+  for (let i = 255; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    const t = p[i]; p[i] = p[j]; p[j] = t;
+  }
+  for (let i = 0; i < 512; i++) perm[i] = p[i & 255];
+})();
+function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+function lerp(a, b, t) { return a + t * (b - a); }
+function grad(hash, x, y, z) {
+  const h = hash & 15;
+  const u = h < 8 ? x : y;
+  const v = h < 4 ? y : (h === 12 || h === 14 ? x : z);
+  return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+}
+function noise(x, y, z) {
+  const X = Math.floor(x) & 255, Y = Math.floor(y) & 255, Z = Math.floor(z) & 255;
+  x -= Math.floor(x); y -= Math.floor(y); z -= Math.floor(z);
+  const u = fade(x), v = fade(y), w = fade(z);
+  const A = perm[X] + Y, AA = perm[A] + Z, AB = perm[A + 1] + Z;
+  const B = perm[X + 1] + Y, BA = perm[B] + Z, BB = perm[B + 1] + Z;
+  return lerp(
+    lerp(lerp(grad(perm[AA], x, y, z),     grad(perm[BA], x - 1, y, z), u),
+         lerp(grad(perm[AB], x, y - 1, z), grad(perm[BB], x - 1, y - 1, z), u), v),
+    lerp(lerp(grad(perm[AA + 1], x, y, z - 1),     grad(perm[BA + 1], x - 1, y, z - 1), u),
+         lerp(grad(perm[AB + 1], x, y - 1, z - 1), grad(perm[BB + 1], x - 1, y - 1, z - 1), u), v),
+    w
+  );
+}
+
+// ---------- Mobile detection ----------
+const IS_MOBILE = window.matchMedia('(max-width: 768px)').matches;
+if (IS_MOBILE) {
+  document.getElementById('ui').style.display = 'none';
+  document.getElementById('overlay').style.display = 'none';
+}
+
+// ---------- Canvas setup ----------
+const main = document.getElementById('c');
+const ctx = main.getContext('2d');
+const buf = document.createElement('canvas');
+const bctx = buf.getContext('2d');
+
+const DOWNSCALE = 3;
+let W = 0, H = 0, BW = 0, BH = 0;
+let imgData;
+function resize() {
+  W = main.width  = window.innerWidth;
+  H = main.height = window.innerHeight;
+  BW = buf.width  = Math.max(1, Math.ceil(W / DOWNSCALE));
+  BH = buf.height = Math.max(1, Math.ceil(H / DOWNSCALE));
+  imgData = bctx.createImageData(BW, BH);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ---------- Tuning ----------
+const NOISE_FEATURE_PX = 220;
+const NOISE_SCALE      = 1 / NOISE_FEATURE_PX;
+const Z_SPEED          = 0.10;
+const DIFFICULTY_START = -0.5;
+const DIFFICULTY_RISE  = 0.028;
+const DIFFICULTY_MAX   = 0.65;
+
+const PLAYER_R   = 14;
+const MOVE_SPEED = 260; // px/sec
+const ACCEL      = 1800; // smoothing toward target velocity
+
+const JUMP_DURATION_SINGLE = 0.50; // sec of invuln + growth
+const JUMP_DURATION_DOUBLE = 0.80; // resets timer when triggered mid-jump
+const JUMP_R_SINGLE = 1.7;         // radius multiplier at jump start
+const JUMP_R_DOUBLE = 2.4;         // radius multiplier on double jump
+
+// ---------- State ----------
+let zOffset = Math.random() * 9999;
+let difficulty = DIFFICULTY_START;
+let elapsed = 0;
+let state = 'start'; // 'start' | 'playing' | 'gameover'
+
+const player = {
+  x: 0, y: 0,
+  vx: 0, vy: 0,
+  radius: PLAYER_R,
+  jumpTimer: 0,     // sec remaining of current jump
+  jumpTimerMax: 0,  // duration of current jump (for normalizing visual)
+  jumpBoost: 1,     // radius multiplier at jump start
+  jumpsUsed: 0,     // 0 = none, 1 = single, 2 = double (refills when on light & not jumping)
+};
+
+const keys = { up: false, down: false, left: false, right: false };
+
+function sampleNoise(wx, wy) {
+  return noise(wx * NOISE_SCALE, wy * NOISE_SCALE, zOffset);
+}
+function isLight(wx, wy) {
+  return sampleNoise(wx, wy) > difficulty;
+}
+
+// ---------- Render ----------
+function renderNoise() {
+  const data = imgData.data;
+  const D = DOWNSCALE;
+  for (let by = 0; by < BH; by++) {
+    const wy = by * D;
+    for (let bx = 0; bx < BW; bx++) {
+      const wx = bx * D;
+      const n = noise(wx * NOISE_SCALE, wy * NOISE_SCALE, zOffset);
+      let v;
+      if (n < difficulty) {
+        v = 0;
+      } else {
+        let g = (n + 1) * 0.5;
+        if (g < 0) g = 0; else if (g > 1) g = 1;
+        v = (g * 255) | 0;
+      }
+      const idx = (by * BW + bx) * 4;
+      data[idx] = v; data[idx + 1] = v; data[idx + 2] = v; data[idx + 3] = 255;
+    }
+  }
+  bctx.putImageData(imgData, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'medium';
+  ctx.drawImage(buf, 0, 0, BW, BH, 0, 0, BW * DOWNSCALE, BH * DOWNSCALE);
+}
+
+function drawPlayer() {
+  const r = player.radius;
+  const jumping = player.jumpTimer > 0;
+  const u = jumping ? player.jumpTimer / player.jumpTimerMax : 0; // 1 → 0
+
+  ctx.save();
+  if (jumping) {
+    ctx.shadowColor = 'rgba(255, 220, 130, ' + (0.4 + 0.5 * u) + ')';
+    ctx.shadowBlur = 12 + 40 * u;
+  }
+  const g = ctx.createRadialGradient(
+    player.x - r * 0.35, player.y - r * 0.35, 1,
+    player.x, player.y, r
+  );
+  if (jumping) {
+    g.addColorStop(0, '#fff4d6');
+    g.addColorStop(0.55, '#ffc25a');
+    g.addColorStop(1, '#cf7a1a');
+  } else {
+    g.addColorStop(0, '#ffd6e0');
+    g.addColorStop(0.55, '#ff6680');
+    g.addColorStop(1, '#b21d3b');
+  }
+  ctx.beginPath();
+  ctx.arc(player.x, player.y, r, 0, Math.PI * 2);
+  ctx.fillStyle = g;
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+  ctx.stroke();
+
+  // expanding burst ring during jump
+  if (jumping) {
+    const burst = 1 - u; // 0 at start → 1 at end
+    const ringR = r + 30 * burst;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, ringR, 0, Math.PI * 2);
+    ctx.lineWidth = 2 * u;
+    ctx.strokeStyle = 'rgba(255, 220, 130, ' + (u * 0.9) + ')';
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function darkContact() {
+  const r = player.radius * 0.96;
+  // center sample (catches case where player is entirely inside a dark blob)
+  if (!isLight(player.x, player.y)) return true;
+  const samples = 16;
+  for (let i = 0; i < samples; i++) {
+    const a = (i / samples) * Math.PI * 2;
+    const sx = player.x + Math.cos(a) * r;
+    const sy = player.y + Math.sin(a) * r;
+    if (sx < 0 || sy < 0 || sx > W || sy > H) return true;
+    if (!isLight(sx, sy)) return true;
+  }
+  return false;
+}
+
+// ---------- Game flow ----------
+function update(dt) {
+  elapsed += dt;
+  zOffset += Z_SPEED * dt;
+  difficulty = Math.min(DIFFICULTY_MAX, DIFFICULTY_START + elapsed * DIFFICULTY_RISE);
+
+  // target velocity from input
+  let tx = 0, ty = 0;
+  if (keys.left)  tx -= 1;
+  if (keys.right) tx += 1;
+  if (keys.up)    ty -= 1;
+  if (keys.down)  ty += 1;
+  const mag = Math.hypot(tx, ty);
+  if (mag > 0) { tx /= mag; ty /= mag; }
+  const targetVx = tx * MOVE_SPEED;
+  const targetVy = ty * MOVE_SPEED;
+
+  // smooth toward target
+  const a = ACCEL * dt;
+  const dvx = targetVx - player.vx;
+  const dvy = targetVy - player.vy;
+  player.vx += Math.sign(dvx) * Math.min(Math.abs(dvx), a);
+  player.vy += Math.sign(dvy) * Math.min(Math.abs(dvy), a);
+
+  player.x += player.vx * dt;
+  player.y += player.vy * dt;
+
+  // jump timer + visual radius (linear ease from boost back to 1)
+  if (player.jumpTimer > 0) {
+    player.jumpTimer = Math.max(0, player.jumpTimer - dt);
+  }
+  const ju = (player.jumpTimerMax > 0) ? player.jumpTimer / player.jumpTimerMax : 0;
+  player.radius = PLAYER_R * (1 + (player.jumpBoost - 1) * ju);
+
+  // clamp to viewport (use base radius so growing doesn't shove us)
+  const m = PLAYER_R + 2;
+  if (player.x < m) { player.x = m; player.vx = 0; }
+  if (player.x > W - m) { player.x = W - m; player.vx = 0; }
+  if (player.y < m) { player.y = m; player.vy = 0; }
+  if (player.y > H - m) { player.y = H - m; player.vy = 0; }
+
+  // only die / refresh jumps when NOT mid-jump (jump = invuln)
+  if (player.jumpTimer === 0) {
+    if (darkContact()) return die();
+    if (player.jumpsUsed > 0) player.jumpsUsed = 0;
+  }
+}
+
+function die() {
+  state = 'gameover';
+  document.getElementById('msg').textContent = 'Survived ' + elapsed.toFixed(1) + 's';
+  document.getElementById('overlay').classList.remove('hidden');
+}
+
+function findSpawn() {
+  // pick the roomiest light spot we can find
+  let best = null, bestScore = -1;
+  for (let attempt = 0; attempt < 80; attempt++) {
+    const tx = W * (0.2 + Math.random() * 0.6);
+    const ty = H * (0.2 + Math.random() * 0.6);
+    if (!isLight(tx, ty)) continue;
+    // distance to nearest dark — sample on rings outward
+    let score = 0;
+    for (let ring = 1; ring <= 8; ring++) {
+      const rr = ring * PLAYER_R;
+      let allLight = true;
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * Math.PI * 2;
+        if (!isLight(tx + Math.cos(a) * rr, ty + Math.sin(a) * rr)) { allLight = false; break; }
+      }
+      if (!allLight) break;
+      score = ring;
+    }
+    if (score > bestScore) { bestScore = score; best = { x: tx, y: ty }; }
+  }
+  return best || { x: W * 0.5, y: H * 0.5 };
+}
+
+function resetGame() {
+  zOffset = Math.random() * 9999;
+  difficulty = DIFFICULTY_START;
+  elapsed = 0;
+  const spawn = findSpawn();
+  player.x = spawn.x;
+  player.y = spawn.y;
+  player.vx = 0;
+  player.vy = 0;
+  player.radius = PLAYER_R;
+  player.jumpTimer = 0;
+  player.jumpTimerMax = 0;
+  player.jumpBoost = 1;
+  player.jumpsUsed = 0;
+  state = 'playing';
+  document.getElementById('overlay').classList.add('hidden');
+}
+
+function jump() {
+  if (state !== 'playing') return;
+  if (player.jumpsUsed >= 2) return;
+  player.jumpsUsed++;
+  const isDouble = player.jumpsUsed === 2;
+  player.jumpTimer    = isDouble ? JUMP_DURATION_DOUBLE : JUMP_DURATION_SINGLE;
+  player.jumpTimerMax = player.jumpTimer;
+  player.jumpBoost    = isDouble ? JUMP_R_DOUBLE : JUMP_R_SINGLE;
+}
+
+function setKey(code, down) {
+  switch (code) {
+    case 'KeyW': case 'ArrowUp':    keys.up    = down; return true;
+    case 'KeyS': case 'ArrowDown':  keys.down  = down; return true;
+    case 'KeyA': case 'ArrowLeft':  keys.left  = down; return true;
+    case 'KeyD': case 'ArrowRight': keys.right = down; return true;
+  }
+  return false;
+}
+
+addEventListener('keydown', (e) => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (e.repeat) return;
+    if (state !== 'playing') resetGame();
+    else jump();
+    return;
+  }
+  if (setKey(e.code, true)) e.preventDefault();
+});
+addEventListener('keyup', (e) => {
+  if (setKey(e.code, false)) e.preventDefault();
+});
+
+// ---------- Main loop ----------
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+
+  if (IS_MOBILE) {
+    zOffset += Z_SPEED * dt;
+    elapsed += dt;
+    // capped lower than desktop so the page doesn't go fully black
+    difficulty = Math.min(0.3, DIFFICULTY_START + elapsed * DIFFICULTY_RISE);
+  } else if (state === 'playing') {
+    update(dt);
+  } else {
+    zOffset += Z_SPEED * dt;
+  }
+
+  renderNoise();
+  if (!IS_MOBILE && (state === 'playing' || state === 'gameover')) drawPlayer();
+
+  if (!IS_MOBILE) {
+    document.getElementById('diff').textContent = difficulty.toFixed(2);
+    document.getElementById('time').textContent = elapsed.toFixed(1);
+  }
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
