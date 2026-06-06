@@ -150,7 +150,7 @@ class Transform(_Base):
     semantic: bool  # True for economic/semantic, False for abstract
     domain: str | None = None  # Corpus A only
     description: str | None = None
-    schema: Schema  # noqa: A003 — protocol mandates the field name `schema`
+    schema: Schema = Field()  # type: ignore[assignment]  # protocol mandates field name `schema` (shadows BaseModel.schema)
     source: str  # ground-truth Python: def transform(x: dict) -> dict  (codegen'd from graph)
     graph: DataflowGraph  # for twin construction + complexity + validation
     complexity: ComplexityTuple

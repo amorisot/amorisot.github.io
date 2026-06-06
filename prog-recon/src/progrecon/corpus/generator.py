@@ -11,6 +11,7 @@ tuple. Degenerate graphs are rejected and retried with a fresh seed offset.
 from __future__ import annotations
 
 import random
+from collections.abc import Mapping
 from dataclasses import dataclass
 from dataclasses import field as dc_field
 
@@ -98,11 +99,11 @@ def sample_params(op: str, chosen: list[Producer], rng: random.Random) -> dict:
             return {"truthy": rng.sample(cond.categories, k=k)}
         return {}
     if op == "count_above":
-        lo, hi = _merged_range(chosen)
-        return {"thr": rng.randint(int(lo), max(int(lo) + 1, int(hi)))}
+        flo, fhi = _merged_range(chosen)
+        return {"thr": rng.randint(int(flo), max(int(flo) + 1, int(fhi)))}
     if op == "bracket_dispatch":
-        lo, hi = _merged_range(chosen)
-        lo_i, hi_i = int(lo), max(int(lo) + 3, int(hi))
+        flo, fhi = _merged_range(chosen)
+        lo_i, hi_i = int(flo), max(int(flo) + 3, int(fhi))
         n_thr = rng.randint(1, 3)
         cuts = sorted(rng.sample(range(lo_i + 1, hi_i), k=min(n_thr, max(1, hi_i - lo_i - 1))))
         return {"thresholds": cuts, "values": [rng.randint(0, 9) for _ in range(len(cuts) + 1)]}
@@ -112,7 +113,7 @@ def sample_params(op: str, chosen: list[Producer], rng: random.Random) -> dict:
     raise GenerationError(f"no param sampler for op {op!r}")
 
 
-def reconstruct_producer(ref: str, schema: Schema, out_types: dict[str, str]) -> Producer:
+def reconstruct_producer(ref: str, schema: Schema, out_types: Mapping[str, str]) -> Producer:
     """Rebuild a Producer for an input field or node ref (for re-sampling params).
 
     Shared by the perturbation and twin layers so they re-derive producer types

@@ -195,9 +195,9 @@ def validate(g: DataflowGraph, schema: Schema) -> list[GraphError]:
 
     # 6. No constant (input-independent) outputs.
     for f in schema.outputs:
-        producer = g.output_map.get(f.name)
-        if producer in node_ids and not _reaches_input(g, producer, field_names):
-            errors.append(GraphError(code="constant_output", message=f"output {f.name!r} does not depend on any input", node_id=producer))
+        prod = g.output_map.get(f.name)
+        if prod is not None and prod in node_ids and not _reaches_input(g, prod, field_names):
+            errors.append(GraphError(code="constant_output", message=f"output {f.name!r} does not depend on any input", node_id=prod))
 
     return errors
 
