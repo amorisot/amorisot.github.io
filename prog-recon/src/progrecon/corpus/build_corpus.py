@@ -37,7 +37,7 @@ class CorpusManifest(BaseModel):
     twins: list[Transform]
     quarantined_a: list[str]
     quarantined_b: int  # count of generated-but-rejected B candidates
-    quarantined_twins: list[str]
+    mask_only_twins: list[str]  # twins that fell back to mask-only (no op-swap)
 
     def summary(self) -> dict[str, int]:
         return {
@@ -46,7 +46,7 @@ class CorpusManifest(BaseModel):
             "twins": len(self.twins),
             "quarantined_a": len(self.quarantined_a),
             "quarantined_b": self.quarantined_b,
-            "quarantined_twins": len(self.quarantined_twins),
+            "mask_only_twins": len(self.mask_only_twins),
         }
 
 
@@ -84,17 +84,20 @@ def build_corpus_b(
     return kept, rejected
 
 
-def build_twin(a: Transform, *, max_tries: int = 10) -> tuple[Transform, bool]:
-    """Build an identified abstract twin of `a`; (twin, identified?)."""
-    last = None
+def build_twin(a: Transform, *, max_tries: int = 12) -> tuple[Transform, bool]:
+    """Build an identified abstract twin of `a`; returns (twin, swapped?).
+
+    Tries op-swapped twins first (more thoroughly scrambled). If none is
+    identifiable, falls back to a mask-only twin (names masked, ops unchanged),
+    which is behaviorally identical to the already-identified A and therefore
+    always passes identifiability.
+    """
     for s in range(max_tries):
         tw = twin.make_abstract(a, seed=1000 + s, twin_id=f"{a.id}~twin")
-        rep = identifiability.check(tw, n_probes=300)
-        last = tw
-        if rep.passed:
+        if identifiability.check(tw, n_probes=300).passed:
             return tw, True
-    assert last is not None
-    return last, False
+    # Fallback: mask-only twin (guaranteed identifiable — same behavior as A).
+    return twin.make_abstract(a, seed=0, twin_id=f"{a.id}~twin", swap_ops=False), False
 
 
 def build_full_corpus(*, n_b: int = 50, seed: int = 0, cfg: Config | None = None) -> CorpusManifest:
@@ -103,17 +106,17 @@ def build_full_corpus(*, n_b: int = 50, seed: int = 0, cfg: Config | None = None
     corpus_b, rejected_b = build_corpus_b(n_b, seed=seed, cfg=cfg)
 
     twins: list[Transform] = []
-    quar_twins: list[str] = []
+    mask_only: list[str] = []
     for a in corpus_a:
-        tw, ok = build_twin(a)
+        tw, swapped = build_twin(a)
         twins.append(tw)
-        if not ok:
-            quar_twins.append(tw.id)
+        if not swapped:
+            mask_only.append(tw.id)
 
     return CorpusManifest(
         corpus_a=corpus_a, corpus_b=corpus_b, twins=twins,
         quarantined_a=[tid for tid, _ in quar_a],
-        quarantined_b=rejected_b, quarantined_twins=quar_twins,
+        quarantined_b=rejected_b, mask_only_twins=mask_only,
     )
 
 
@@ -129,8 +132,8 @@ def render_summary(man: CorpusManifest) -> str:
         f"({s['quarantined_a']} quarantined)",
         f"- Corpus B (generated abstract): **{s['corpus_b']}** identified "
         f"({s['quarantined_b']} candidates rejected during search)",
-        f"- Twins (abstract controls of A): **{s['twins']}** "
-        f"({s['quarantined_twins']} not fully identified)",
+        f"- Twins (abstract controls of A): **{s['twins']}** all identified "
+        f"({s['mask_only_twins']} fell back to mask-only — no identifiable op-swap)",
         "",
     ]
     for title, items in (("Corpus A", man.corpus_a), ("Corpus B", man.corpus_b)):

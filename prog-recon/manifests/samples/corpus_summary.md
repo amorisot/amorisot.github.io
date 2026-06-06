@@ -5,60 +5,60 @@
 
 - Corpus A (authored semantic): **50** identified (0 quarantined)
 - Corpus B (generated abstract): **50** identified (14 candidates rejected during search)
-- Twins (abstract controls of A): **50** (0 not fully identified)
+- Twins (abstract controls of A): **50** all identified (2 fell back to mask-only — no identifiable op-swap)
 
 ## Corpus A — id / domain / C(T) / band
 
+- `A-FIN-01` finance  C=10.0 band=high
+- `A-FIN-02` finance  C=5.0 band=med
+- `A-FIN-03` insurance  C=7.0 band=med
+- `A-FIN-04` finance  C=5.0 band=med
+- `A-FIN-05` finance  C=10.0 band=high
+- `A-FIN-06` finance  C=5.0 band=med
 - `A-RETAIL-01` retail  C=7.0 band=med
 - `A-RETAIL-02` retail  C=12.0 band=high
 - `A-RETAIL-03` retail  C=11.0 band=high
-- `A-RETAIL-04` retail  C=6.0 band=med
-- `A-RETAIL-05` retail  C=11.0 band=high
-- `A-RETAIL-06` retail  C=7.0 band=med
-- `A-RETAIL-07` retail  C=11.0 band=high
-- `A-RETAIL-08` retail  C=8.0 band=med
-- `A-RETAIL-09` retail  C=12.0 band=high
-- `A-RETAIL-10` retail  C=5.0 band=med
-- `A-TAX-01` tax  C=10.0 band=high
-- `A-TAX-02` tax  C=5.0 band=med
-- `A-TAX-03` tax  C=7.0 band=med
-- `A-TAX-04` finance  C=9.0 band=med
-- `A-TAX-05` finance  C=10.0 band=high
-- `A-FIN-01` finance  C=7.0 band=med
-- `A-FIN-02` finance  C=4.0 band=low
-- `A-FIN-03` finance  C=3.0 band=low
-- `A-FIN-04` finance  C=5.0 band=med
-- `A-FIN-05` finance  C=7.0 band=med
-- `A-EDU-01` education  C=10.0 band=high
-- `A-EDU-02` education  C=5.0 band=med
-- `A-EDU-03` education  C=5.0 band=med
-- `A-EDU-04` education  C=7.0 band=med
-- `A-EDU-05` education  C=6.0 band=med
-- `A-EDU-06` education  C=10.0 band=high
-- `A-EDU-07` education  C=6.0 band=med
-- `A-EDU-08` education  C=7.0 band=med
-- `A-EDU-09` education  C=6.0 band=med
-- `A-EDU-10` education  C=3.0 band=low
-- `A-LOG-01` logistics  C=12.0 band=high
-- `A-LOG-02` logistics  C=5.0 band=med
-- `A-LOG-03` logistics  C=9.0 band=med
-- `A-LOG-04` logistics  C=8.0 band=med
-- `A-LOG-05` logistics  C=4.0 band=low
-- `A-LOG-06` logistics  C=5.0 band=med
-- `A-LOG-07` logistics  C=5.0 band=med
-- `A-LOG-08` logistics  C=6.0 band=med
-- `A-LOG-09` logistics  C=6.0 band=med
-- `A-LOG-10` logistics  C=6.0 band=med
-- `A-HR-01` hr  C=8.0 band=med
-- `A-HR-02` hr  C=9.0 band=med
-- `A-HR-03` hr  C=4.0 band=low
-- `A-HR-04` hr  C=4.0 band=low
-- `A-HR-05` hr  C=7.0 band=med
-- `A-HR-06` hr  C=5.0 band=med
-- `A-HR-07` hr  C=9.0 band=med
-- `A-HR-08` hr  C=7.0 band=med
-- `A-HR-09` hr  C=5.0 band=med
-- `A-HR-10` hr  C=5.0 band=med
+- `A-RETAIL-04` retail  C=8.0 band=med
+- `A-RETAIL-05` retail  C=8.0 band=med
+- `A-HEALTH-01` healthcare  C=9.0 band=med
+- `A-HEALTH-02` healthcare  C=5.0 band=med
+- `A-HEALTH-03` healthcare  C=13.0 band=high
+- `A-HEALTH-04` healthcare  C=10.0 band=high
+- `A-HEALTH-05` healthcare  C=12.0 band=high
+- `A-HEALTH-06` healthcare  C=5.0 band=med
+- `A-PROF-01` legal  C=5.0 band=med
+- `A-PROF-02` software  C=11.0 band=high
+- `A-PROF-03` engineering  C=5.0 band=med
+- `A-PROF-04` engineering  C=11.0 band=high
+- `A-PROF-05` consulting  C=6.0 band=med
+- `A-PROF-06` accounting  C=9.0 band=med
+- `A-PROF-07` architecture  C=7.0 band=med
+- `A-MFG-01` manufacturing  C=5.0 band=med
+- `A-MFG-02` manufacturing  C=5.0 band=med
+- `A-MFG-03` manufacturing  C=9.0 band=med
+- `A-MFG-04` manufacturing  C=7.0 band=med
+- `A-MFG-05` manufacturing  C=6.0 band=med
+- `A-REALEST-01` real_estate  C=9.0 band=med
+- `A-REALEST-02` real_estate  C=6.0 band=med
+- `A-REALEST-03` real_estate  C=6.0 band=med
+- `A-REALEST-04` real_estate  C=6.0 band=med
+- `A-REALEST-05` real_estate  C=5.0 band=med
+- `A-GOV-01` government  C=9.0 band=med
+- `A-GOV-02` government  C=11.0 band=high
+- `A-GOV-03` government  C=10.0 band=high
+- `A-GOV-04` government  C=12.0 band=high
+- `A-GOV-05` government  C=13.0 band=high
+- `A-GOV-06` government  C=5.0 band=med
+- `A-INFO-01` media  C=4.0 band=low
+- `A-INFO-02` media  C=12.0 band=high
+- `A-INFO-03` media  C=11.0 band=high
+- `A-INFO-04` media  C=6.0 band=med
+- `A-INFO-05` media  C=7.0 band=med
+- `A-WHOLE-01` wholesale  C=10.0 band=high
+- `A-WHOLE-02` wholesale  C=9.0 band=med
+- `A-WHOLE-03` wholesale  C=11.0 band=high
+- `A-WHOLE-04` wholesale  C=6.0 band=med
+- `A-WHOLE-05` wholesale  C=10.0 band=high
 
 ## Corpus B — id / domain / C(T) / band
 

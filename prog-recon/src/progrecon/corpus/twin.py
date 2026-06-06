@@ -107,11 +107,20 @@ def _assert_isomorphic(a: DataflowGraph, b: DataflowGraph) -> None:
     assert a.output_map == b.output_map, "twin output_map differs"
 
 
-def make_abstract(transform: Transform, *, seed: int, twin_id: str | None = None) -> Transform:
-    """Produce the structurally-identical abstract twin of a transform."""
+def make_abstract(
+    transform: Transform, *, seed: int, twin_id: str | None = None, swap_ops: bool = True
+) -> Transform:
+    """Produce the structurally-identical abstract twin of a transform.
+
+    With ``swap_ops=True`` (default) each op is swapped for a same-tier/arity/
+    branch/out-type alternative where one exists. With ``swap_ops=False`` only
+    the field names/labels are masked (ops unchanged) — a behaviorally identical
+    but de-labelled twin, used as the guaranteed-identifiable fallback when
+    swapping would make the program reducible.
+    """
     rng = random.Random(seed)
     schema, g = _canonicalize_names(transform.schema, transform.graph)
-    twin_graph = _swap_ops(schema, g, rng)
+    twin_graph = _swap_ops(schema, g, rng) if swap_ops else g
 
     _assert_isomorphic(g, twin_graph)
     validate_or_raise(twin_graph, schema)
@@ -124,6 +133,7 @@ def make_abstract(transform: Transform, *, seed: int, twin_id: str | None = None
     prov = dict(transform.provenance)
     prov["twin_of"] = transform.id
     prov["twin_seed"] = seed
+    prov["twin_swapped"] = swap_ops
     return transform.model_copy(
         update={
             "id": new_id,

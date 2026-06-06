@@ -39,7 +39,14 @@ def test_corpus_counts(manifest):
     assert s["corpus_b"] == 50
     assert s["twins"] == 50
     assert s["quarantined_a"] == 0
-    assert s["quarantined_twins"] == 0
+    # every twin is identified; a few may fall back to mask-only (no op-swap)
+    assert s["mask_only_twins"] <= 6
+
+
+def test_all_twins_identified(manifest):
+    from progrecon.corpus import identifiability
+    for tw in manifest.twins:
+        assert identifiability.check(tw, n_probes=300).passed, tw.id
 
 
 def test_corpus_b_distinct_and_abstract(manifest):

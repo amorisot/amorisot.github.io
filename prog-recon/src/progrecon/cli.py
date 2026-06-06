@@ -75,8 +75,8 @@ def build_corpus_cmd(
     s = man.summary()
     typer.echo(
         f"corpus_a={s['corpus_a']} corpus_b={s['corpus_b']} twins={s['twins']} "
-        f"| quarantined: A={s['quarantined_a']} B-rejected={s['quarantined_b']} "
-        f"twins={s['quarantined_twins']}"
+        f"| quarantined_a={s['quarantined_a']} b_rejected={s['quarantined_b']} "
+        f"mask_only_twins={s['mask_only_twins']}"
     )
     if write:
         paths = build_corpus.write_corpus(man, cfg=cfg)
