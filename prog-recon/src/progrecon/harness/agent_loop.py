@@ -73,9 +73,11 @@ def _split_train(train: SampleSet, frac: float) -> tuple[SampleSet, SampleSet]:
 def _test_candidate(
     code: str, validation: list[Example], schema, *, rel_tol: float, timeout_s: float, mem_mb: int
 ) -> tuple[bool, list[str]]:
+    results = sandbox.run_candidate_batch(
+        code, [ex.x for ex in validation], timeout_s=timeout_s, mem_mb=mem_mb
+    )
     failures: list[str] = []
-    for ex in validation:
-        res = sandbox.run_candidate(code, ex.x, timeout_s=timeout_s, mem_mb=mem_mb)
+    for ex, res in zip(validation, results, strict=True):
         ok = res.get("ok") and row_match(res.get("value"), ex.y, schema, rel_tol=rel_tol)
         if not ok:
             got = res.get("value") if res.get("ok") else f"<error: {res.get('error')}>"

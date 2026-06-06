@@ -3,7 +3,7 @@
 Constraint (build spec §0.6, §4): candidate source runs in a restricted
 subprocess with:
 * no network (socket creation is disabled inside the child),
-* no filesystem writes (RLIMIT_FSIZE = 0; candidate stdout is captured in-memory),
+* no filesystem writes outside a per-run temp dir (deterministic open-guard),
 * a wall-clock cap (parent kills the process group on timeout) AND a CPU cap
   (RLIMIT_CPU, so a busy loop is reaped even if it ignores wall-clock), and
 * a memory cap (RLIMIT_AS).
@@ -11,6 +11,11 @@ subprocess with:
 This is defense-in-depth in pure Python, not a hardware sandbox; true isolation
 would use containers/seccomp. It is sufficient for the threat model here
 (our own and model-authored transform functions).
+
+The executor is *batch-first*: ``run_candidate_batch`` compiles the candidate
+once and maps ``transform`` over many inputs in a single subprocess (so scoring
+2000 rows costs one process, not 2000). ``run_candidate`` is the single-row
+wrapper.
 """
 
 from __future__ import annotations
@@ -22,9 +27,6 @@ import subprocess
 import sys
 from typing import Any
 
-# The child driver: read {"source","x"} from stdin, disable network, exec the
-# candidate with its stdout captured, call transform(x), emit a single result
-# line prefixed with a sentinel so the parent can find it unambiguously.
 _SENTINEL = "@@PROGRECON_RESULT@@"
 
 _DRIVER = r'''
@@ -62,7 +64,7 @@ def _emit(obj):
 def main():
     payload = json.loads(sys.stdin.read())
     source = payload["source"]
-    x = payload["x"]
+    xs = payload["xs"]
     ns = {}
     real_stdout = sys.stdout
     sys.stdout = io.StringIO()  # capture/ignore candidate prints
@@ -71,20 +73,26 @@ def main():
         fn = ns.get("transform")
         if not callable(fn):
             sys.stdout = real_stdout
-            _emit({"ok": False, "error": "no callable transform(x) defined"})
+            _emit({"setup_ok": False, "error": "no callable transform(x) defined", "rows": []})
             return
-        result = fn(x)
+        rows = []
+        for x in xs:
+            try:
+                value = fn(x)
+                json.dumps(value)  # ensure serializable
+                rows.append({"ok": True, "value": value})
+            except (TypeError, ValueError) as e:
+                rows.append({"ok": False, "error": "bad/non-serializable result: " + str(e)})
+            except Exception as e:
+                rows.append({"ok": False, "error": type(e).__name__ + ": " + str(e)})
     finally:
         sys.stdout = real_stdout
-    try:
-        _emit({"ok": True, "value": result})
-    except (TypeError, ValueError) as e:
-        _emit({"ok": False, "error": "non-serializable result: " + str(e)})
+    _emit({"setup_ok": True, "error": None, "rows": rows})
 
 try:
     main()
-except Exception as e:  # noqa: BLE001 - report any candidate failure
-    sys.stdout.write(SENT + json.dumps({"ok": False, "error": type(e).__name__ + ": " + str(e)}) + "\n")
+except Exception as e:  # noqa: BLE001
+    sys.stdout.write(SENT + json.dumps({"setup_ok": False, "error": type(e).__name__ + ": " + str(e), "rows": []}) + "\n")
 finally:
     shutil.rmtree(_TMPDIR, ignore_errors=True)
 '''.replace("%SENTINEL%", _SENTINEL)
@@ -98,8 +106,6 @@ def _make_limits(timeout_s: float, mem_mb: int):
         resource.setrlimit(resource.RLIMIT_CPU, (cpu, cpu))
         mem = mem_mb * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (mem, mem))
-        # Bound write size (defense in depth); the open-guard confines *where*
-        # writes may go (the per-run temp dir only).
         fsize = 16 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_FSIZE, (fsize, fsize))
 
@@ -117,6 +123,54 @@ def _kill(proc: subprocess.Popen) -> None:
         pass
 
 
+def run_candidate_batch(
+    source: str,
+    xs: list[dict[str, Any]],
+    *,
+    timeout_s: float = 5.0,
+    mem_mb: int = 512,
+) -> list[dict[str, Any]]:
+    """Map ``transform`` over many inputs in one subprocess.
+
+    Returns one ``{"ok": bool, "value"|"error"}`` dict per input. If the whole
+    subprocess fails (compile error, no transform, timeout, OOM), every input
+    gets the same ``ok=False`` error.
+    """
+    payload = json.dumps({"source": source, "xs": xs})
+    cmd = [sys.executable, "-I", "-B", "-c", _DRIVER]
+    try:
+        proc = subprocess.Popen(
+            cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, start_new_session=True, preexec_fn=_make_limits(timeout_s, mem_mb),  # noqa: PLW1509
+        )
+    except OSError as e:  # pragma: no cover
+        return [{"ok": False, "error": f"spawn failed: {e}"} for _ in xs]
+
+    try:
+        out, err = proc.communicate(payload, timeout=timeout_s + 1.0)
+    except subprocess.TimeoutExpired:
+        _kill(proc)
+        return [{"ok": False, "error": "timeout"} for _ in xs]
+
+    if proc.returncode != 0:
+        msg = f"subprocess exited rc={proc.returncode}: {err.strip()[:300]}"
+        return [{"ok": False, "error": msg} for _ in xs]
+
+    parsed = None
+    for line in reversed(out.splitlines()):
+        if line.startswith(_SENTINEL):
+            parsed = json.loads(line[len(_SENTINEL):])
+            break
+    if parsed is None:
+        return [{"ok": False, "error": f"no result line; stderr={err[:200]!r}"} for _ in xs]
+    if not parsed.get("setup_ok"):
+        return [{"ok": False, "error": parsed.get("error", "setup failed")} for _ in xs]
+    rows = parsed.get("rows", [])
+    if len(rows) != len(xs):  # pragma: no cover - defensive
+        return [{"ok": False, "error": "row count mismatch"} for _ in xs]
+    return rows
+
+
 def run_candidate(
     source: str,
     x: dict[str, Any],
@@ -124,43 +178,5 @@ def run_candidate(
     timeout_s: float = 5.0,
     mem_mb: int = 512,
 ) -> dict[str, Any]:
-    """Run untrusted ``transform(x)`` and return {"ok": bool, "value"|"error"}.
-
-    Never raises for candidate-side failures; returns an ``ok=False`` dict with
-    a diagnostic ``error`` instead (timeout, crash, OOM, bad output, ...).
-    """
-    payload = json.dumps({"source": source, "x": x})
-    cmd = [sys.executable, "-I", "-B", "-c", _DRIVER]
-    try:
-        proc = subprocess.Popen(
-            cmd,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            start_new_session=True,
-            preexec_fn=_make_limits(timeout_s, mem_mb),  # noqa: PLW1509
-        )
-    except OSError as e:  # pragma: no cover - spawn failure
-        return {"ok": False, "error": f"spawn failed: {e}"}
-
-    try:
-        out, err = proc.communicate(payload, timeout=timeout_s + 1.0)
-    except subprocess.TimeoutExpired:
-        _kill(proc)
-        return {"ok": False, "error": "timeout"}
-
-    if proc.returncode != 0:
-        # Negative rc => killed by signal (e.g. -9 SIGKILL, -24 SIGXCPU/OOM).
-        return {
-            "ok": False,
-            "error": f"subprocess exited rc={proc.returncode}: {err.strip()[:300]}",
-        }
-
-    for line in reversed(out.splitlines()):
-        if line.startswith(_SENTINEL):
-            return json.loads(line[len(_SENTINEL):])
-    return {
-        "ok": False,
-        "error": f"no result line; stdout={out[:200]!r} stderr={err[:200]!r}",
-    }
+    """Run untrusted ``transform(x)`` once; never raises for candidate failures."""
+    return run_candidate_batch(source, [x], timeout_s=timeout_s, mem_mb=mem_mb)[0]
