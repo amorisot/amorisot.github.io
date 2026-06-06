@@ -64,6 +64,11 @@ def _oracle_client(transform: Transform, cfg: Config) -> ModelClient:
     return ModelClient(cfg, mock_model=MockModel(responder=responder))
 
 
+def manifest_path(task_id: str, cell: GridCell, repeat_idx: int, cfg: Config) -> Path:
+    """Deterministic per-run manifest path (used for writing AND resumability)."""
+    return Path(cfg.paths.manifests_dir) / f"{task_id}__{cell.cell_key()}__r{repeat_idx}.json"
+
+
 def run_cell(
     cell: GridCell,
     *,
@@ -71,6 +76,7 @@ def run_cell(
     client: ModelClient | None = None,
     repeat_idx: int = 0,
     seed: int = 0,
+    perturbation: PerturbationSpec | None = None,
     cfg: Config | None = None,
     write_artifacts: bool = True,
 ) -> CellRun:
@@ -78,7 +84,8 @@ def run_cell(
     if transform is None:
         transform = generate_identified_transform(cell, seed=seed, cfg=cfg)
 
-    task = perturb.make_task(transform, PerturbationSpec(seed=seed))
+    spec = perturbation or PerturbationSpec(seed=seed)
+    task = perturb.make_task(transform, spec)
     concrete = task.transform
 
     bundle = sampler.make_dataset(
@@ -114,9 +121,7 @@ def run_cell(
     if write_artifacts:
         man_dir = Path(cfg.paths.manifests_dir)
         man_dir.mkdir(parents=True, exist_ok=True)
-        (man_dir / f"{task.task_id}__{cell.cell_key()}__r{repeat_idx}.json").write_text(
-            outcome.model_dump_json(indent=2)
-        )
+        manifest_path(task.task_id, cell, repeat_idx, cfg).write_text(outcome.model_dump_json(indent=2))
 
     c_val = complexity.transform_complexity(concrete)
     one_line = (

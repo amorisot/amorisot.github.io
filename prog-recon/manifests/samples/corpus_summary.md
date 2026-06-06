@@ -1,11 +1,11 @@
-# Corpus summary (50 B + 50 A + 50 twins)
+# Corpus summary (50 B + 54 A + 54 twins)
 
 > Pure offline generation — no model calls, no grid run. Identifiability-
 > failing candidates are quarantined (not run).
 
-- Corpus A (authored semantic): **50** identified (0 quarantined)
+- Corpus A (authored semantic): **54** identified (0 quarantined)
 - Corpus B (generated abstract): **50** identified (14 candidates rejected during search)
-- Twins (abstract controls of A): **50** all identified (2 fell back to mask-only — no identifiable op-swap)
+- Twins (abstract controls of A): **54** all identified (2 fell back to mask-only — no identifiable op-swap)
 
 ## Corpus A — id / domain / C(T) / band
 
@@ -59,6 +59,10 @@
 - `A-WHOLE-03` wholesale  C=11.0 band=high
 - `A-WHOLE-04` wholesale  C=6.0 band=med
 - `A-WHOLE-05` wholesale  C=10.0 band=high
+- `A-RETAIL-06` retail  C=4.0 band=low
+- `A-HEALTH-07` healthcare  C=4.0 band=low
+- `A-MFG-06` manufacturing  C=4.0 band=low
+- `A-INFO-06` media  C=4.0 band=low
 
 ## Corpus B — id / domain / C(T) / band
 

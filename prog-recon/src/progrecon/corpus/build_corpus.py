@@ -123,7 +123,7 @@ def build_full_corpus(*, n_b: int = 50, seed: int = 0, cfg: Config | None = None
 def render_summary(man: CorpusManifest) -> str:
     s = man.summary()
     lines = [
-        "# Corpus summary (50 B + 50 A + 50 twins)",
+        f"# Corpus summary ({s['corpus_b']} B + {s['corpus_a']} A + {s['twins']} twins)",
         "",
         "> Pure offline generation — no model calls, no grid run. Identifiability-",
         "> failing candidates are quarantined (not run).",
@@ -174,3 +174,13 @@ def load_corpus_jsonl(path: str | Path) -> list[Transform]:
     """Reload a persisted corpus split."""
     p = Path(path)
     return [Transform.model_validate_json(line) for line in p.read_text().splitlines() if line.strip()]
+
+
+def load_persisted(cfg: Config | None = None) -> tuple[list[Transform], list[Transform], list[Transform]] | None:
+    """Load (corpus_a, corpus_b, twins) from disk if previously written, else None."""
+    cfg = cfg or get_config()
+    base = Path(cfg.paths.manifests_dir) / "corpus"
+    fa, fb, ft = base / "corpus_a.jsonl", base / "corpus_b.jsonl", base / "twins.jsonl"
+    if fa.exists() and fb.exists() and ft.exists():
+        return load_corpus_jsonl(fa), load_corpus_jsonl(fb), load_corpus_jsonl(ft)
+    return None

@@ -400,6 +400,33 @@ AUTHORED_SPECS: list[dict[str, Any]] = [
                   ("n2", "sum_inputs", {}, ["n0", "n1"])],
         "outputs": [("total_rebate", "int", "n2", "total rebate (USD)")],
     },
+    # ===== Low-complexity arithmetic exemplars (the complexity floor) =========
+    # Single-op programs across distinct sectors, to populate the low band of
+    # the C(T) axis with genuinely simple-but-semantic computations.
+    {
+        "id": "A-RETAIL-06", "domain": "retail", "desc": "change due = tendered less bill total",
+        "inputs": [("amount_tendered", "int", 1, 500, "amount tendered (USD)"), ("bill_total", "int", 1, 500, "bill total (USD)")],
+        "nodes": [("n0", "diff", {}, ["amount_tendered", "bill_total"])],
+        "outputs": [("change_due", "int", "n0", "change due (USD)")],
+    },
+    {
+        "id": "A-HEALTH-07", "domain": "healthcare", "desc": "fluid balance = intake less output",
+        "inputs": [("intake_ml", "int", 0, 4000, "fluid intake (mL)"), ("output_ml", "int", 0, 4000, "fluid output (mL)")],
+        "nodes": [("n0", "diff", {}, ["intake_ml", "output_ml"])],
+        "outputs": [("fluid_balance_ml", "int", "n0", "net fluid balance (mL)")],
+    },
+    {
+        "id": "A-MFG-06", "domain": "manufacturing", "desc": "total pieces = cartons * pieces per carton",
+        "inputs": [("cartons", "int", 1, 200, "cartons"), ("pieces_per_carton", "int", 1, 48, "pieces per carton")],
+        "nodes": [("n0", "product", {}, ["cartons", "pieces_per_carton"])],
+        "outputs": [("total_pieces", "int", "n0", "total pieces")],
+    },
+    {
+        "id": "A-INFO-06", "domain": "media", "desc": "total reach = organic + paid views",
+        "inputs": [("organic_views", "int", 0, 50000, "organic views"), ("paid_views", "int", 0, 50000, "paid views")],
+        "nodes": [("n0", "sum_inputs", {}, ["organic_views", "paid_views"])],
+        "outputs": [("total_reach", "int", "n0", "total reach")],
+    },
 ]
 
 

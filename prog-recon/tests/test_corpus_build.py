@@ -21,8 +21,15 @@ def manifest():
 
 def test_authored_all_identified():
     kept, quar = authored.load_corpus_a(n_probes=400)
-    assert len(kept) == 50
+    assert len(kept) == len(authored.AUTHORED_SPECS)
     assert quar == [], [q[0] for q in quar]
+
+
+def test_corpus_has_a_low_band_floor():
+    # The set must include genuinely low-complexity (single-op arithmetic) programs.
+    from progrecon.corpus import complexity
+    bands = [complexity.transform_band(t) for t in authored.build_all()]
+    assert bands.count("low") >= 3
 
 
 def test_authored_source_matches_graph():
@@ -35,9 +42,9 @@ def test_authored_source_matches_graph():
 
 def test_corpus_counts(manifest):
     s = manifest.summary()
-    assert s["corpus_a"] == 50
+    assert s["corpus_a"] == len(authored.AUTHORED_SPECS) >= 50
     assert s["corpus_b"] == 50
-    assert s["twins"] == 50
+    assert s["twins"] == s["corpus_a"]  # one twin per A program
     assert s["quarantined_a"] == 0
     # every twin is identified; a few may fall back to mask-only (no op-swap)
     assert s["mask_only_twins"] <= 6
@@ -82,5 +89,5 @@ def test_write_and_reload(manifest):
         paths = build_corpus.write_corpus(manifest, cfg=cfg)
         assert Path(paths["summary"]).exists()
         reloaded = build_corpus.load_corpus_jsonl(paths["corpus_a"])
-        assert len(reloaded) == 50
+        assert len(reloaded) == len(authored.AUTHORED_SPECS)
         assert reloaded[0] == manifest.corpus_a[0]

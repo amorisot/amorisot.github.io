@@ -117,6 +117,56 @@ def estimate(
         raise typer.Exit(2) from None
 
 
+@app.command("sweep")
+def sweep_cmd(
+    name: str = typer.Option("sample", help="sample | dimensionality | semantic | leakage"),
+    repeats: int = 1,
+    n_transforms: int = 5,
+    run: bool = typer.Option(False, "--run", help="Execute the plan (offline oracle by default)."),
+    i_accept_cost: bool = typer.Option(False, "--i-accept-cost", help="Acknowledge over-ceiling spend."),
+) -> None:
+    """Plan a targeted sweep, estimate its cost, and (optionally) run it resumably."""
+    from .analysis import aggregate
+    from .corpus import build_corpus
+    from .runner import sweep
+
+    cfg = get_config()
+    loaded = build_corpus.load_persisted(cfg)
+    if loaded is None:
+        typer.echo("(no persisted corpus found — building it; run `progrecon build-corpus` to cache)")
+        man = build_corpus.build_full_corpus(cfg=cfg)
+        corpus_a, corpus_b, twins = man.corpus_a, man.corpus_b, man.twins
+    else:
+        corpus_a, corpus_b, twins = loaded
+
+    mid = cfg.models.cheap.id
+    if name == "sample":
+        items = sweep.plan_sample_sweep(corpus_b[:n_transforms], "B", ks=cfg.grid.k, repeats=repeats, model_id=mid)
+    elif name == "dimensionality":
+        items = sweep.plan_dimensionality_sweep(corpus_b[:n_transforms], "B", distractor_levels=[0, 3, 10, 30], k=200, repeats=repeats, model_id=mid)
+    elif name == "semantic":
+        by_id = {a.id: a for a in corpus_a}
+        pairs = [(by_id[t.twin_id], t) for t in twins if t.twin_id in by_id][:n_transforms]
+        items = sweep.plan_semantic_sweep(pairs, k=200, repeats=repeats, model_id=mid)
+    elif name == "leakage":
+        items = sweep.plan_leakage_sweep(corpus_b[:n_transforms], "B", query_budgets=[0, 1, 3], k=200, repeats=repeats, model_id=mid)
+    else:
+        typer.echo(f"unknown sweep {name!r} (sample | dimensionality | semantic | leakage)")
+        raise typer.Exit(2)
+
+    report = sweep.estimate(items, cfg=cfg)
+    typer.echo(f"sweep '{name}': {len(items)} runs planned")
+    typer.echo(report.render())
+    if not run:
+        typer.echo("(estimate only — pass --run to execute; offline oracle unless a real provider is configured)")
+        raise typer.Exit(0)
+    budget.guard(report, accept_cost=i_accept_cost)
+    outcomes = sweep.run_sweep(items, cfg=cfg)
+    df = aggregate.outcomes_to_frame(outcomes)
+    typer.echo(f"{len(outcomes)} runs complete")
+    typer.echo(aggregate.cell_table(df).to_string(index=False))
+
+
 @app.command("analyze")
 def analyze(manifests_dir: str = "manifests") -> None:
     """Load run manifests into a tidy frame and print the cell-level table."""
