@@ -1,0 +1,78 @@
+# prog-recon configuration — all tunable knobs live here.
+# Secrets (API keys) are NEVER stored here; they come from environment only.
+
+budget:
+  usd_ceiling: 50.0          # hard abort ceiling; raise deliberately (never silently)
+  per_run_token_cap: 60000   # token cap per single agent run
+
+models:
+  # The "cheap" model used for the vertical slice (Phase 6/8).
+  # provider defaults to `mock` so that NOTHING hits a network until a human
+  # deliberately switches the provider and supplies an API key in env.
+  cheap:
+    id: claude-haiku-4-5-20251001
+    provider: mock
+    version: "2026-01"
+    temperature: 0.0
+  roster: []                 # full model roster filled in at Phase 7
+
+# $ per 1,000,000 tokens (input, output). Used for cost metering + budget est.
+model_pricing:
+  claude-haiku-4-5-20251001: {input_per_mtok: 1.0, output_per_mtok: 5.0}
+  claude-sonnet-4-6: {input_per_mtok: 3.0, output_per_mtok: 15.0}
+  claude-opus-4-8: {input_per_mtok: 15.0, output_per_mtok: 75.0}
+  mock: {input_per_mtok: 0.0, output_per_mtok: 0.0}
+
+# Complexity index C(T) = sum(w_component * component). Placeholders now;
+# calibrated against the pilot in Phase 7.1 and written back here.
+complexity_weights:
+  w_depth: 1.0
+  w_arity: 1.0
+  w_tier: 1.0
+  w_branch: 1.0
+complexity_bands:
+  low_max: 4.0      # C <= low_max          -> "low"
+  med_max: 9.0      # low_max < C <= med_max -> "med", else "high"
+
+grid:
+  n: [1, 3, 10, 30, 100]
+  m: [1, 3, 10]
+  k: [10, 100, 1000, 10000]
+  corpus: [A, B, twin]
+  complexity_band: [low, med, high]
+  noise: [none, eps, flip]
+  mode: [scratch, infill]
+  query_budget: [0]
+  # Targeted sweeps (NOT the naive full cross). Populated in Phase 7.
+  sweeps: []
+
+harness:
+  b_iter: 10                 # max HYPOTHESIZE/REFINE iterations
+  b_query_default: 0         # default B_q (oracle queries) when cell unspecified
+  train_validation_fraction: 0.2  # fraction of train held out for the TEST step
+
+sandbox:
+  timeout_s: 5
+  mem_mb: 512
+
+scoring:
+  rel_tol: 1.0e-6
+  test_id_size: 2000
+  test_ood_size: 2000
+
+sampling:
+  ood_shift_factor: 1.5      # multiply numeric range half-widths for OOD draws
+  noise_eps_sigma: 0.05      # relative gaussian sigma for `eps` noise (train only)
+  noise_flip_prob: 0.1       # flip probability for `flip` noise (train only)
+  max_branch_coverage_tries: 400
+
+# Corpus-B generator "personalities": tier sets + topology priors. NOT 50 copies
+# of code — just config rows consumed by corpus.generator.
+generators:
+  - {name: wide_shallow, tiers: [0, 1], max_depth: 2, arity_bias: wide}
+  - {name: deep_narrow, tiers: [0, 1, 2], max_depth: 5, arity_bias: narrow}
+  - {name: full_stack, tiers: [0, 1, 2, 3], max_depth: 4, arity_bias: mixed}
+
+paths:
+  manifests_dir: manifests
+  logs_dir: logs
