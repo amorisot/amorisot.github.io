@@ -62,6 +62,28 @@ def generate(
     typer.echo(f"wrote {out} ({made} transforms)")
 
 
+@app.command("build-corpus")
+def build_corpus_cmd(
+    n_b: int = 50, seed: int = 0,
+    write: bool = typer.Option(True, "--write/--no-write", help="Persist JSONL + summary."),
+) -> None:
+    """Assemble 50 Corpus B + 50 Corpus A + 50 twins (offline; no model calls)."""
+    from .corpus import build_corpus
+
+    cfg = get_config()
+    man = build_corpus.build_full_corpus(n_b=n_b, seed=seed, cfg=cfg)
+    s = man.summary()
+    typer.echo(
+        f"corpus_a={s['corpus_a']} corpus_b={s['corpus_b']} twins={s['twins']} "
+        f"| quarantined: A={s['quarantined_a']} B-rejected={s['quarantined_b']} "
+        f"twins={s['quarantined_twins']}"
+    )
+    if write:
+        paths = build_corpus.write_corpus(man, cfg=cfg)
+        for k, v in paths.items():
+            typer.echo(f"  {k}: {v}")
+
+
 @app.command("run-slice")
 def run_slice(
     n: int = 3, m: int = 1, k: int = 100, band: str = "med", noise: str = "none", seed: int = 0,

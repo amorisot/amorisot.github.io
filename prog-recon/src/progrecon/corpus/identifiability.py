@@ -22,10 +22,11 @@ import random
 
 from pydantic import BaseModel, ConfigDict
 
+from ..data.sampler import draw_x
 from ..dsl import executor
 from ..dsl.graph import ancestor_nodes
 from ..dsl.ops import BRANCH_OPS, branch_arm_taken, branch_arms
-from ..types import Schema, Transform
+from ..types import Transform
 
 
 class BranchCoverage(BaseModel):
@@ -47,21 +48,6 @@ class IdentifiabilityReport(BaseModel):
     branch_coverage: list[BranchCoverage]
     simpler_equivalent_outputs: list[str]
     constant_outputs: list[str]
-
-
-def _draw_x(schema: Schema, rng: random.Random) -> dict:
-    """Minimal uniform P_x draw (the canonical biased sampler lives in data/)."""
-    x: dict = {}
-    for f in schema.inputs:
-        if f.type == "categorical":
-            x[f.name] = rng.choice(f.categories or ["a"])
-        elif f.type == "bool":
-            x[f.name] = rng.random() < 0.5
-        else:
-            lo = int(f.low) if f.low is not None else -50
-            hi = int(f.high) if f.high is not None else 50
-            x[f.name] = rng.randint(lo, max(lo, hi))
-    return x
 
 
 def _approx_eq(a, b) -> bool:
@@ -152,7 +138,7 @@ def check(transform: Transform, k_min: int = 50, *, seed: int = 0, n_probes: int
     deterministic = True
     probes: list[tuple[dict, dict]] = []
     for _ in range(n):
-        x = _draw_x(schema, rng)
+        x = draw_x(schema, rng)
         y, cache = executor.run_graph_trace(g, x)
         # determinism: source agrees with graph
         try:

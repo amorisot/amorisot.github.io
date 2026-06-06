@@ -1,0 +1,114 @@
+# Corpus summary (50 B + 50 A + 50 twins)
+
+> Pure offline generation — no model calls, no grid run. Identifiability-
+> failing candidates are quarantined (not run).
+
+- Corpus A (authored semantic): **50** identified (0 quarantined)
+- Corpus B (generated abstract): **50** identified (14 candidates rejected during search)
+- Twins (abstract controls of A): **50** (0 not fully identified)
+
+## Corpus A — id / domain / C(T) / band
+
+- `A-RETAIL-01` retail  C=7.0 band=med
+- `A-RETAIL-02` retail  C=12.0 band=high
+- `A-RETAIL-03` retail  C=11.0 band=high
+- `A-RETAIL-04` retail  C=6.0 band=med
+- `A-RETAIL-05` retail  C=11.0 band=high
+- `A-RETAIL-06` retail  C=7.0 band=med
+- `A-RETAIL-07` retail  C=11.0 band=high
+- `A-RETAIL-08` retail  C=8.0 band=med
+- `A-RETAIL-09` retail  C=12.0 band=high
+- `A-RETAIL-10` retail  C=5.0 band=med
+- `A-TAX-01` tax  C=10.0 band=high
+- `A-TAX-02` tax  C=5.0 band=med
+- `A-TAX-03` tax  C=7.0 band=med
+- `A-TAX-04` finance  C=9.0 band=med
+- `A-TAX-05` finance  C=10.0 band=high
+- `A-FIN-01` finance  C=7.0 band=med
+- `A-FIN-02` finance  C=4.0 band=low
+- `A-FIN-03` finance  C=3.0 band=low
+- `A-FIN-04` finance  C=5.0 band=med
+- `A-FIN-05` finance  C=7.0 band=med
+- `A-EDU-01` education  C=10.0 band=high
+- `A-EDU-02` education  C=5.0 band=med
+- `A-EDU-03` education  C=5.0 band=med
+- `A-EDU-04` education  C=7.0 band=med
+- `A-EDU-05` education  C=6.0 band=med
+- `A-EDU-06` education  C=10.0 band=high
+- `A-EDU-07` education  C=6.0 band=med
+- `A-EDU-08` education  C=7.0 band=med
+- `A-EDU-09` education  C=6.0 band=med
+- `A-EDU-10` education  C=3.0 band=low
+- `A-LOG-01` logistics  C=12.0 band=high
+- `A-LOG-02` logistics  C=5.0 band=med
+- `A-LOG-03` logistics  C=9.0 band=med
+- `A-LOG-04` logistics  C=8.0 band=med
+- `A-LOG-05` logistics  C=4.0 band=low
+- `A-LOG-06` logistics  C=5.0 band=med
+- `A-LOG-07` logistics  C=5.0 band=med
+- `A-LOG-08` logistics  C=6.0 band=med
+- `A-LOG-09` logistics  C=6.0 band=med
+- `A-LOG-10` logistics  C=6.0 band=med
+- `A-HR-01` hr  C=8.0 band=med
+- `A-HR-02` hr  C=9.0 band=med
+- `A-HR-03` hr  C=4.0 band=low
+- `A-HR-04` hr  C=4.0 band=low
+- `A-HR-05` hr  C=7.0 band=med
+- `A-HR-06` hr  C=5.0 band=med
+- `A-HR-07` hr  C=9.0 band=med
+- `A-HR-08` hr  C=7.0 band=med
+- `A-HR-09` hr  C=5.0 band=med
+- `A-HR-10` hr  C=5.0 band=med
+
+## Corpus B — id / domain / C(T) / band
+
+- `B-GEN-000` -  C=3.0 band=low
+- `B-GEN-001` -  C=2.0 band=low
+- `B-GEN-002` -  C=8.0 band=med
+- `B-GEN-003` -  C=9.0 band=med
+- `B-GEN-004` -  C=11.0 band=high
+- `B-GEN-005` -  C=13.0 band=high
+- `B-GEN-006` -  C=8.0 band=med
+- `B-GEN-007` -  C=10.0 band=high
+- `B-GEN-008` -  C=12.0 band=high
+- `B-GEN-009` -  C=7.0 band=med
+- `B-GEN-010` -  C=2.0 band=low
+- `B-GEN-011` -  C=10.0 band=high
+- `B-GEN-012` -  C=8.0 band=med
+- `B-GEN-013` -  C=11.0 band=high
+- `B-GEN-014` -  C=8.0 band=med
+- `B-GEN-015` -  C=10.0 band=high
+- `B-GEN-016` -  C=2.0 band=low
+- `B-GEN-017` -  C=9.0 band=med
+- `B-GEN-018` -  C=3.0 band=low
+- `B-GEN-019` -  C=10.0 band=high
+- `B-GEN-020` -  C=7.0 band=med
+- `B-GEN-021` -  C=7.0 band=med
+- `B-GEN-022` -  C=9.0 band=med
+- `B-GEN-023` -  C=2.0 band=low
+- `B-GEN-024` -  C=5.0 band=med
+- `B-GEN-025` -  C=8.0 band=med
+- `B-GEN-026` -  C=2.0 band=low
+- `B-GEN-027` -  C=3.0 band=low
+- `B-GEN-028` -  C=12.0 band=high
+- `B-GEN-029` -  C=5.0 band=med
+- `B-GEN-030` -  C=11.0 band=high
+- `B-GEN-031` -  C=10.0 band=high
+- `B-GEN-032` -  C=13.0 band=high
+- `B-GEN-033` -  C=10.0 band=high
+- `B-GEN-034` -  C=9.0 band=med
+- `B-GEN-035` -  C=10.0 band=high
+- `B-GEN-036` -  C=8.0 band=med
+- `B-GEN-037` -  C=5.0 band=med
+- `B-GEN-038` -  C=8.0 band=med
+- `B-GEN-039` -  C=7.0 band=med
+- `B-GEN-040` -  C=8.0 band=med
+- `B-GEN-041` -  C=14.0 band=high
+- `B-GEN-042` -  C=7.0 band=med
+- `B-GEN-043` -  C=10.0 band=high
+- `B-GEN-044` -  C=6.0 band=med
+- `B-GEN-045` -  C=6.0 band=med
+- `B-GEN-046` -  C=12.0 band=high
+- `B-GEN-047` -  C=7.0 band=med
+- `B-GEN-048` -  C=8.0 band=med
+- `B-GEN-049` -  C=3.0 band=low
