@@ -18,9 +18,16 @@ status table and [the build spec](docs/build_spec.md) for the full plan.
 ```bash
 uv venv --python 3.11
 uv pip install -e ".[dev]"
-uv run pytest            # all tests run offline with MockModel
-uv run progrecon --help  # CLI: generate / run / score / analyze
+uv run pytest                 # all tests run offline with MockModel
+uv run progrecon --help       # CLI: generate / run-slice / estimate / analyze
+uv run progrecon dump-ops     # regenerate docs/op_semantics.md (CHECKPOINT 1 review doc)
+uv run progrecon run-slice    # run ONE cheap cell end-to-end (offline oracle by default)
+uv run progrecon estimate     # estimate spend and gate it against the ceiling (runs nothing)
 ```
+
+To run against a real model (post-CHECKPOINT 7, deliberately): set
+`models.cheap.provider: anthropic` in `config.yaml` and export `ANTHROPIC_API_KEY`.
+The metered client aborts if cumulative spend would cross `budget.usd_ceiling`.
 
 ## Hard guardrails (enforced in code)
 
