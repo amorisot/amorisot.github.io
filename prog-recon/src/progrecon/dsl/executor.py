@@ -46,6 +46,18 @@ def run_graph(g: DataflowGraph, x: dict[str, Any]) -> dict[str, Any]:
     return y
 
 
+def run_graph_trace(g: DataflowGraph, x: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Like run_graph but also returns the full node-value cache (for tracing)."""
+    order = topological_order(g)
+    cache: dict[str, Any] = {}
+    for nid in order:
+        nd = g.node(nid)
+        argv = [cache[i] if i in cache else x[i] for i in nd.inputs]
+        cache[nid] = ops.get_op(nd.op)(nd.params, *argv)
+    y = {out_name: cache[producer] for out_name, producer in g.output_map.items()}
+    return y, cache
+
+
 def run_source(source: str, x: dict[str, Any]) -> dict[str, Any]:
     """Execute a trusted source string in-process and call transform(x)."""
     ns: dict[str, Any] = {}

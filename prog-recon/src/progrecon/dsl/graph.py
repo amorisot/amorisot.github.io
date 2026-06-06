@@ -89,6 +89,20 @@ def node_out_types(g: DataflowGraph, schema: Schema) -> dict[str, ConcreteType]:
     return out
 
 
+def ancestor_nodes(g: DataflowGraph, roots: set[str]) -> set[str]:
+    """All node_ids in the transitive input-cone of `roots` (inclusive)."""
+    by_id = {nd.node_id: nd for nd in g.nodes}
+    keep: set[str] = set()
+    stack = [r for r in roots if r in by_id]
+    while stack:
+        nid = stack.pop()
+        if nid in keep:
+            continue
+        keep.add(nid)
+        stack.extend(i for i in by_id[nid].inputs if i in by_id)
+    return keep
+
+
 def _reaches_input(g: DataflowGraph, start: str, field_names: set[str]) -> bool:
     """Does node `start` transitively depend on at least one input field?"""
     seen: set[str] = set()
