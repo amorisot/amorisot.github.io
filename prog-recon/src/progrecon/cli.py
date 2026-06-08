@@ -18,7 +18,7 @@ from .runner import budget, grid, run_cell
 app = typer.Typer(add_completion=False, help="Program Reconstruction Scaling Study harness")
 
 
-def _run_with_progress(items, *, client, cfg, desc):
+def _run_with_progress(items, *, client, cfg, desc, resume=True):
     """Run a sweep with a live tqdm progress bar (outcome + running spend)."""
     from tqdm import tqdm
 
@@ -32,7 +32,7 @@ def _run_with_progress(items, *, client, cfg, desc):
         bar.update(1)
 
     try:
-        return sweep.run_sweep(items, client=client, cfg=cfg, on_item=_cb)
+        return sweep.run_sweep(items, client=client, cfg=cfg, resume=resume, on_item=_cb)
     finally:
         bar.close()
 
@@ -142,6 +142,7 @@ def sweep_cmd(
     repeats: int = 1,
     n_transforms: int = 5,
     run: bool = typer.Option(False, "--run", help="Execute the plan (offline oracle by default)."),
+    fresh: bool = typer.Option(False, "--fresh", help="Ignore cached runs; re-run all from scratch."),
     i_accept_cost: bool = typer.Option(False, "--i-accept-cost", help="Acknowledge over-ceiling spend."),
 ) -> None:
     """Plan a targeted sweep, estimate its cost, and (optionally) run it resumably."""
@@ -180,7 +181,7 @@ def sweep_cmd(
         typer.echo("(estimate only — pass --run to execute; offline oracle unless a real provider is configured)")
         raise typer.Exit(0)
     budget.guard(report, accept_cost=i_accept_cost)
-    outcomes = _run_with_progress(items, client=None, cfg=cfg, desc=f"sweep {name}")
+    outcomes = _run_with_progress(items, client=None, cfg=cfg, desc=f"sweep {name}", resume=not fresh)
     df = aggregate.outcomes_to_frame(outcomes)
     typer.echo(f"{len(outcomes)} runs complete")
     typer.echo(aggregate.cell_table(df).to_string(index=False))
@@ -196,6 +197,7 @@ def experiment(
     repeats: int = 3,
     test_size: int = 300,
     run: bool = typer.Option(False, "--run", help="Execute (otherwise estimate only)."),
+    fresh: bool = typer.Option(False, "--fresh", help="Ignore cached runs; re-run all from scratch."),
     i_accept_cost: bool = typer.Option(False, "--i-accept-cost"),
 ) -> None:
     """Run a small curated experiment: chosen semantic programs vs their twins."""
@@ -248,7 +250,7 @@ def experiment(
             raise typer.Exit(2)
         client = ModelClient(cfg)
     budget.guard(report, accept_cost=i_accept_cost)
-    outcomes = _run_with_progress(items, client=client, cfg=cfg, desc=f"experiment ({model})")
+    outcomes = _run_with_progress(items, client=client, cfg=cfg, desc=f"experiment ({model})", resume=not fresh)
     df = aggregate.outcomes_to_frame(outcomes)
     typer.echo(f"\n{len(outcomes)} runs complete")
     typer.echo(aggregate.cell_table(df).to_string(index=False))

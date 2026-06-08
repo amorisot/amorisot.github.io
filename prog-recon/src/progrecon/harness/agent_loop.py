@@ -120,6 +120,7 @@ def run(
     iterations = 0
     queries = 0
     tokens = 0
+    start_usd = client.total_usd  # snapshot: report THIS run's spend, not cumulative
     outcome = "failed"
 
     while iterations < cfg.harness.b_iter:
@@ -189,7 +190,7 @@ def run(
 
     return LoopResult(
         outcome=outcome, final_source=final_source, iterations_used=iterations,
-        queries_used=queries, tokens_used=tokens, usd_cost=client.total_usd, transcript=transcript,
+        queries_used=queries, tokens_used=tokens, usd_cost=client.total_usd - start_usd, transcript=transcript,
     )
 
 
