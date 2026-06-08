@@ -18,6 +18,25 @@ from .runner import budget, grid, run_cell
 app = typer.Typer(add_completion=False, help="Program Reconstruction Scaling Study harness")
 
 
+def _run_with_progress(items, *, client, cfg, desc):
+    """Run a sweep with a live tqdm progress bar (outcome + running spend)."""
+    from tqdm import tqdm
+
+    from .runner import sweep
+
+    bar = tqdm(total=len(items), desc=desc, unit="run")
+
+    def _cb(done, total, wi, oc):  # noqa: ANN001
+        spent = f"${client.total_usd:.3f}" if client is not None else "mock"
+        bar.set_postfix_str(f"{wi.transform.id}/{wi.cell.corpus} {oc.outcome} exact={oc.exact_pass} {spent}")
+        bar.update(1)
+
+    try:
+        return sweep.run_sweep(items, client=client, cfg=cfg, on_item=_cb)
+    finally:
+        bar.close()
+
+
 @app.command("dump-ops")
 def dump_ops(out: str = "docs/op_semantics.md") -> None:
     """Regenerate the op semantics table (the CHECKPOINT 1 review doc)."""
@@ -161,7 +180,7 @@ def sweep_cmd(
         typer.echo("(estimate only — pass --run to execute; offline oracle unless a real provider is configured)")
         raise typer.Exit(0)
     budget.guard(report, accept_cost=i_accept_cost)
-    outcomes = sweep.run_sweep(items, cfg=cfg)
+    outcomes = _run_with_progress(items, client=None, cfg=cfg, desc=f"sweep {name}")
     df = aggregate.outcomes_to_frame(outcomes)
     typer.echo(f"{len(outcomes)} runs complete")
     typer.echo(aggregate.cell_table(df).to_string(index=False))
@@ -229,7 +248,7 @@ def experiment(
             raise typer.Exit(2)
         client = ModelClient(cfg)
     budget.guard(report, accept_cost=i_accept_cost)
-    outcomes = sweep.run_sweep(items, client=client, cfg=cfg)
+    outcomes = _run_with_progress(items, client=client, cfg=cfg, desc=f"experiment ({model})")
     df = aggregate.outcomes_to_frame(outcomes)
     typer.echo(f"\n{len(outcomes)} runs complete")
     typer.echo(aggregate.cell_table(df).to_string(index=False))

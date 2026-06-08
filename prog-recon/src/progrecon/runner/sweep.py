@@ -19,6 +19,7 @@ the global USD ceiling is enforced across the whole sweep.
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from ..config import Config, get_config
@@ -145,33 +146,39 @@ def run_sweep(
     client: ModelClient | None = None,
     cfg: Config | None = None,
     resume: bool = True,
+    on_item: Callable[[int, int, WorkItem, RunOutcome], None] | None = None,
 ) -> list[RunOutcome]:
     """Run all work items (resumable). Returns the per-item RunOutcomes.
 
     If ``client`` is given (a real metered client), it is shared across items so
     the global USD ceiling applies to the whole sweep. If ``None``, each item
-    uses a per-task oracle MockModel (offline).
+    uses a per-task oracle MockModel (offline). ``on_item(done, total, wi, oc)``
+    is invoked after each item completes (for progress display).
     """
     cfg = cfg or get_config()
+    total = len(items)
     outcomes: list[RunOutcome] = []
-    for wi in items:
+    for i, wi in enumerate(items):
         path = run_cell.manifest_path(wi.task_id, wi.cell, wi.repeat_idx, cfg)
+        oc: RunOutcome | None = None
         if resume and path.exists():
             prev = RunOutcome.model_validate_json(path.read_text())
             if prev.outcome != "error":  # errors are transient -> re-run them
-                outcomes.append(prev)
-                continue
-        try:
-            res = run_cell.run_cell(
-                wi.cell, transform=wi.transform, client=client, repeat_idx=wi.repeat_idx,
-                seed=wi.perturbation.seed, perturbation=wi.perturbation, cfg=cfg, write_artifacts=True,
-            )
-            outcomes.append(res.outcome)
-        except Exception as e:  # noqa: BLE001 - one bad run must not abort the sweep
-            spent = client.total_usd if client is not None else 0.0
-            outcomes.append(RunOutcome(
-                task_id=wi.task_id, cell=wi.cell, repeat_idx=wi.repeat_idx, final_source=None,
-                outcome="error", iterations_used=0, tokens_used=0, usd_cost=spent,
-                transcript_path=f"(run crashed: {type(e).__name__}: {e})"[:300],
-            ))
+                oc = prev
+        if oc is None:
+            try:
+                oc = run_cell.run_cell(
+                    wi.cell, transform=wi.transform, client=client, repeat_idx=wi.repeat_idx,
+                    seed=wi.perturbation.seed, perturbation=wi.perturbation, cfg=cfg, write_artifacts=True,
+                ).outcome
+            except Exception as e:  # noqa: BLE001 - one bad run must not abort the sweep
+                spent = client.total_usd if client is not None else 0.0
+                oc = RunOutcome(
+                    task_id=wi.task_id, cell=wi.cell, repeat_idx=wi.repeat_idx, final_source=None,
+                    outcome="error", iterations_used=0, tokens_used=0, usd_cost=spent,
+                    transcript_path=f"(run crashed: {type(e).__name__}: {e})"[:300],
+                )
+        outcomes.append(oc)
+        if on_item is not None:
+            on_item(i + 1, total, wi, oc)
     return outcomes

@@ -98,6 +98,15 @@ def test_run_sweep_offline_and_resumable(transforms, cfg, monkeypatch):
     assert all(o.exact_pass for o in again)
 
 
+def test_run_sweep_calls_on_item_per_run(transforms, cfg):
+    items = sweep.plan_sample_sweep(transforms[:1], "B", ks=[10, 30], repeats=1, model_id="mock")
+    seen = []
+    sweep.run_sweep(items, cfg=cfg, on_item=lambda done, total, wi, oc: seen.append((done, total, oc.outcome)))
+    assert [s[0] for s in seen] == [1, 2]      # done counter advances
+    assert all(s[1] == len(items) for s in seen)
+    assert len(seen) == len(items)
+
+
 def test_run_sweep_reruns_error_outcomes(transforms, cfg):
     # A stale 'error' manifest must NOT be replayed on resume — errors are transient.
     items = sweep.plan_sample_sweep(transforms[:1], "B", ks=[10], repeats=1, model_id="mock")
