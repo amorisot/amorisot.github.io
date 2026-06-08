@@ -56,24 +56,30 @@ def estimate(
     cells: list[GridCell],
     *,
     repeats: int = 1,
-    avg_input_tokens: int = 4000,
+    tokens_per_example: float = 28.6,
     avg_output_tokens: int = 600,
     cfg: Config | None = None,
 ) -> BudgetReport:
-    """Estimate spend for running ``cells`` × ``repeats``.
+    """Estimate spend for running ``cells`` × ``repeats`` (a conservative ceiling).
 
-    Per task, the harness makes up to ``b_iter`` model calls; we estimate the
-    expected number of calls as ``b_iter`` (worst-case upper bound is honest for
-    a *ceiling* estimate).
+    Per task the harness makes up to ``b_iter`` model calls; we use that as the
+    call count. The prompt is **k-aware**: input tokens per call ≈ a fixed
+    preamble plus ``tokens_per_example`` for each *shown* training example
+    (k minus the held-out validation slice), measured at ~28.6 tok/example for
+    our serialization. No prompt-caching discount is applied, so the figure is
+    an honest upper bound.
     """
     cfg = cfg or get_config()
     calls_per_task = cfg.harness.b_iter
+    visible_frac = 1.0 - cfg.harness.train_validation_fraction
     per_cell: list[CellEstimate] = []
     total = 0.0
     for cell in cells:
         price = cfg.price_for(cell.model_id)
         calls = calls_per_task * repeats
-        in_tok = calls * avg_input_tokens
+        visible = max(1, int(cell.k * visible_frac))
+        in_per_call = int(400 + tokens_per_example * visible)  # preamble + shown examples
+        in_tok = calls * in_per_call
         out_tok = calls * avg_output_tokens
         usd = in_tok / 1_000_000 * price.input_per_mtok + out_tok / 1_000_000 * price.output_per_mtok
         total += usd

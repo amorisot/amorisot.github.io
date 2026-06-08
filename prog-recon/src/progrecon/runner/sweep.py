@@ -108,6 +108,27 @@ def plan_leakage_sweep(
     ]
 
 
+def plan_experiment(
+    corpus_a: list[Transform], twins: list[Transform], *, ids: list[str],
+    include_twins: bool, k: int, repeats: int, model_id: str,
+) -> tuple[list[WorkItem], list[str]]:
+    """Curated small run: chosen Corpus-A programs (+ their twins) at fixed k.
+
+    Returns (work items, missing ids). Each chosen A program contributes a
+    semantic-condition run; with ``include_twins`` its matched abstract twin
+    contributes the control run — the minimal semantic-vs-abstract comparison.
+    """
+    by_id = {t.id: t for t in corpus_a}
+    chosen = [by_id[i] for i in ids if i in by_id]
+    missing = [i for i in ids if i not in by_id]
+    items = plan_sample_sweep(chosen, "A", ks=[k], repeats=repeats, model_id=model_id)
+    if include_twins:
+        tw_by_base = {t.twin_id: t for t in twins}
+        chosen_tw = [tw_by_base[a.id] for a in chosen if a.id in tw_by_base]
+        items += plan_sample_sweep(chosen_tw, "twin", ks=[k], repeats=repeats, model_id=model_id)
+    return items, missing
+
+
 # ---------------------------------------------------------------------------
 # Estimation + execution
 # ---------------------------------------------------------------------------

@@ -52,6 +52,27 @@ def test_semantic_plan_pairs_a_with_twin(transforms, cfg):
     assert {wi.cell.k for wi in items} == {20}
 
 
+def test_plan_experiment_selects_and_pairs(transforms, cfg):
+    a = transforms  # two authored programs
+    tws = [twin.make_abstract(t, seed=1) for t in a]
+    ids = [a[0].id, "A-DOES-NOT-EXIST"]
+    items, missing = sweep.plan_experiment(
+        a, tws, ids=ids, include_twins=True, k=16, repeats=2, model_id="mock")
+    assert missing == ["A-DOES-NOT-EXIST"]
+    # 1 chosen A x 2 repeats, + its twin x 2 repeats
+    assert len(items) == 4
+    assert {wi.cell.corpus for wi in items} == {"A", "twin"}
+    # no-twins halves it
+    items2, _ = sweep.plan_experiment(a, tws, ids=[a[0].id], include_twins=False, k=16, repeats=2, model_id="mock")
+    assert len(items2) == 2 and {wi.cell.corpus for wi in items2} == {"A"}
+
+
+def test_estimate_is_k_aware(transforms, cfg):
+    big = sweep.plan_sample_sweep(transforms[:1], "B", ks=[1000], repeats=1, model_id=cfg.models.cheap.id)
+    small = sweep.plan_sample_sweep(transforms[:1], "B", ks=[10], repeats=1, model_id=cfg.models.cheap.id)
+    assert sweep.estimate(big, cfg=cfg).total_usd > sweep.estimate(small, cfg=cfg).total_usd
+
+
 def test_estimate_is_computed_from_plan(transforms, cfg):
     items = sweep.plan_sample_sweep(transforms, "B", ks=[10, 100], repeats=1, model_id=cfg.models.cheap.id)
     rep = sweep.estimate(items, cfg=cfg)

@@ -11,7 +11,7 @@ from pathlib import Path
 
 import typer
 
-from .config import get_config
+from .config import get_api_key, get_config
 from .dsl.ops_spec import render_op_table_markdown
 from .runner import budget, grid, run_cell
 
@@ -165,6 +165,72 @@ def sweep_cmd(
     df = aggregate.outcomes_to_frame(outcomes)
     typer.echo(f"{len(outcomes)} runs complete")
     typer.echo(aggregate.cell_table(df).to_string(index=False))
+
+
+@app.command("experiment")
+def experiment(
+    ids: str = typer.Option("A-INFO-01,A-RETAIL-01,A-HEALTH-05", help="Comma-separated Corpus-A ids."),
+    twins: bool = typer.Option(True, "--twins/--no-twins", help="Also run the matched abstract twins."),
+    model: str = typer.Option("", help="Model id (default: config cheap model)."),
+    provider: str = typer.Option("anthropic", help="anthropic | mock (mock = offline oracle)."),
+    k: int = 128,
+    repeats: int = 3,
+    test_size: int = 300,
+    run: bool = typer.Option(False, "--run", help="Execute (otherwise estimate only)."),
+    i_accept_cost: bool = typer.Option(False, "--i-accept-cost"),
+) -> None:
+    """Run a small curated experiment: chosen semantic programs vs their twins."""
+    from .analysis import aggregate
+    from .corpus import build_corpus
+    from .runner import sweep
+    from .runner.model_client import ModelClient
+
+    cfg = get_config()
+    model = model or cfg.models.cheap.id
+    cfg = cfg.model_copy(update={
+        "models": cfg.models.model_copy(update={
+            "cheap": cfg.models.cheap.model_copy(update={"id": model, "provider": provider})}),
+        "scoring": cfg.scoring.model_copy(update={"test_id_size": test_size, "test_ood_size": test_size}),
+    })
+
+    loaded = build_corpus.load_persisted(cfg)
+    if loaded is None:
+        typer.echo("(building corpus once — run `progrecon build-corpus` to cache it)")
+        man = build_corpus.build_full_corpus(cfg=cfg)
+        corpus_a, twins_all = man.corpus_a, man.twins
+    else:
+        corpus_a, _, twins_all = loaded
+
+    want = [s.strip() for s in ids.split(",") if s.strip()]
+    items, missing = sweep.plan_experiment(
+        corpus_a, twins_all, ids=want, include_twins=twins, k=k, repeats=repeats, model_id=model)
+    if missing:
+        typer.echo(f"WARNING: unknown ids skipped: {missing}")
+    if not items:
+        typer.echo("no work items — check --ids")
+        raise typer.Exit(2)
+
+    report = sweep.estimate(items, cfg=cfg)
+    typer.echo(f"experiment: {len(items)} runs  (model={model}, provider={provider}, k={k}, "
+               f"repeats={repeats}, test_size={test_size})")
+    typer.echo(report.render())
+    if not run:
+        typer.echo("(estimate only — add --run to execute)")
+        raise typer.Exit(0)
+
+    client = None
+    if provider != "mock":
+        if not get_api_key("anthropic"):
+            typer.echo("ERROR: ANTHROPIC_API_KEY is not set in the environment.")
+            raise typer.Exit(2)
+        client = ModelClient(cfg)
+    budget.guard(report, accept_cost=i_accept_cost)
+    outcomes = sweep.run_sweep(items, client=client, cfg=cfg)
+    df = aggregate.outcomes_to_frame(outcomes)
+    typer.echo(f"\n{len(outcomes)} runs complete")
+    typer.echo(aggregate.cell_table(df).to_string(index=False))
+    if client is not None:
+        typer.echo(f"\nactual spend: ${client.total_usd:.4f}")
 
 
 @app.command("analyze")

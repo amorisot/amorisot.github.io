@@ -37,7 +37,10 @@ complexity_bands:
 grid:
   n: [1, 3, 10, 30, 100]
   m: [1, 3, 10]
-  k: [10, 100, 1000, 10000]
+  # k capped at 3000: ~3000 shown examples ~= 86k tokens, which fits Haiku's
+  # 200k context. k=10000 (~286k tokens) exceeds it — use Sonnet/Opus (1M) for
+  # larger k, or subsample the shown examples.
+  k: [10, 100, 1000, 3000]
   corpus: [A, B, twin]
   complexity_band: [low, med, high]
   noise: [none, eps, flip]
