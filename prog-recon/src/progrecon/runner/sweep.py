@@ -157,8 +157,10 @@ def run_sweep(
     for wi in items:
         path = run_cell.manifest_path(wi.task_id, wi.cell, wi.repeat_idx, cfg)
         if resume and path.exists():
-            outcomes.append(RunOutcome.model_validate_json(path.read_text()))
-            continue
+            prev = RunOutcome.model_validate_json(path.read_text())
+            if prev.outcome != "error":  # errors are transient -> re-run them
+                outcomes.append(prev)
+                continue
         res = run_cell.run_cell(
             wi.cell, transform=wi.transform, client=client, repeat_idx=wi.repeat_idx,
             seed=wi.perturbation.seed, perturbation=wi.perturbation, cfg=cfg, write_artifacts=True,

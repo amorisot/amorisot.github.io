@@ -127,7 +127,7 @@ def run(
         try:
             resp = client.complete(
                 system=system, messages=messages, model_id=cell.model_id,
-                max_tokens=cfg.budget.per_run_token_cap,
+                max_tokens=cfg.harness.max_output_tokens,  # per-CALL output cap
             )
         except Exception as e:  # noqa: BLE001 - includes BudgetExceeded
             transcript.append({"role": "harness", "content": f"client error: {e}"})

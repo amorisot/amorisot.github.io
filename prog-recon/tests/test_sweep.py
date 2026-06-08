@@ -5,6 +5,7 @@ import pytest
 from progrecon.config import load_config
 from progrecon.corpus import authored, twin
 from progrecon.runner import run_cell, sweep
+from progrecon.types import RunOutcome
 
 
 @pytest.fixture
@@ -95,3 +96,18 @@ def test_run_sweep_offline_and_resumable(transforms, cfg, monkeypatch):
     again = sweep.run_sweep(items, cfg=cfg, resume=True)
     assert [o.task_id for o in again] == [o.task_id for o in outcomes]
     assert all(o.exact_pass for o in again)
+
+
+def test_run_sweep_reruns_error_outcomes(transforms, cfg):
+    # A stale 'error' manifest must NOT be replayed on resume — errors are transient.
+    items = sweep.plan_sample_sweep(transforms[:1], "B", ks=[10], repeats=1, model_id="mock")
+    wi = items[0]
+    path = run_cell.manifest_path(wi.task_id, wi.cell, wi.repeat_idx, cfg)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    stale = RunOutcome(
+        task_id=wi.task_id, cell=wi.cell, repeat_idx=wi.repeat_idx, final_source=None,
+        outcome="error", iterations_used=0, tokens_used=0, usd_cost=0.0, transcript_path="x",
+    )
+    path.write_text(stale.model_dump_json())
+    outs = sweep.run_sweep(items, cfg=cfg, resume=True)
+    assert outs[0].outcome != "error"  # re-ran -> oracle solves it

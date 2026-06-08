@@ -71,6 +71,7 @@ class HarnessConfig(_CfgBase):
     b_iter: int
     b_query_default: int
     train_validation_fraction: float = 0.2
+    max_output_tokens: int = 4096  # per-CALL output cap (distinct from the per-run budget)
 
 
 class SandboxConfig(_CfgBase):

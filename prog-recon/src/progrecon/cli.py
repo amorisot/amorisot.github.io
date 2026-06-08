@@ -233,8 +233,79 @@ def experiment(
     df = aggregate.outcomes_to_frame(outcomes)
     typer.echo(f"\n{len(outcomes)} runs complete")
     typer.echo(aggregate.cell_table(df).to_string(index=False))
+
+    from collections import Counter as _Counter
+    breakdown = _Counter(o.outcome for o in outcomes)
+    typer.echo(f"\noutcomes: {dict(breakdown)}")
+    # If runs errored, surface the first error note from a transcript (don't fail silently).
+    if breakdown.get("error"):
+        import json as _json
+        for o in outcomes:
+            if o.outcome == "error" and o.transcript_path and Path(o.transcript_path).exists():
+                tr = _json.loads(Path(o.transcript_path).read_text())
+                notes = [m.get("content", "") for m in tr if m.get("role") == "harness"]
+                if notes:
+                    typer.echo(f"first error: {notes[-1][:400]}")
+                    break
     if client is not None:
         typer.echo(f"\nactual spend: ${client.total_usd:.4f}")
+
+
+@app.command("show-data")
+def show_data(
+    id: str = typer.Option("A-HEALTH-05", "--id", help="Corpus-A program id."),
+    k: int = 12,
+    seed: int = 0,
+    test_size: int = 5,
+    semantic: bool = typer.Option(True, "--semantic/--abstract", help="Show real labels, or masked."),
+    out: str = typer.Option("", help="If set, write the FULL splits as JSON into this dir."),
+) -> None:
+    """Reproduce and display a program's train / test_id / test_ood rows.
+
+    Splits are deterministic from (program, seed): to see the exact data a given
+    run used, pass that run's seed (the number after '#p' in its manifest name)
+    and the same --k / --test-size.
+    """
+    import json as _json
+
+    from .corpus import authored
+    from .data import sampler, serialize
+    from .dsl import executor
+
+    cfg = get_config()
+    cfg = cfg.model_copy(update={"scoring": cfg.scoring.model_copy(
+        update={"test_id_size": test_size, "test_ood_size": test_size})})
+    by_id = {t.id: t for t in authored.build_all()}
+    if id not in by_id:
+        typer.echo(f"unknown id {id!r}. See manifests/samples/corpus_summary.md for the list.")
+        raise typer.Exit(2)
+    t = by_id[id]
+    bundle = sampler.make_dataset(t, k=k, seed=seed, branch_bias=True, cfg=cfg)
+
+    typer.echo(f"=== {t.id}  ({t.domain})  {t.description} ===")
+    typer.echo(f"firewall row-id ranges: train {sorted(bundle.train.row_ids)[:1]}.. | "
+               f"test_id from {min(bundle.test_id.row_ids)} | test_ood from {min(bundle.test_ood.row_ids)} | "
+               f"disjoint={bundle.firewall_ok()}\n")
+
+    typer.echo("--- TRAIN (this is exactly what the model is shown) ---")
+    typer.echo(serialize.for_prompt(bundle.train, t.schema, mask_names=not semantic))
+
+    for split in (bundle.test_id, bundle.test_ood):
+        typer.echo(f"\n--- {split.kind.upper()} (held out; never shown to the model) ---")
+        for ex in split.examples[:test_size]:
+            typer.echo(f"  {ex.x}  ->  {ex.y}")
+
+    if out:
+        d = Path(out)
+        d.mkdir(parents=True, exist_ok=True)
+        for split in (bundle.train, bundle.test_id, bundle.test_ood):
+            (d / f"{t.id}__{split.kind}__seed{seed}.json").write_text(
+                _json.dumps([{"row_id": e.row_id, "x": e.x, "y": e.y} for e in split.examples],
+                            indent=2, default=lambda o: round(o, 6) if isinstance(o, float) else o))
+        # sanity: the ground-truth source that produced these rows
+        (d / f"{t.id}__source.py").write_text(t.source)
+        typer.echo(f"\nwrote full splits + ground-truth source to {out}/")
+        _ = executor  # (kept available for ad-hoc verification)
 
 
 @app.command("analyze")

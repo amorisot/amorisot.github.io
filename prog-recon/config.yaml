@@ -53,6 +53,7 @@ harness:
   b_iter: 10                 # max HYPOTHESIZE/REFINE iterations
   b_query_default: 0         # default B_q (oracle queries) when cell unspecified
   train_validation_fraction: 0.2  # fraction of train held out for the TEST step
+  max_output_tokens: 4096    # per-CALL output cap (the per-run budget is budget.per_run_token_cap)
 
 sandbox:
   timeout_s: 5
