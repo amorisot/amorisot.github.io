@@ -102,12 +102,22 @@ def _make_limits(timeout_s: float, mem_mb: int):
     def _limits() -> None:  # runs in the child after fork, before exec
         import resource
 
+        def _try(res: int, soft: int, hard: int) -> None:
+            # Best-effort: some platforms don't support a given limit (notably
+            # RLIMIT_AS on macOS). A failure here must NOT abort the subprocess,
+            # so swallow it — the wall-clock timeout (parent-side) and the
+            # network/fs guards (in-process) are the platform-independent floor.
+            try:
+                resource.setrlimit(res, (soft, hard))
+            except (ValueError, OSError):
+                pass
+
         cpu = int(timeout_s) + 1
-        resource.setrlimit(resource.RLIMIT_CPU, (cpu, cpu))
+        _try(resource.RLIMIT_CPU, cpu, cpu)
         mem = mem_mb * 1024 * 1024
-        resource.setrlimit(resource.RLIMIT_AS, (mem, mem))
+        _try(resource.RLIMIT_AS, mem, mem)
         fsize = 16 * 1024 * 1024
-        resource.setrlimit(resource.RLIMIT_FSIZE, (fsize, fsize))
+        _try(resource.RLIMIT_FSIZE, fsize, fsize)
 
     return _limits
 

@@ -241,12 +241,17 @@ def experiment(
     if breakdown.get("error"):
         import json as _json
         for o in outcomes:
-            if o.outcome == "error" and o.transcript_path and Path(o.transcript_path).exists():
+            if o.outcome != "error":
+                continue
+            if o.transcript_path and Path(o.transcript_path).exists():
                 tr = _json.loads(Path(o.transcript_path).read_text())
                 notes = [m.get("content", "") for m in tr if m.get("role") == "harness"]
                 if notes:
                     typer.echo(f"first error: {notes[-1][:400]}")
                     break
+            elif o.transcript_path.startswith("("):  # inline crash message
+                typer.echo(f"first error: {o.transcript_path}")
+                break
     if client is not None:
         typer.echo(f"\nactual spend: ${client.total_usd:.4f}")
 

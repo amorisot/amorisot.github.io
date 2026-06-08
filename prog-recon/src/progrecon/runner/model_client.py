@@ -175,7 +175,9 @@ class ModelClient:
         try:
             import anthropic
         except ImportError as e:
-            raise RuntimeError("install the 'providers' extra to use the anthropic provider") from e
+            raise RuntimeError(
+                "the 'anthropic' package is not installed; run `uv sync` (it is a project dependency)"
+            ) from e
 
         client = anthropic.Anthropic(api_key=key, max_retries=4)
         kwargs: dict[str, Any] = {

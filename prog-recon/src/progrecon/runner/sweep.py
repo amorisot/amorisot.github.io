@@ -161,9 +161,17 @@ def run_sweep(
             if prev.outcome != "error":  # errors are transient -> re-run them
                 outcomes.append(prev)
                 continue
-        res = run_cell.run_cell(
-            wi.cell, transform=wi.transform, client=client, repeat_idx=wi.repeat_idx,
-            seed=wi.perturbation.seed, perturbation=wi.perturbation, cfg=cfg, write_artifacts=True,
-        )
-        outcomes.append(res.outcome)
+        try:
+            res = run_cell.run_cell(
+                wi.cell, transform=wi.transform, client=client, repeat_idx=wi.repeat_idx,
+                seed=wi.perturbation.seed, perturbation=wi.perturbation, cfg=cfg, write_artifacts=True,
+            )
+            outcomes.append(res.outcome)
+        except Exception as e:  # noqa: BLE001 - one bad run must not abort the sweep
+            spent = client.total_usd if client is not None else 0.0
+            outcomes.append(RunOutcome(
+                task_id=wi.task_id, cell=wi.cell, repeat_idx=wi.repeat_idx, final_source=None,
+                outcome="error", iterations_used=0, tokens_used=0, usd_cost=spent,
+                transcript_path=f"(run crashed: {type(e).__name__}: {e})"[:300],
+            ))
     return outcomes

@@ -667,6 +667,7 @@ name = "progrecon"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "anthropic" },
     { name = "numpy" },
     { name = "pandas" },
     { name = "pydantic" },
@@ -683,13 +684,10 @@ dev = [
     { name = "ruff" },
     { name = "types-pyyaml" },
 ]
-providers = [
-    { name = "anthropic" },
-]
 
 [package.metadata]
 requires-dist = [
-    { name = "anthropic", marker = "extra == 'providers'", specifier = ">=0.40" },
+    { name = "anthropic", specifier = ">=0.40" },
     { name = "black", marker = "extra == 'dev'", specifier = ">=24.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
     { name = "numpy", specifier = ">=1.26" },
@@ -702,7 +700,7 @@ requires-dist = [
     { name = "typer", specifier = ">=0.12" },
     { name = "types-pyyaml", marker = "extra == 'dev'" },
 ]
-provides-extras = ["providers", "dev"]
+provides-extras = ["dev"]
 
 [[package]]
 name = "pydantic"
