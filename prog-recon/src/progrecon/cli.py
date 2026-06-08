@@ -193,15 +193,19 @@ def experiment(
         "scoring": cfg.scoring.model_copy(update={"test_id_size": test_size, "test_ood_size": test_size}),
     })
 
-    loaded = build_corpus.load_persisted(cfg)
-    if loaded is None:
-        typer.echo("(building corpus once — run `progrecon build-corpus` to cache it)")
-        man = build_corpus.build_full_corpus(cfg=cfg)
-        corpus_a, twins_all = man.corpus_a, man.twins
-    else:
-        corpus_a, _, twins_all = loaded
-
     want = [s.strip() for s in ids.split(",") if s.strip()]
+    typer.echo(f"preparing {len(want)} program(s){' + twins' if twins else ''}...")
+    loaded = build_corpus.load_persisted(cfg)
+    if loaded is not None:
+        corpus_a, _, twins_all = loaded
+    else:
+        # Build ONLY what this experiment needs (fast) — not the whole corpus.
+        from .corpus import authored
+        corpus_a = authored.build_all()
+        by_id = {t.id: t for t in corpus_a}
+        chosen_now = [by_id[i] for i in want if i in by_id]
+        twins_all = [build_corpus.build_twin(a)[0] for a in chosen_now] if twins else []
+
     items, missing = sweep.plan_experiment(
         corpus_a, twins_all, ids=want, include_twins=twins, k=k, repeats=repeats, model_id=model)
     if missing:

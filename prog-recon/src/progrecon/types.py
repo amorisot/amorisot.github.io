@@ -15,9 +15,14 @@ Design notes:
 
 from __future__ import annotations
 
+import warnings
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+# The `Transform.schema` field name is mandated by the protocol and harmlessly
+# shadows the deprecated BaseModel.schema method; silence the cosmetic warning.
+warnings.filterwarnings("ignore", message=r'Field name "schema".*', category=UserWarning)
 
 # ---------------------------------------------------------------------------
 # Base
