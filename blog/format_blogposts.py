@@ -247,6 +247,7 @@ The next step change model drops, you try it, it is very good because it is a st
 Every so often, there is a story in the news about some absurd air travel mishap. Surprisingly frequently, it is about Air Canada.
 
 To illustrate:
+
 - <a href="https://globalnews.ca/news/9938774/air-canada-vomit-seat-passenger-apology/">Air Canada customers kicked off plane for refusing vomit-covered seat</a>
 - <a href="https://www.cbc.ca/news/canada/toronto/pearson-airport-heist-arrests-1.7176041">The largest gold heist in Canadian history was an inside job at an Air Canada warehouse</a>
 - <a href="https://www.cnn.com/2012/04/17/travel/canada-disoriented-pilot/index.html">An Air Canada pilot mistook the planet Venus for an oncoming plane and dove, injuring 16</a>
