@@ -358,7 +358,7 @@ def make_structured_data(title: str, published: str | None, updated: str | None)
     data["author"] = {
         "@type": "Person",
         "name": "Adrien Morisot",
-        "url": "https://amorisot.github.io/"
+        "url": "https://adrienmorisot.com/"
     }
     import json
     return f'<script type="application/ld+json">{json.dumps(data)}</script>'
@@ -423,11 +423,11 @@ def generate_sitemap(blog_posts: dict[str, str]):
     """Generate sitemap.xml with all pages. blog_posts is slug -> lastmod date."""
     # Static pages
     static_pages = [
-        ("https://amorisot.github.io/", "index.html"),
-        ("https://amorisot.github.io/art", "art.html"),
-        ("https://amorisot.github.io/ml", "ml.html"),
-        ("https://amorisot.github.io/books", "books.html"),
-        ("https://amorisot.github.io/blog", "blog.html"),
+        ("https://adrienmorisot.com/", "index.html"),
+        ("https://adrienmorisot.com/art", "art.html"),
+        ("https://adrienmorisot.com/ml", "ml.html"),
+        ("https://adrienmorisot.com/books", "books.html"),
+        ("https://adrienmorisot.com/blog", "blog.html"),
     ]
 
     urls = []
@@ -437,7 +437,7 @@ def generate_sitemap(blog_posts: dict[str, str]):
 
     # Blog posts - use explicit dates
     for slug, lastmod in blog_posts.items():
-        urls.append(f"  <url>\n    <loc>https://amorisot.github.io/blog/{slug}.html</loc>\n    <lastmod>{lastmod}</lastmod>\n  </url>")
+        urls.append(f"  <url>\n    <loc>https://adrienmorisot.com/blog/{slug}.html</loc>\n    <lastmod>{lastmod}</lastmod>\n  </url>")
 
     sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     sitemap += "\n".join(urls)
@@ -477,7 +477,7 @@ def main():
     write_if_changed(filepath, BLOG_TEMPLATE.format(
         title="🌱 seedlings",
         og_type="article",
-        og_url=f"https://amorisot.github.io/blog/{seedlings_slug}.html",
+        og_url=f"https://adrienmorisot.com/blog/{seedlings_slug}.html",
         description="Ideas I'm mulling over, that may one day grow into fuller posts.",
         content=f"    <h3>🌱 seedlings</h3>\n      {seedlings_content}",
         structured_data=make_structured_data("seedlings", published, updated)
@@ -499,7 +499,7 @@ def main():
         write_if_changed(filepath, BLOG_TEMPLATE.format(
             title=post_name,
             og_type="article",
-            og_url=f"https://amorisot.github.io/blog/{slug}.html",
+            og_url=f"https://adrienmorisot.com/blog/{slug}.html",
             description=make_description(content),
             content=formatted,
             structured_data=make_structured_data(post_name, published, updated)
@@ -508,7 +508,7 @@ def main():
     write_if_changed("blog.html", BLOG_TEMPLATE.format(
         title="Blog",
         og_type="website",
-        og_url="https://amorisot.github.io/blog",
+        og_url="https://adrienmorisot.com/blog",
         description="Blog posts by Adrien Morisot on ML, LLMs, and other topics.",
         content=all_post_links.strip(),
         structured_data=""
