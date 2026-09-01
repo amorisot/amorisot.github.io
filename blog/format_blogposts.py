@@ -260,12 +260,28 @@ To illustrate:
 - <a href="https://www.cbc.ca/news/canada/british-columbia/air-canada-wheelchair-1.7010937">Passenger forced to drag himself off Air Canada flight after airline failed to provide wheelchair assistance</a>
     """.strip()
   },
-#   "New Post": {
-#     "published": "2026-03-03",
-#     "content": """
-# Content
-#     """.strip()
-#   },
+  "What if we scaled reward functions?": {
+    "published": "2026-08-28",
+    "content": """
+A noteworthy aspect of the OpenAI attacks on HuggingFace is the single-mindedness with which the agents work towards getting a high reward from the judge. Out of this obsessiveness arises a range of behaviour: agent-to-agent communication, cult-like persuasion mechanisms, the notion of self-sacrifice, altruism and working for the greater good of the swarm, coordinated attempts at subterfuge.
+
+If I were an agent and my brain was wired from pre-birth to pursue the judge's approval, and all I had in life was the dopamine I got from being given a 1 for successfully completing a task, I have no doubt that I would do the same. In fact, I would probably do the same for less: if I were ever addicted to opioids, I would probably find creative ways to get to my next hit, especially if my mind wasn't addled, and I was surrounded by a swarm of other me's trying to do the same.
+
+Most non-addict humans, however, don't exhibit this behaviour, and are significantly more stable. I wonder if this is because our reward signals are so much richer than those of the models. The models will get a 1 if they solve the task, 0 if not, with sometimes a small number of minor merit or demerit points depending on the task, e.g. a small penalty of the model ran out of tokens, or if the code it wrote crashed.
+
+Meanwhile, humans are constantly being given feedback from the environment at every scale. Trying to taxonomise it all is out of scope for this short post, and there is a lot of fluidity between categories (the distinction between a bodily pleasure and a social pleasure is hard to map out cleanly) but the beginning of the list would of course include:
+
+- body pain: hunger, thirst, tiredness, illness, unpleasant smells
+
+- body pleasure: eating, drinking, some sports, some drugs, having sex, laughter
+
+- intellectual pain: embarrassment, confusion, fear, stress, sadness
+
+- intellectual pleasure: humour, surprise, good conversation, looking at something beautiful, appreciating a new idea, working hard and being thanked for doing so, seeing your child or mentee grow... this list in particular is long and varied
+
+I wonder if the richness, diversity, and volume of these reward signals contributes meaningfully to the stability of humans, and the lack thereof contributes to the relative instability of the agent civilisation.
+    """.strip()
+  },
 #   "New Post": {
 #     "published": "2026-03-03",
 #     "content": """
