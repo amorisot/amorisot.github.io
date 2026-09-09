@@ -2,23 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://adrienmorisot.com/</loc>
-    <lastmod>2026-03-24</lastmod>
+    <lastmod>2026-08-25</lastmod>
   </url>
   <url>
     <loc>https://adrienmorisot.com/art</loc>
-    <lastmod>2026-05-24</lastmod>
+    <lastmod>2026-08-25</lastmod>
   </url>
   <url>
     <loc>https://adrienmorisot.com/ml</loc>
-    <lastmod>2026-03-24</lastmod>
+    <lastmod>2026-08-25</lastmod>
   </url>
   <url>
     <loc>https://adrienmorisot.com/books</loc>
-    <lastmod>2026-05-10</lastmod>
+    <lastmod>2026-08-25</lastmod>
   </url>
   <url>
     <loc>https://adrienmorisot.com/blog</loc>
-    <lastmod>2026-06-11</lastmod>
+    <lastmod>2026-08-25</lastmod>
   </url>
   <url>
     <loc>https://adrienmorisot.com/blog/seedlings.html</loc>
@@ -79,5 +79,9 @@
   <url>
     <loc>https://adrienmorisot.com/blog/I_love_Air_Canada.html</loc>
     <lastmod>2026-06-11</lastmod>
+  </url>
+  <url>
+    <loc>https://adrienmorisot.com/blog/What_if_we_scaled_reward_functions.html</loc>
+    <lastmod>2026-08-28</lastmod>
   </url>
 </urlset>
